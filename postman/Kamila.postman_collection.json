@@ -1,0 +1,187 @@
+{
+	"info": {
+		"_postman_id": "6c3c9adf-c0a3-4f59-8930-76f0a8d3a1b6",
+		"name": "Kamila",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "20088736"
+	},
+	"item": [
+		{
+			"name": "Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var data = pm.response.json();\r",
+							"var tkn = data.data.bearer.token;\r",
+							"pm.environment.set(\"access_token\", tkn);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "basicauthppmdks",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "ppmdks",
+							"type": "string"
+						},
+						{
+							"key": "showPassword",
+							"value": false,
+							"type": "boolean"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"Jesse\",\r\n    \"password\": \"pass1\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v1/auth/login",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Users",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"Jesse\",\r\n    \"password\": \"pass1\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v1/users",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"users"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Get Users",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"Jesse\",\r\n    \"password\": \"pass1\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "1051"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"41b-M4OtXcrkh2DqzqqdmoD+hjq/NYM\""
+						},
+						{
+							"key": "Date",
+							"value": "Tue, 17 May 2022 06:25:40 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"status\": \"success\",\n    \"message\": \"Get users success\",\n    \"data\": {\n        \"count\": 10,\n        \"users\": [\n            {\n                \"email\": \"admin@admin.com\",\n                \"username\": \"Heisenberg\",\n                \"name\": \"Walter White\",\n                \"role\": \"ADMINISTRATOR\"\n            },\n            {\n                \"email\": \"standard@standard.com\",\n                \"username\": \"Jesse\",\n                \"name\": \"Jesse Pinkman\",\n                \"role\": \"STANDARD\"\n            },\n            {\n                \"email\": \"skyler.white@test.com\",\n                \"username\": \"Sky\",\n                \"name\": \"Skyler White\",\n                \"role\": \"STANDARD\"\n            },\n            {\n                \"email\": \"hank.schrader@test.com\",\n                \"username\": \"Hank\",\n                \"name\": \"Hank Schrader\",\n                \"role\": \"STANDARD\"\n            },\n            {\n                \"email\": \"marie.schrader@test.com\",\n                \"username\": \"Marie\",\n                \"name\": \"Marie Schrader\",\n                \"role\": \"STANDARD\"\n            },\n            {\n                \"email\": \"saul.goodman@test.com\",\n                \"username\": \"The Lawyer\",\n                \"name\": \"Saul Goodman\",\n                \"role\": \"STANDARD\"\n            },\n            {\n                \"email\": \"gustavo.fring@test.com\",\n                \"username\": \"Gus\",\n                \"name\": \"Gustavo Fring\",\n                \"role\": \"STANDARD\"\n            },\n            {\n                \"email\": \"michael.ehrmantraut@test.com\",\n                \"username\": \"Mike\",\n                \"name\": \"Michael Ehrmantraut\",\n                \"role\": \"STANDARD\"\n            },\n            {\n                \"email\": \"hector.salamanca@test.com\",\n                \"username\": \"Tio\",\n                \"name\": \"Hector Salamanca\",\n                \"role\": \"STANDARD\"\n            },\n            {\n                \"email\": \"alberto.salamanca@test.com\",\n                \"username\": \"Tuco\",\n                \"name\": \"Alberto Salamanca\",\n                \"role\": \"STANDARD\"\n            }\n        ]\n    }\n}"
+				}
+			]
+		}
+	]
+}

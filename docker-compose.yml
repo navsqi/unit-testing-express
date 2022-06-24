@@ -1,0 +1,21 @@
+version: '3.7'
+
+# restart: on-failure
+services:
+  tsnode:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: tsnode
+    expose:
+      - '4000'
+    ports:
+      - 4000:4000
+    env_file:
+      - .env
+    networks:
+      - nauvalmbp
+      
+networks:
+  nauvalmbp:
+    external: true
