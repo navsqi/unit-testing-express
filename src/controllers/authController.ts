@@ -9,9 +9,10 @@ import { objectUpload } from '~/config/minio';
 
 export const register = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const userRepository = getRepository(User);
+
     const bodies = req.body as User;
     const user = new User();
-    const userRepository = getRepository(User);
 
     const uploadToS3 = await objectUpload(
       process.env.MINIO_BUCKET,

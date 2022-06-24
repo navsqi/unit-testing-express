@@ -43,7 +43,7 @@ class MasterInstansi {
 
   @Column({
     nullable: true,
-    length: 13,
+    length: 15,
   })
   no_telepon_instansi: string;
 
@@ -80,7 +80,7 @@ class MasterInstansi {
 
   @Column({
     type: 'smallint',
-    default: 0,
+    default: 1,
   })
   is_approved: number;
 
@@ -92,10 +92,10 @@ class MasterInstansi {
   @UpdateDateColumn()
   updated_at: Date;
 
-  @Column()
+  @Column({ nullable: true })
   created_by: number;
 
-  @Column()
+  @Column({ nullable: true })
   updated_by: number;
 }
 

@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 node:14.19.1 as build
+FROM --platform=linux/amd64 node:16.15.0-alpine as build
 
 # Set Working Directory
 WORKDIR /app

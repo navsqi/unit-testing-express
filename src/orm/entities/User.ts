@@ -54,6 +54,12 @@ class User {
   })
   kode_unit_kerja: string;
 
+  @Column({
+    type: 'smallint',
+    default: 1,
+  })
+  is_approved: number;
+
   @Column()
   @CreateDateColumn()
   created_at: Date;

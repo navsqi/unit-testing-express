@@ -15,7 +15,6 @@ export const getUser = async (req: Request, res: Response, next: NextFunction) =
 
     return res.customSuccess(200, 'Get users success', dataRes);
   } catch (e) {
-    console.log(e);
     return next(e);
   }
 };

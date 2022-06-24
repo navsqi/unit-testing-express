@@ -1,18 +1,16 @@
 interface IPaging {
-   offset?: number | boolean;
-   limit?: number | boolean;
-} 
+  offset?: number;
+  limit?: number;
+}
 
-const paging = (qs: {[key: string]: any}): IPaging => {
-   const limit = qs.limit ? { limit: Number(qs.limit) } : false;
-   const page = qs.page ? { page: Number(qs.page) > 0 ? Number(qs.page) : 1 } : false;
-   const offset = page ? { offset: (Number(qs.page) - 1) * Number(qs.limit) } : false;
- 
-   return { ...limit, ...offset };
- };
+const paging = (qs: { [key: string]: any }): IPaging => {
+  const limit = qs.limit ? Number(qs.limit) : 50;
+  const page = qs.page ? +qs.page : 1;
+  const offset = (Number(page) - 1) * Number(limit);
 
- const queryHelper = {
-    paging
- }
+  return { limit, offset };
+};
 
- export default queryHelper;
+export default {
+  paging,
+};
