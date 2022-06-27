@@ -1,4 +1,13 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import Outlet from './Outlet';
 
 export enum JenisInstansi {
   PEMERINTAH = 'PEMERINTAH',
@@ -19,7 +28,6 @@ class MasterInstansi {
   id: number;
 
   @Column({
-    unique: true,
     length: 80,
   })
   nama_instansi: string;
@@ -36,7 +44,6 @@ class MasterInstansi {
 
   @Column({
     nullable: true,
-    unique: true,
     length: 100,
   })
   email: string;
@@ -72,11 +79,9 @@ class MasterInstansi {
   jabatan_karyawan: string;
 
   @Column({
-    type: 'enum',
-    nullable: true,
-    enum: CakupanInstansi,
+    type: 'int4',
   })
-  cakupan_instansi: CakupanInstansi;
+  outlet_id: number;
 
   @Column({
     type: 'smallint',
@@ -97,6 +102,10 @@ class MasterInstansi {
 
   @Column({ nullable: true })
   updated_by: number;
+
+  @ManyToOne(() => Outlet)
+  @JoinColumn([{ name: 'outlet_id', referencedColumnName: 'id' }])
+  cakupan_instansi: Outlet;
 }
 
 export default MasterInstansi;

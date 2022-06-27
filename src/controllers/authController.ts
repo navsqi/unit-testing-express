@@ -9,24 +9,27 @@ import { objectUpload } from '~/config/minio';
 
 export const register = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const userRepository = getRepository(User);
+    const userRepo = getRepository(User);
 
+    let photo: Express.Multer.File = null;
     const bodies = req.body as User;
     const user = new User();
 
-    const uploadToS3 = await objectUpload(
-      process.env.MINIO_BUCKET,
-      req.files['photo'][0].originalname,
-      req.files['photo'][0].buffer,
-      { 'Content-Type': req.files['photo'][0].mimetype, 'Content-Disposision': 'inline' },
-    );
+    if (req.files.length > 0 && req.files['photo']) {
+      photo = req.files['photo'][0];
+
+      await objectUpload(process.env.MINIO_BUCKET, photo.originalname, photo.buffer, {
+        'Content-Type': req.files['photo'][0].mimetype,
+        'Content-Disposision': 'inline',
+      });
+    }
 
     user.username = bodies.username;
     user.name = bodies.name;
     user.email = bodies.email;
     user.password = bodies.password;
     user.hashPassword();
-    await userRepository.save(user);
+    await userRepo.save(user);
 
     const token = await signToken(user);
 
@@ -44,12 +47,12 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
 };
 
 export const login = async (req: Request, res: Response, next: NextFunction) => {
-  const userRepository = getRepository(User);
+  const userRepo = getRepository(User);
 
   try {
     const bodies = req.body as User;
 
-    const user = await userRepository.findOne({ where: [{ email: bodies.email }, { username: bodies.username }] });
+    const user = await userRepo.findOne({ where: [{ email: bodies.email }, { username: bodies.username }] });
 
     if (!user) return next(new CustomError('User not found', 404));
 
@@ -73,7 +76,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 };
 
 export const exchangeTokenSso = async (req: Request, res: Response, next: NextFunction) => {
-  const userRepository = getRepository(User);
+  const userRepo = getRepository(User);
 
   try {
     const bodies = req.body;
@@ -84,10 +87,10 @@ export const exchangeTokenSso = async (req: Request, res: Response, next: NextFu
 
     const ssoRes = loginSSO.data as ISSOExchangeTokenResponse;
 
-    let user = await userRepository.findOne({ where: { nik: ssoRes.nik, name: ssoRes.nama_lengkap } });
+    let user = await userRepo.findOne({ where: { nik: ssoRes.nik, name: ssoRes.nama_lengkap } });
 
     if (!user) {
-      user = await userRepository.save({
+      user = await userRepo.save({
         name: ssoRes.nama_lengkap,
         role: ssoRes.nama_jabatan,
         grade: ssoRes.nama_grade,

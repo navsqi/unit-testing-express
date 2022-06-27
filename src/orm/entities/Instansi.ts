@@ -8,6 +8,9 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import MasterInstansi, { JenisInstansi } from './MasterInstansi';
+import OrganisasiPegawai from './OrganisasiPegawai';
+import Outlet from './Outlet';
+import SaranaMedia from './SaranaMedia';
 
 @Entity('instansi')
 class Instansi {
@@ -15,21 +18,11 @@ class Instansi {
   id: number;
 
   @Column({
-    unique: true,
     type: 'int8',
   })
   master_instansi_id: number;
 
   @Column({
-    unique: true,
-    type: 'int8',
-  })
-  @ManyToOne(() => MasterInstansi)
-  @JoinColumn([{ name: 'master_instansi_id', referencedColumnName: 'id' }])
-  master_instansi: MasterInstansi;
-
-  @Column({
-    unique: true,
     length: 80,
   })
   nama_instansi: string;
@@ -46,14 +39,13 @@ class Instansi {
 
   @Column({
     nullable: true,
-    unique: true,
     length: 100,
   })
   email: string;
 
   @Column({
     nullable: true,
-    length: 13,
+    length: 15,
   })
   no_telepon_instansi: string;
 
@@ -82,9 +74,9 @@ class Instansi {
   jabatan_karyawan: string;
 
   @Column({
-    length: 60,
+    type: 'int4',
   })
-  cakupan_instansi: string;
+  outlet_id: number;
 
   @Column({
     nullable: true,
@@ -113,10 +105,10 @@ class Instansi {
   jumlah_kerjasama: number;
 
   @Column()
-  sarana_media: string;
+  sarana_media_id: string;
 
   @Column()
-  organisasi: string;
+  organisasi_pegawai_id: number;
 
   @Column({
     type: 'double precision',
@@ -125,6 +117,7 @@ class Instansi {
 
   @Column({
     type: 'smallint',
+    default: '0',
   })
   status_potensial: number;
 
@@ -147,6 +140,22 @@ class Instansi {
 
   @Column()
   updated_by: number;
+
+  @ManyToOne(() => MasterInstansi)
+  @JoinColumn([{ name: 'master_instansi_id', referencedColumnName: 'id' }])
+  master_instansi: MasterInstansi;
+
+  @ManyToOne(() => SaranaMedia)
+  @JoinColumn([{ name: 'sarana_media_id', referencedColumnName: 'id' }])
+  sarana_media: SaranaMedia;
+
+  @ManyToOne(() => OrganisasiPegawai)
+  @JoinColumn([{ name: 'organisasi_pegawai_id', referencedColumnName: 'id' }])
+  organisasi_pegawai: OrganisasiPegawai;
+
+  @ManyToOne(() => Outlet)
+  @JoinColumn([{ name: 'outlet_id', referencedColumnName: 'id' }])
+  cakupan_instansi: Outlet;
 }
 
 export default Instansi;

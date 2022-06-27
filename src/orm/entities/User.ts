@@ -7,14 +7,11 @@ class User {
   id: number;
 
   @Column({
-    unique: true,
     nullable: true,
   })
   nik: string;
 
-  @Column({
-    unique: true,
-  })
+  @Column({})
   email: string;
 
   @Column({ nullable: true })
@@ -22,7 +19,6 @@ class User {
 
   @Column({
     nullable: true,
-    unique: true,
   })
   username: string;
 

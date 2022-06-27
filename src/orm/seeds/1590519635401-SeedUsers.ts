@@ -6,15 +6,15 @@ import User from '../entities/User';
 export class SeedUsers1590519635401 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<any> {
     let user = new User();
-    const userRepository = getRepository(User);
+    const userRepo = getRepository(User);
 
-    user.username = 'Heisenberg';
-    user.name = 'Walter White';
-    user.email = 'admin@admin.com';
+    user.username = 'nauvalsh';
+    user.name = 'Nauval';
+    user.email = 'nauval@admin.com';
     user.password = 'pass1';
     user.hashPassword();
     user.role = 'ADMINISTRATOR';
-    await userRepository.save(user);
+    await userRepo.save(user);
 
     user = new User();
     user.username = 'Jesse';
@@ -23,7 +23,7 @@ export class SeedUsers1590519635401 implements MigrationInterface {
     user.password = 'pass1';
     user.hashPassword();
     user.role = 'STANDARD';
-    await userRepository.save(user);
+    await userRepo.save(user);
 
     user = new User();
     user.username = 'Sky';
@@ -31,7 +31,7 @@ export class SeedUsers1590519635401 implements MigrationInterface {
     user.email = 'skyler.white@test.com';
     user.password = 'pass1';
     user.hashPassword();
-    await userRepository.save(user);
+    await userRepo.save(user);
 
     user = new User();
     user.username = 'Hank';
@@ -39,7 +39,7 @@ export class SeedUsers1590519635401 implements MigrationInterface {
     user.email = 'hank.schrader@test.com';
     user.password = 'pass1';
     user.hashPassword();
-    await userRepository.save(user);
+    await userRepo.save(user);
 
     user = new User();
     user.username = 'Marie';
@@ -47,7 +47,7 @@ export class SeedUsers1590519635401 implements MigrationInterface {
     user.email = 'marie.schrader@test.com';
     user.password = 'pass1';
     user.hashPassword();
-    await userRepository.save(user);
+    await userRepo.save(user);
 
     user = new User();
     user.username = 'The Lawyer';
@@ -55,7 +55,7 @@ export class SeedUsers1590519635401 implements MigrationInterface {
     user.email = 'saul.goodman@test.com';
     user.password = 'pass1';
     user.hashPassword();
-    await userRepository.save(user);
+    await userRepo.save(user);
 
     user = new User();
     user.username = 'Gus';
@@ -63,7 +63,7 @@ export class SeedUsers1590519635401 implements MigrationInterface {
     user.email = 'gustavo.fring@test.com';
     user.password = 'pass1';
     user.hashPassword();
-    await userRepository.save(user);
+    await userRepo.save(user);
 
     user = new User();
     user.username = 'Mike';
@@ -71,7 +71,7 @@ export class SeedUsers1590519635401 implements MigrationInterface {
     user.email = 'michael.ehrmantraut@test.com';
     user.password = 'pass1';
     user.hashPassword();
-    await userRepository.save(user);
+    await userRepo.save(user);
 
     user = new User();
     user.username = 'Tio';
@@ -79,7 +79,7 @@ export class SeedUsers1590519635401 implements MigrationInterface {
     user.email = 'hector.salamanca@test.com';
     user.password = 'pass1';
     user.hashPassword();
-    await userRepository.save(user);
+    await userRepo.save(user);
 
     user = new User();
     user.username = 'Tuco';
@@ -87,7 +87,7 @@ export class SeedUsers1590519635401 implements MigrationInterface {
     user.email = 'alberto.salamanca@test.com';
     user.password = 'pass1';
     user.hashPassword();
-    await userRepository.save(user);
+    await userRepo.save(user);
   }
 
   public async down(queryRunner: QueryRunner): Promise<any> {
