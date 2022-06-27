@@ -2,7 +2,46 @@ import { NextFunction, Request, Response } from 'express';
 import { getRepository } from 'typeorm';
 import Instansi from '~/orm/entities/Instansi';
 import MasterInstansi from '~/orm/entities/MasterInstansi';
+import OrganisasiPegawai from '~/orm/entities/OrganisasiPegawai';
 import queryHelper from '~/utils/queryHelper';
+
+export const getOrganisasiPegawai = async (req: Request, res: Response, next: NextFunction) => {
+  const organisasiPegawaiRepo = getRepository(OrganisasiPegawai);
+
+  try {
+    const [organisasiPegawai, count] = await organisasiPegawaiRepo.findAndCount();
+
+    const dataRes = {
+      meta: {
+        count,
+      },
+      organisasiPegawai,
+    };
+
+    return res.customSuccess(200, 'Get organisasi pegawai', dataRes);
+  } catch (e) {
+    return next(e);
+  }
+};
+
+export const getSaranaMedia = async (req: Request, res: Response, next: NextFunction) => {
+  const saranaMediaRepo = getRepository(OrganisasiPegawai);
+
+  try {
+    const [saranaMedia, count] = await saranaMediaRepo.findAndCount();
+
+    const dataRes = {
+      meta: {
+        count,
+      },
+      saranaMedia,
+    };
+
+    return res.customSuccess(200, 'Get sarana media', dataRes);
+  } catch (e) {
+    return next(e);
+  }
+};
 
 export const getMasterInstansi = async (req: Request, res: Response, next: NextFunction) => {
   const masterInsRepo = getRepository(MasterInstansi);
