@@ -1,7 +1,7 @@
 {
   "name": "typeorm-boilerplate",
   "version": "1.0.0",
-  "description": "Typescript + TypeORM Boilerplate",
+  "description": "Kamila Backend",
   "scripts": {
     "build": "rm -rf dist && tsc",
     "start": "node -r ./tsconfig-paths-bootstrap.js ./dist/index.js",
