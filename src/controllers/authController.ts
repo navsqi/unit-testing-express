@@ -6,6 +6,7 @@ import { signToken } from './../services/tokenSrv';
 import APISSO from '~/apis/sso';
 import { ISSOExchangeTokenResponse } from '~/interfaces/ISso';
 import { objectUpload } from '~/config/minio';
+import { generateFileName } from '~/utils/common';
 
 export const register = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -14,11 +15,13 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
     let photo: Express.Multer.File = null;
     const bodies = req.body as User;
     const user = new User();
+    let fileName: string = null;
 
-    if (req.files.length > 0 && req.files['photo']) {
+    if (req.files && req.files['photo']) {
       photo = req.files['photo'][0];
+      fileName = 'hbluserprofile/' + generateFileName(photo.originalname);
 
-      await objectUpload(process.env.MINIO_BUCKET, photo.originalname, photo.buffer, {
+      await objectUpload(process.env.MINIO_BUCKET, fileName, photo.buffer, {
         'Content-Type': req.files['photo'][0].mimetype,
         'Content-Disposision': 'inline',
       });
@@ -28,6 +31,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
     user.name = bodies.name;
     user.email = bodies.email;
     user.password = bodies.password;
+    user.photo = fileName;
     user.hashPassword();
     await userRepo.save(user);
 

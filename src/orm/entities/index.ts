@@ -4,6 +4,7 @@ import OrganisasiPegawai from './OrganisasiPegawai';
 import Outlet from './Outlet';
 import SaranaMedia from './SaranaMedia';
 import User from './User';
+import Mou from './Mou';
 
 export default {
   User,
@@ -12,4 +13,5 @@ export default {
   Instansi,
   SaranaMedia,
   OrganisasiPegawai,
+  Mou,
 };
