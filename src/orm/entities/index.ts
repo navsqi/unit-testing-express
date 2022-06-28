@@ -1,9 +1,9 @@
-import User from './User';
-import Outlet from './Outlet';
-import MasterInstansi from './MasterInstansi';
 import Instansi from './Instansi';
-import SaranaMedia from './SaranaMedia';
+import MasterInstansi from './MasterInstansi';
 import OrganisasiPegawai from './OrganisasiPegawai';
+import Outlet from './Outlet';
+import SaranaMedia from './SaranaMedia';
+import User from './User';
 
 export default {
   User,

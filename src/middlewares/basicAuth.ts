@@ -1,9 +1,6 @@
 import CustomError from '~/utils/customError';
 
 export const basicAuth = async (req, res, next) => {
-  // -----------------------------------------------------------------------
-  // authentication middleware
-
   try {
     const auth = { login: process.env.BASIC_USERNAME, password: process.env.BASIC_PASSWORD }; // change this
 
@@ -22,7 +19,7 @@ export const basicAuth = async (req, res, next) => {
     res.status(401).json({ status: 'fail', message: 'Authentication required' }); // custom message
   } catch (e) {
     console.log(e);
-    return next(new CustomError('Terjadi kesalahan pada otorisasi', 404));
+    return next(new CustomError('Terjadi kesalahan pada otorisasi', 401));
   }
 
   // -----------------------------------------------------------------------

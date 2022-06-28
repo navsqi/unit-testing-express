@@ -1,5 +1,14 @@
 import bcrypt from 'bcryptjs';
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import Outlet from './Outlet';
 
 @Entity('users')
 class User {
@@ -56,6 +65,12 @@ class User {
   })
   is_approved: number;
 
+  @Column({
+    type: 'int8',
+    default: null,
+  })
+  outlet_id: number;
+
   @Column()
   @CreateDateColumn()
   created_at: Date;
@@ -63,6 +78,10 @@ class User {
   @Column()
   @UpdateDateColumn()
   updated_at: Date;
+
+  @ManyToOne(() => Outlet)
+  @JoinColumn([{ name: 'outlet_id', referencedColumnName: 'id' }])
+  cakupan_instansi: Outlet;
 
   hashPassword() {
     this.password = bcrypt.hashSync(this.password, 8);
