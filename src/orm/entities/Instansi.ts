@@ -123,6 +123,12 @@ class Instansi {
 
   @Column({
     type: 'smallint',
+    default: '0',
+  })
+  kategori_instansi: number;
+
+  @Column({
+    type: 'smallint',
     default: 0,
   })
   is_approved: number;

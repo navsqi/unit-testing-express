@@ -1,8 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
-import { getRepository } from 'typeorm';
+import { getRepository, ILike } from 'typeorm';
 import Instansi from '~/orm/entities/Instansi';
 import MasterInstansi from '~/orm/entities/MasterInstansi';
 import OrganisasiPegawai from '~/orm/entities/OrganisasiPegawai';
+import SaranaMedia from '~/orm/entities/SaranaMedia';
 import queryHelper from '~/utils/queryHelper';
 
 export const getOrganisasiPegawai = async (req: Request, res: Response, next: NextFunction) => {
@@ -25,7 +26,7 @@ export const getOrganisasiPegawai = async (req: Request, res: Response, next: Ne
 };
 
 export const getSaranaMedia = async (req: Request, res: Response, next: NextFunction) => {
-  const saranaMediaRepo = getRepository(OrganisasiPegawai);
+  const saranaMediaRepo = getRepository(SaranaMedia);
 
   try {
     const [saranaMedia, count] = await saranaMediaRepo.findAndCount();
@@ -47,11 +48,18 @@ export const getMasterInstansi = async (req: Request, res: Response, next: NextF
   const masterInsRepo = getRepository(MasterInstansi);
 
   try {
+    const filter = {
+      nama_instansi: req.query.nama_instansi || '',
+    };
+
     const paging = queryHelper.paging(req.query);
 
     const [masterInstansi, count] = await masterInsRepo.findAndCount({
       take: paging.limit,
       skip: paging.offset,
+      where: {
+        nama_instansi: ILike(`%${filter.nama_instansi}%`),
+      },
     });
 
     const dataRes = {
@@ -147,11 +155,18 @@ export const getInstansi = async (req: Request, res: Response, next: NextFunctio
   const instansiRepo = getRepository(Instansi);
 
   try {
+    const filter = {
+      nama_instansi: req.query.nama_instansi || '',
+    };
+
     const paging = queryHelper.paging(req.query);
 
     const [masterInstansi, count] = await instansiRepo.findAndCount({
       take: paging.limit,
       skip: paging.offset,
+      where: {
+        nama_instansi: ILike(`%${filter.nama_instansi}%`),
+      },
     });
 
     const dataRes = {

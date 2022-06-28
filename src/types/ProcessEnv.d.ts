@@ -27,6 +27,8 @@ declare global {
       MINIO_KEY: string;
       MINIO_SSL: string;
       MINIO_BUCKET: string;
+      BASIC_USERNAME: string;
+      BASIC_PASSWORD: string;
     }
   }
 }
