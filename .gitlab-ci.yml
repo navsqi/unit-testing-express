@@ -1,0 +1,38 @@
+image: artifactory.pegadaian.co.id:8084/docker:latest
+
+variables:
+  DOCKER_AUTH_CONFIG: '{"auths": {"artifactory.pegadaian.co.id:5443": {"auth": "$DOCKER_AU_CONFIG"},"artifactory.pegadaian.co.id:8084": {"auth": "$DOCKER_AU_CONFIG"}}}'
+  TAG_LATEST: artifactory.pegadaian.co.id:5443/$CI_PROJECT_NAME:latest
+  TAG_COMMIT: artifactory.pegadaian.co.id:5443/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA
+  OPENSHIFT_REG_JKT: default-route-openshift-image-registry.apps.ocp-jkt.pegadaian.co.id
+#   OPENSHIFT_REG_SBY: default-route-openshift-image-registry.apps.ocp-sby.pegadaian.co.id
+
+stages:
+  - build_image
+  - openshift_dev_pushimage
+  # - openshift_prod_pushimage
+  
+image-build:
+  stage: build_image
+  script:
+    - mkdir -p ~/.docker/ && echo $DOCKER_AUTH_CONFIG > ~/.docker/config.json
+    - docker build -t $TAG_LATEST -t $TAG_COMMIT .
+    - docker push $TAG_LATEST
+    - docker push $TAG_COMMIT
+  only:
+    - develop
+    # - master
+
+openshift-dev-pushimage:
+  stage: openshift_dev_pushimage
+  script:
+    - docker tag $TAG_LATEST $OPENSHIFT_REG_JKT/support-dev/$CI_PROJECT_NAME:latest
+    - docker tag $TAG_LATEST $OPENSHIFT_REG_JKT/support-dev/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA
+    - docker login -u admin -p $OC_TOKEN_DEV_JKT $OPENSHIFT_REG_JKT
+    - docker push $OPENSHIFT_REG_JKT/support-dev/$CI_PROJECT_NAME:latest
+    - docker push $OPENSHIFT_REG_JKT/support-dev/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA
+  only:
+    - develop
+    - master
+  environment:
+    name: development-jkt

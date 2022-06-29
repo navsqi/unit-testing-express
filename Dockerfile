@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 node:16.15.0-alpine as build
+FROM artifactory.pegadaian.co.id:8084/node:16.15.0-alpine as build
 
 # Set Working Directory
 WORKDIR /app
