@@ -4,12 +4,13 @@ FROM --platform=linux/amd64 node:16.15.0-alpine as build
 WORKDIR /app
 
 # Copy Node Packages Requirement
-COPY package*.json /app/package.json
+COPY package.json ./
+COPY package-lock.json ./
 
-RUN npm install
+RUN npm ci
 
 # Copy Node Source Code File
-COPY . .
+COPY . ./
 
 RUN npm run build
 
