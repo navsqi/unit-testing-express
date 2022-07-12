@@ -171,7 +171,7 @@ export const createNewLeadsByCsv = async (req: Request, res: Response, next: Nex
         leads.no_hp = row[2];
         leads.up = +row[3];
         leads.kode_produk = row[4];
-        leads.nik_ktp_karyawan = row[5] ?? null;
+        leads.nik_ktp_karyawan = row[5] ? row[5] : null;
         leads.created_by = req.user.nik;
         leads.kode_unit_kerja = req.user.kode_unit_kerja;
         leads.source_data = 'BULK CSV';
@@ -206,7 +206,9 @@ export const checkNasabahPeroranganByNikDukcapil = async (req: Request, res: Res
 
     const getIp = parseIp(req);
 
-    const checkToNasabahPerorangan = await nasabahPeroranganRepo.findOne({ where: { nik: bodies.nik } });
+    const checkToNasabahPerorangan = await nasabahPeroranganRepo.findOne({
+      where: { nik: bodies.nik, nama: bodies.nama.toUpperCase() },
+    });
 
     if (checkToNasabahPerorangan) {
       const dataRes = {
@@ -229,15 +231,16 @@ export const checkNasabahPeroranganByNikDukcapil = async (req: Request, res: Res
 
     if (!ktpData) return next(new CustomError('Data NIK EKTP tidak ditemukan', 404));
 
-    await nasabahPeroranganRepo.save({
+    const data = await nasabahPeroranganRepo.save({
       nik: bodies.nik,
+      nama: bodies.nama.toUpperCase(),
       created_by: req.user.nik,
       source_data: 'DUKCAPIL',
     });
 
     const dataRes = {
       isNikValid: true,
-      ktp: ktpData,
+      ktp: data,
     };
 
     return res.customSuccess(200, 'Check data KTP success', dataRes);
