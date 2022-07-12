@@ -4,9 +4,11 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import AssignmentInstansi from './AssignmentInstansi';
 import MasterInstansi, { JenisInstansi } from './MasterInstansi';
 import OrganisasiPegawai from './OrganisasiPegawai';
 import Outlet from './Outlet';
@@ -74,9 +76,10 @@ class Instansi {
   jabatan_karyawan: string;
 
   @Column({
-    type: 'int4',
+    type: 'varchar',
+    length: 10,
   })
-  outlet_id: number;
+  kode_unit_kerja: string;
 
   @Column({
     nullable: true,
@@ -142,10 +145,10 @@ class Instansi {
   updated_at: Date;
 
   @Column()
-  created_by: number;
+  created_by: string;
 
   @Column()
-  updated_by: number;
+  updated_by: string;
 
   @ManyToOne(() => MasterInstansi)
   @JoinColumn([{ name: 'master_instansi_id', referencedColumnName: 'id' }])
@@ -160,8 +163,11 @@ class Instansi {
   organisasi_pegawai: OrganisasiPegawai;
 
   @ManyToOne(() => Outlet)
-  @JoinColumn([{ name: 'outlet_id', referencedColumnName: 'id' }])
+  @JoinColumn([{ name: 'kode_unit_kerja', referencedColumnName: 'kode' }])
   cakupan_instansi: Outlet;
+
+  @OneToMany(() => AssignmentInstansi, (assignmentInstansi) => assignmentInstansi.instansi)
+  assignment_instansi: Outlet;
 }
 
 export default Instansi;

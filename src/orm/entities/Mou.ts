@@ -31,16 +31,17 @@ class Mou {
   instansi_id: number;
 
   @Column({
-    type: 'int8',
+    type: 'varchar',
     default: null,
   })
-  outlet_id: number;
+  kode_unit_kerja: string;
 
   @Column({
-    type: 'int8',
+    type: 'varchar',
+    length: 100,
     default: null,
   })
-  user_assigned_id: number;
+  nama_pic: string;
 
   @Column({
     nullable: true,
@@ -92,26 +93,22 @@ class Mou {
   @UpdateDateColumn()
   updated_at: Date;
 
-  @Column()
-  created_by: number;
+  @Column({ nullable: true })
+  created_by: string;
 
   @Column({ nullable: true })
-  updated_by: number;
+  updated_by: string;
 
   @ManyToOne(() => Instansi)
   @JoinColumn([{ name: 'instansi_id', referencedColumnName: 'id' }])
   instansi: Instansi;
 
   @ManyToOne(() => Outlet)
-  @JoinColumn([{ name: 'outlet_id', referencedColumnName: 'id' }])
+  @JoinColumn([{ name: 'kode_unit_kerja', referencedColumnName: 'kode' }])
   outlet: Outlet;
 
   @ManyToOne(() => User)
-  @JoinColumn([{ name: 'user_assigned_id', referencedColumnName: 'id' }])
-  user_assigned: User;
-
-  @ManyToOne(() => User)
-  @JoinColumn([{ name: 'created_by', referencedColumnName: 'id' }])
+  @JoinColumn([{ name: 'created_by', referencedColumnName: 'nik' }])
   user_created: User;
 }
 

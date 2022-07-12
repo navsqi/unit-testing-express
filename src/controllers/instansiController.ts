@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { getRepository, ILike } from 'typeorm';
+import { FindManyOptions, getRepository, ILike } from 'typeorm';
 import Instansi from '~/orm/entities/Instansi';
 import MasterInstansi from '~/orm/entities/MasterInstansi';
 import OrganisasiPegawai from '~/orm/entities/OrganisasiPegawai';
@@ -102,8 +102,9 @@ export const createNewMasterInstansi = async (req: Request, res: Response, next:
   try {
     const instansi = await masterInsRepo.save({
       ...req.body,
-      created_by: req.user.id,
-      updated_by: req.user.id,
+      kode_unit_kerja: req.user.kode_unit_kerja,
+      created_by: req.user.nik,
+      updated_by: req.user.nik,
     });
 
     const dataRes = {
@@ -119,10 +120,12 @@ export const createNewMasterInstansi = async (req: Request, res: Response, next:
 export const updateMasterInstansi = async (req: Request, res: Response, next: NextFunction) => {
   const masterInsRepo = getRepository(MasterInstansi);
 
+  console.log(req.body);
+
   try {
     const instansi = await masterInsRepo.update(req.params.id, {
       ...req.body,
-      updated_by: req.user.id,
+      updated_by: req.user.nik,
     });
 
     const dataRes = {
@@ -155,18 +158,27 @@ export const getInstansi = async (req: Request, res: Response, next: NextFunctio
   const instansiRepo = getRepository(Instansi);
 
   try {
+    const where: FindManyOptions<Instansi> = {};
+
     const filter = {
-      nama_instansi: req.query.nama_instansi || '',
+      nama_instansi: req.query.nama_instansi,
+      is_approved: req.query.is_approved,
     };
+
+    if (filter.nama_instansi) {
+      where['nama_instansi'] = ILike(`%${filter.nama_instansi}%`);
+    }
+
+    if (filter.is_approved) {
+      where['is_approved'] = +filter.is_approved;
+    }
 
     const paging = queryHelper.paging(req.query);
 
     const [masterInstansi, count] = await instansiRepo.findAndCount({
       take: paging.limit,
       skip: paging.offset,
-      where: {
-        nama_instansi: ILike(`%${filter.nama_instansi}%`),
-      },
+      where,
     });
 
     const dataRes = {
@@ -207,10 +219,12 @@ export const createNewInstansi = async (req: Request, res: Response, next: NextF
   const instansiRepo = getRepository(Instansi);
 
   try {
+    console.log(req.body.kode_unit_kerja);
     const instansi = await instansiRepo.save({
       ...req.body,
-      created_by: req.user.id,
-      updated_by: req.user.id,
+      kode_unit_kerja: req.user.kode_unit_kerja,
+      created_by: req.user.nik,
+      updated_by: req.user.nik,
     });
 
     const dataRes = {
@@ -229,7 +243,7 @@ export const updateInstansi = async (req: Request, res: Response, next: NextFunc
   try {
     const instansi = await instansiRepo.update(req.params.id, {
       ...req.body,
-      updated_by: req.user.id,
+      updated_by: req.user.nik,
     });
 
     const dataRes = {

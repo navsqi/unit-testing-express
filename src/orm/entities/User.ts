@@ -1,14 +1,5 @@
 import bcrypt from 'bcryptjs';
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
-import Outlet from './Outlet';
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity('users')
 class User {
@@ -16,7 +7,7 @@ class User {
   id: number;
 
   @Column({
-    nullable: true,
+    unique: true,
   })
   nik: string;
 
@@ -29,12 +20,7 @@ class User {
   @Column({
     nullable: true,
   })
-  username: string;
-
-  @Column({
-    nullable: true,
-  })
-  name: string;
+  nama: string;
 
   @Column({
     nullable: true,
@@ -42,19 +28,25 @@ class User {
   photo: string;
 
   @Column({
-    length: 70,
+    length: 100,
     nullable: true,
   })
   role: string;
 
   @Column({
-    length: 70,
+    length: 12,
     nullable: true,
   })
-  grade: string;
+  kode_role: string;
 
   @Column({
-    length: 6,
+    length: 100,
+    nullable: true,
+  })
+  unit_kerja: string;
+
+  @Column({
+    length: 12,
     nullable: true,
   })
   kode_unit_kerja: string;
@@ -65,12 +57,6 @@ class User {
   })
   is_approved: number;
 
-  @Column({
-    type: 'int8',
-    default: null,
-  })
-  outlet_id: number;
-
   @Column()
   @CreateDateColumn()
   created_at: Date;
@@ -78,10 +64,6 @@ class User {
   @Column()
   @UpdateDateColumn()
   updated_at: Date;
-
-  @ManyToOne(() => Outlet)
-  @JoinColumn([{ name: 'outlet_id', referencedColumnName: 'id' }])
-  cakupan_instansi: Outlet;
 
   hashPassword() {
     this.password = bcrypt.hashSync(this.password, 8);

@@ -29,6 +29,14 @@ declare global {
       MINIO_BUCKET: string;
       BASIC_USERNAME: string;
       BASIC_PASSWORD: string;
+      TSCALE_EXTERNAL_URL: string;
+      TSCALE_EXTERNAL_URL_AUTH: string;
+      TSCALE_EXTERNAL_CHANNELID: string;
+      TSCALE_EXTERNAL_CLIENTID: string;
+      TSCALE_EXTERNAL_BASIC_USER: string;
+      TSCALE_EXTERNAL_BASIC_PASS: string;
+      TSCALE_EXTERNAL_AUTH_USER: string;
+      TSCALE_EXTERNAL_AUTH_PASS: string;
     }
   }
 }

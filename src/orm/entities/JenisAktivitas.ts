@@ -1,30 +1,14 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
-@Entity('outlet')
-class Outlet {
+@Entity('jenis_aktivitas')
+class JenisAktivitas {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({
-    length: 10,
-    unique: true,
+    length: 200,
   })
-  kode: string;
-
-  @Column({
-    length: 220,
-  })
-  nama: string;
-
-  @Column({
-    type: 'smallint',
-  })
-  unit_kerja: number;
-
-  @Column({
-    type: 'int4',
-  })
-  parent: number;
+  deskripsi: string;
 
   @Column()
   @CreateDateColumn()
@@ -35,4 +19,4 @@ class Outlet {
   updated_at: Date;
 }
 
-export default Outlet;
+export default JenisAktivitas;

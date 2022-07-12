@@ -12,9 +12,6 @@ export const registerVal = async (req: Request, res: Response, next: NextFunctio
         'string.email': `"email" invalid email`,
         'any.required': `"email" is a required field`,
       }),
-      username: Joi.string().trim().min(5).required().messages({
-        'string.pattern.base': 'Invalid username characters',
-      }),
     });
 
     const result = await schema.validate(req.body, { abortEarly: false, allowUnknown: true });

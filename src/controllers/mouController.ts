@@ -24,7 +24,6 @@ export const createMou = async (req: Request, res: Response, next: NextFunction)
       });
     }
 
-    mou.outlet_id = bodies.outlet_id;
     mou.instansi_id = bodies.instansi_id;
     mou.jenis_kerjasama = bodies.jenis_kerjasama;
     mou.nomor_kerjasama = bodies.nomor_kerjasama;
@@ -32,9 +31,10 @@ export const createMou = async (req: Request, res: Response, next: NextFunction)
     mou.deskripsi = bodies.deskripsi;
     mou.start_date = bodies.start_date;
     mou.end_date = bodies.end_date;
+    mou.nama_pic = bodies.nama_pic ? bodies.nama_pic : req.user.nama;
     mou.file = fileName;
-    mou.created_by = req.user.id;
-    mou.outlet_id = req.user.outlet_id;
+    mou.created_by = req.user.nik;
+    mou.kode_unit_kerja = bodies.kode_unit_kerja ? bodies.kode_unit_kerja : req.user.kode_unit_kerja;
 
     await mouRepo.save(mou);
 
@@ -89,6 +89,7 @@ export const getMouById = async (req: Request, res: Response, next: NextFunction
 
   try {
     const mou = await mouRepo.findOne({
+      relations: ['outlet'],
       where: {
         id: req.params.id,
       },
@@ -111,9 +112,9 @@ export const updateMou = async (req: Request, res: Response, next: NextFunction)
     const bodies = req.body as Mou;
     const mou = new Mou();
 
-    mou.user_assigned_id = bodies.user_assigned_id || null;
+    mou.nama_pic = bodies.nama_pic;
     mou.status = bodies.status;
-    mou.updated_by = req.user.id;
+    mou.updated_by = req.user.nik;
 
     const updateMou = await mouRepo.update(req.params.id, mou);
 
@@ -121,7 +122,27 @@ export const updateMou = async (req: Request, res: Response, next: NextFunction)
       mou: updateMou,
     };
 
-    return res.customSuccess(200, 'New mou created', dataRes);
+    return res.customSuccess(200, 'Mou updated', dataRes);
+  } catch (e) {
+    return next(e);
+  }
+};
+
+export const deleteMou = async (req: Request, res: Response, next: NextFunction) => {
+  const mouRepo = getRepository(Mou);
+
+  try {
+    const mou = await mouRepo.delete({ id: +req.params.id });
+
+    if (mou.affected > 0) {
+      // delete photo
+    }
+
+    const dataRes = {
+      mou: mou,
+    };
+
+    return res.customSuccess(200, 'Delete mou success', dataRes);
   } catch (e) {
     return next(e);
   }

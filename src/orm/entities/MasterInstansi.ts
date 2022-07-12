@@ -79,9 +79,9 @@ class MasterInstansi {
   jabatan_karyawan: string;
 
   @Column({
-    type: 'int4',
+    type: 'varchar',
   })
-  outlet_id: number;
+  kode_unit_kerja: number;
 
   @Column({
     type: 'smallint',
@@ -98,13 +98,13 @@ class MasterInstansi {
   updated_at: Date;
 
   @Column({ nullable: true })
-  created_by: number;
+  created_by: string;
 
   @Column({ nullable: true })
-  updated_by: number;
+  updated_by: string;
 
   @ManyToOne(() => Outlet)
-  @JoinColumn([{ name: 'outlet_id', referencedColumnName: 'id' }])
+  @JoinColumn([{ name: 'kode_unit_kerja', referencedColumnName: 'kode' }])
   cakupan_instansi: Outlet;
 }
 

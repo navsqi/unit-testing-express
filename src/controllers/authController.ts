@@ -27,11 +27,11 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
       });
     }
 
-    user.username = bodies.username;
-    user.name = bodies.name;
+    user.nama = bodies.nama;
     user.email = bodies.email;
     user.password = bodies.password;
     user.photo = fileName;
+    user.nik = bodies.nik;
     user.hashPassword();
     await userRepo.save(user);
 
@@ -56,7 +56,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
   try {
     const bodies = req.body as User;
 
-    const user = await userRepo.findOne({ where: [{ email: bodies.email }, { username: bodies.username }] });
+    const user = await userRepo.findOne({ where: [{ email: bodies.email }, { nik: bodies.nik }] });
 
     if (!user) return next(new CustomError('User not found', 404));
 
@@ -91,17 +91,18 @@ export const exchangeTokenSso = async (req: Request, res: Response, next: NextFu
 
     const ssoRes = loginSSO.data as ISSOExchangeTokenResponse;
 
-    let user = await userRepo.findOne({ where: { nik: ssoRes.nik, name: ssoRes.nama_lengkap } });
+    let user = await userRepo.findOne({ where: { nik: ssoRes.nik } });
 
     if (!user) {
       user = await userRepo.save({
-        name: ssoRes.nama_lengkap,
-        role: ssoRes.nama_jabatan,
-        grade: ssoRes.nama_grade,
+        nama: ssoRes.nama_lengkap,
         nik: ssoRes.nik,
-        username: ssoRes.nik,
         email: ssoRes.email,
+        role: ssoRes.nama_jabatan,
+        kode_role: ssoRes.kode_jabatan,
+        unit_kerja: ssoRes.nama_unit_kerja,
         kode_unit_kerja: ssoRes.kode_unit_kerja,
+        photo: ssoRes.path_foto,
       });
     }
 

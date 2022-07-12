@@ -30,7 +30,7 @@ export const protect = (roles?: string[]) => {
 
       req.user = await userRepo.findOne({
         where: { id: jwtPayload.id },
-        select: ['id', 'email', 'name', 'role', 'email'],
+        select: ['id', 'nik', 'email', 'nama', 'kode_role', 'role', 'unit_kerja', 'kode_unit_kerja'],
       });
 
       if (!isRoleMatch(roles, jwtPayload.role as string)) return next(new CustomError(`Access denied`, 403));

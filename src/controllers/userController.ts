@@ -6,7 +6,7 @@ export const getUser = async (req: Request, res: Response, next: NextFunction) =
   try {
     const userRepository = getRepository(User);
 
-    const [users, count] = await userRepository.findAndCount({ select: ['name', 'email', 'username', 'role'] });
+    const [users, count] = await userRepository.findAndCount({ select: ['nama', 'email', 'role'] });
 
     const dataRes = {
       count,
