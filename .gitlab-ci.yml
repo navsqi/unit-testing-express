@@ -5,12 +5,10 @@ variables:
   TAG_LATEST: artifactory.pegadaian.co.id:5443/$CI_PROJECT_NAME:latest
   TAG_COMMIT: artifactory.pegadaian.co.id:5443/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA
   OPENSHIFT_REG_JKT: default-route-openshift-image-registry.apps.ocp-jkt.pegadaian.co.id
-#   OPENSHIFT_REG_SBY: default-route-openshift-image-registry.apps.ocp-sby.pegadaian.co.id
 
 stages:
   - build_image
   - openshift_dev_pushimage
-  # - openshift_prod_pushimage
   
 image-build:
   stage: build_image
@@ -21,7 +19,6 @@ image-build:
     - docker push $TAG_COMMIT
   only:
     - develop
-    # - master
 
 openshift-dev-pushimage:
   stage: openshift_dev_pushimage
@@ -33,6 +30,5 @@ openshift-dev-pushimage:
     - docker push $OPENSHIFT_REG_JKT/hbl-surrounding-dev/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA
   only:
     - develop
-    # - master
   environment:
     name: development-jkt

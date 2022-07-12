@@ -9,7 +9,6 @@ COPY package-lock.json ./
 
 RUN npm install
 
-# Copy Node Source Code File
 COPY . ./
 
 RUN npm run build
