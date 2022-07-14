@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { FindManyOptions, getManager, getRepository, ILike } from 'typeorm';
+import { FindManyOptions, getConnection, getRepository, ILike } from 'typeorm';
 import APIPegadaian from '~/apis/pegadaianApi';
 import Leads from '~/orm/entities/Leads';
 import Produk from '~/orm/entities/Produk';
@@ -7,9 +7,10 @@ import CustomError from '~/utils/customError';
 import queryHelper from '~/utils/queryHelper';
 
 import { parse } from 'csv-parse';
-import { addDays, bufferToStream, parseIp } from '~/utils/common';
 import NasabahPerorangan from '~/orm/entities/NasabahPerorangan';
 import { IKTPPassion } from '~/types/APIPegadaianTypes';
+import { addDays, bufferToStream, parseIp } from '~/utils/common';
+import validationCsv from '~/utils/validationCsv';
 
 export const getLeads = async (req: Request, res: Response, next: NextFunction) => {
   const leadsRepo = getRepository(Leads);
@@ -117,6 +118,22 @@ export const createNewLeads = async (req: Request, res: Response, next: NextFunc
   try {
     const bodies = req.body as Leads;
 
+    const getExistingLeads = await leadsRepo.findOne({
+      where: { nik_ktp: bodies.nik_ktp, kode_produk: bodies.kode_produk, step: 'CLP' },
+      relations: ['user_created'],
+    });
+
+    if (!bodies.is_ktp_valid) return next(new CustomError('NIK KTP harus valid', 400));
+
+    if (getExistingLeads) {
+      return next(
+        new CustomError(
+          `NIK ${getExistingLeads.nik_ktp} dengan kode produk ${bodies.kode_produk} sedang diprospek oleh ${getExistingLeads.user_created.nik}`,
+          400,
+        ),
+      );
+    }
+
     if (!bodies.cif && !bodies.nik_ktp) {
       return next(new CustomError('CIF atau NIK wajib di-isi', 400));
     }
@@ -145,19 +162,23 @@ export const createNewLeads = async (req: Request, res: Response, next: NextFunc
 };
 
 export const createNewLeadsByCsv = async (req: Request, res: Response, next: NextFunction) => {
-  // const leadsRepo = getRepository(Leads);
+  const db = getConnection();
+  const queryRunner = db.createQueryRunner();
+
+  queryRunner.connect();
+  await queryRunner.startTransaction();
 
   try {
     const bodies = req.body as Leads;
 
     let csv: Express.Multer.File = null;
 
-    // console.log(req.files);
     if (req.files && req.files['csv']) {
       csv = req.files['csv'][0];
     }
 
     const dataInput: Leads[] = [];
+    let validate = [];
 
     bufferToStream(csv.buffer)
       .pipe(parse({ delimiter: ',', from_line: 2 }))
@@ -180,13 +201,39 @@ export const createNewLeadsByCsv = async (req: Request, res: Response, next: Nex
         dataInput.push(leads);
       })
       .on('end', async () => {
-        const insertLeads = await getManager().transaction(async (t) => {
-          t.createQueryBuilder().insert().into(Leads).values(dataInput).execute();
-        });
+        for (const [index, data] of dataInput.entries()) {
+          validate = validationCsv({ nama: data.nama, nik_ktp: data.nik_ktp, no_hp: data.no_hp });
+
+          if (validate.length > 0) {
+            validate.unshift(`Data pada baris ke - ${index + 1} terdapat kesalahan`);
+            break;
+          }
+
+          const checkExistingLeads = await queryRunner.manager.findOne(Leads, {
+            where: {
+              nik_ktp: data.nik_ktp,
+              kode_produk: data.kode_produk,
+              step: 'CLP',
+            },
+          });
+
+          if (!checkExistingLeads) {
+            await queryRunner.manager.save(Leads, data);
+          }
+        }
+
+        if (validate.length > 0) {
+          await queryRunner.rollbackTransaction();
+          await queryRunner.release();
+          return next(new CustomError(JSON.stringify(validate), 400));
+        }
 
         const dataRes = {
-          leads: insertLeads,
+          leads: true,
         };
+
+        await queryRunner.commitTransaction();
+        await queryRunner.release();
 
         return res.customSuccess(200, 'Create leads success', dataRes);
       })
@@ -194,6 +241,9 @@ export const createNewLeadsByCsv = async (req: Request, res: Response, next: Nex
         return next(error);
       });
   } catch (e) {
+    await queryRunner.rollbackTransaction();
+    await queryRunner.release();
+
     return next(e);
   }
 };
@@ -230,6 +280,9 @@ export const checkNasabahPeroranganByNikDukcapil = async (req: Request, res: Res
     const ktpData = checkKTP?.data?.data;
 
     if (!ktpData) return next(new CustomError('Data NIK EKTP tidak ditemukan', 404));
+
+    if (ktpData.namaLengkap.toUpperCase().includes('TIDAK'))
+      return next(new CustomError('Data NIK EKTP Tidak Valid', 400));
 
     const data = await nasabahPeroranganRepo.save({
       nik: bodies.nik,
