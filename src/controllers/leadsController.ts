@@ -1,22 +1,23 @@
 import { NextFunction, Request, Response } from 'express';
-import { FindManyOptions, getConnection, getRepository, ILike } from 'typeorm';
+import { FindOptionsWhere, ILike } from 'typeorm';
 import APIPegadaian from '~/apis/pegadaianApi';
 import Leads from '~/orm/entities/Leads';
-import Produk from '~/orm/entities/Produk';
 import CustomError from '~/utils/customError';
 import queryHelper from '~/utils/queryHelper';
 
 import { parse } from 'csv-parse';
+import { dataSource } from '~/orm/dbCreateConnection';
 import NasabahPerorangan from '~/orm/entities/NasabahPerorangan';
 import { IKTPPassion } from '~/types/APIPegadaianTypes';
 import { addDays, bufferToStream, parseIp } from '~/utils/common';
 import validationCsv from '~/utils/validationCsv';
 
-export const getLeads = async (req: Request, res: Response, next: NextFunction) => {
-  const leadsRepo = getRepository(Leads);
+const leadsRepo = dataSource.getRepository(Leads);
+const nasabahPeroranganRepo = dataSource.getRepository(NasabahPerorangan);
 
+export const getLeads = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const where: FindManyOptions<Produk> = {};
+    const where: FindOptionsWhere<Leads> = {};
 
     const filter = {
       nama: req.query.nama,
@@ -55,11 +56,28 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
   }
 };
 
-export const updateLeads = async (req: Request, res: Response, next: NextFunction) => {
-  const instansiRepo = getRepository(Leads);
-
+export const getLeadsById = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const instansi = await instansiRepo.update(req.params.id, {
+    const leads = await leadsRepo.findOne({
+      relations: ['instansi', 'event', 'outlet'],
+      where: {
+        id: +req.params.leadsId,
+      },
+    });
+
+    const dataRes = {
+      leads,
+    };
+
+    return res.customSuccess(200, 'Get leads', dataRes);
+  } catch (e) {
+    return next(e);
+  }
+};
+
+export const updateLeads = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const instansi = await leadsRepo.update(req.params.id, {
       ...req.body,
       updated_by: req.user.nik,
     });
@@ -75,10 +93,8 @@ export const updateLeads = async (req: Request, res: Response, next: NextFunctio
 };
 
 export const getKtpByInstansiId = async (req: Request, res: Response, next: NextFunction) => {
-  const leadsRepo = getRepository(Leads);
-
   try {
-    const where: FindManyOptions<Produk> = {};
+    const where: FindOptionsWhere<Leads> = {};
 
     const filter = {
       nama: req.query.nama,
@@ -113,8 +129,6 @@ export const getKtpByInstansiId = async (req: Request, res: Response, next: Next
 };
 
 export const createNewLeads = async (req: Request, res: Response, next: NextFunction) => {
-  const leadsRepo = getRepository(Leads);
-
   try {
     const bodies = req.body as Leads;
 
@@ -162,8 +176,7 @@ export const createNewLeads = async (req: Request, res: Response, next: NextFunc
 };
 
 export const createNewLeadsByCsv = async (req: Request, res: Response, next: NextFunction) => {
-  const db = getConnection();
-  const queryRunner = db.createQueryRunner();
+  const queryRunner = dataSource.createQueryRunner();
 
   queryRunner.connect();
   await queryRunner.startTransaction();
@@ -202,7 +215,12 @@ export const createNewLeadsByCsv = async (req: Request, res: Response, next: Nex
       })
       .on('end', async () => {
         for (const [index, data] of dataInput.entries()) {
-          validate = validationCsv({ nama: data.nama, nik_ktp: data.nik_ktp, no_hp: data.no_hp });
+          validate = validationCsv({
+            nama: data.nama,
+            nik_ktp: data.nik_ktp,
+            no_hp: data.no_hp,
+            kode_produk: data.kode_produk,
+          });
 
           if (validate.length > 0) {
             validate.unshift(`Data pada baris ke - ${index + 1} terdapat kesalahan`);
@@ -249,8 +267,6 @@ export const createNewLeadsByCsv = async (req: Request, res: Response, next: Nex
 };
 
 export const checkNasabahPeroranganByNikDukcapil = async (req: Request, res: Response, next: NextFunction) => {
-  const nasabahPeroranganRepo = getRepository(NasabahPerorangan);
-
   try {
     const bodies = req.body;
 
@@ -303,8 +319,6 @@ export const checkNasabahPeroranganByNikDukcapil = async (req: Request, res: Res
 };
 
 export const checkNasabahPeroranganByNikPassion = async (req: Request, res: Response, next: NextFunction) => {
-  const nasabahPeroranganRepo = getRepository(NasabahPerorangan);
-
   try {
     const bodies = req.body;
 
@@ -370,9 +384,6 @@ export const checkNasabahPeroranganByNikPassion = async (req: Request, res: Resp
 };
 
 export const getNasabahByCif = async (req: Request, res: Response, next: NextFunction) => {
-  // const leadsRepo = getRepository(Leads);
-  const nasabahPeroranganRepo = getRepository(NasabahPerorangan);
-
   try {
     const bodies = req.body;
 
@@ -409,8 +420,6 @@ export const getNasabahByCif = async (req: Request, res: Response, next: NextFun
 };
 
 export const checkBadanUsahaByCif = async (req: Request, res: Response, next: NextFunction) => {
-  const leadsRepo = getRepository(Leads);
-
   try {
     const bodies = req.body;
 

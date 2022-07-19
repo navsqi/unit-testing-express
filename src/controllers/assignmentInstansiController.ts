@@ -1,13 +1,13 @@
 import { NextFunction, Request, Response } from 'express';
-import { getRepository } from 'typeorm';
+import { dataSource } from '~/orm/dbCreateConnection';
 import AssignmentInstansi from '~/orm/entities/AssignmentInstansi';
 import assignmentInstansiSrv from '~/services/assignmentInstansiSrv';
 import CustomError from '~/utils/customError';
 import queryHelper from '~/utils/queryHelper';
 
-export const assignUser = async (req: Request, res: Response, next: NextFunction) => {
-  const assignedInsRepo = getRepository(AssignmentInstansi);
+const assignedInsRepo = dataSource.getRepository(AssignmentInstansi);
 
+export const assignUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const body = req.body;
 
@@ -77,8 +77,6 @@ export const getInstansiByAssignedUser = async (req: Request, res: Response, nex
 };
 
 export const updateAssignment = async (req: Request, res: Response, next: NextFunction) => {
-  const assignedInsRepo = getRepository(AssignmentInstansi);
-
   try {
     const body = req.body as AssignmentInstansi;
 

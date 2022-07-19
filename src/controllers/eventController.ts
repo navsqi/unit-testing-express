@@ -1,13 +1,14 @@
 import { NextFunction, Request, Response } from 'express';
-import { FindManyOptions, getRepository, ILike } from 'typeorm';
+import { ILike } from 'typeorm';
 import { objectUpload } from '~/config/minio';
+import { dataSource } from '~/orm/dbCreateConnection';
 import Event from '~/orm/entities/Event';
 import { generateFileName } from '~/utils/common';
 import queryHelper from '~/utils/queryHelper';
 
-export const createEvent = async (req: Request, res: Response, next: NextFunction) => {
-  const eventRepo = getRepository(Event);
+const eventRepo = dataSource.getRepository(Event);
 
+export const createEvent = async (req: Request, res: Response, next: NextFunction) => {
   try {
     let photo: Express.Multer.File = null;
     const bodies = req.body as Event;
@@ -48,10 +49,8 @@ export const createEvent = async (req: Request, res: Response, next: NextFunctio
 };
 
 export const getEvent = async (req: Request, res: Response, next: NextFunction) => {
-  const eventRepo = getRepository(Event);
-
   try {
-    const where: FindManyOptions<Event> = {};
+    const where = {};
     const qs = req.query;
 
     const filter = {
@@ -96,12 +95,10 @@ export const getEvent = async (req: Request, res: Response, next: NextFunction) 
 };
 
 export const getEventById = async (req: Request, res: Response, next: NextFunction) => {
-  const eventRepo = getRepository(Event);
-
   try {
     const event = await eventRepo.findOne({
       where: {
-        id: req.params.id,
+        id: +req.params.id,
       },
     });
 
@@ -116,8 +113,6 @@ export const getEventById = async (req: Request, res: Response, next: NextFuncti
 };
 
 export const updateEvent = async (req: Request, res: Response, next: NextFunction) => {
-  const eventRepo = getRepository(Event);
-
   try {
     const event = await eventRepo.update(req.params.id, {
       ...req.body,
@@ -139,8 +134,6 @@ export const updateEvent = async (req: Request, res: Response, next: NextFunctio
 };
 
 export const deleteEvent = async (req: Request, res: Response, next: NextFunction) => {
-  const eventRepo = getRepository(Event);
-
   try {
     const event = await eventRepo.delete({ id: +req.params.id });
 

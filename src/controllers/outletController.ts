@@ -1,13 +1,14 @@
 import { NextFunction, Request, Response } from 'express';
-import { FindManyOptions, getRepository, ILike } from 'typeorm';
+import { ILike } from 'typeorm';
+import { dataSource } from '~/orm/dbCreateConnection';
 import Outlet from '~/orm/entities/Outlet';
 import queryHelper from '~/utils/queryHelper';
 
-export const getOutlet = async (req: Request, res: Response, next: NextFunction) => {
-  const outletRepo = getRepository(Outlet);
+const outletRepo = dataSource.getRepository(Outlet);
 
+export const getOutlet = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const where: FindManyOptions = {};
+    const where = {};
 
     const filter = {
       nama: req.query.nama,

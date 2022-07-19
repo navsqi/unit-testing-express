@@ -18,6 +18,8 @@ router.post(
   uploadBuffer([{ name: 'csv', maxCount: 1 }], false),
   leadsController.createNewLeadsByCsv,
 );
+router.get('/:leadsId', leadsController.getLeadsById);
+router.get('/', leadsController.getLeads);
 router.post('/', protect(), inputLeadsVal, leadsController.createNewLeads);
 router.patch('/:id', protect(), leadsController.updateLeads);
 

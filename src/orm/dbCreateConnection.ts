@@ -1,14 +1,17 @@
-import { Connection, createConnection } from 'typeorm';
+import { DataSource } from 'typeorm';
 
 import config from './ormConfig';
 
-export const dbCreateConnection = async (): Promise<Connection | null> => {
-  let conn: any = null;
+export const dataSource = new DataSource(config);
+
+export const dbCreateConnection = async (): Promise<DataSource | null> => {
+  let conn: DataSource;
   try {
-    conn = await createConnection(config);
-    console.log(`[ORM] Connection Name: '${conn.name}' | Database: '${conn.options.database}'`);
+    conn = await dataSource.initialize();
+    console.log(`[ORM] Database: '${conn.options.database}'`);
   } catch (e) {
     console.log(`[ORM] Connection to database failed: `, e.message.toString());
   }
+
   return conn;
 };

@@ -1,11 +1,9 @@
-import { getConnection } from 'typeorm';
+import { dataSource } from '~/orm/dbCreateConnection';
 import AssignmentInstansi from '~/orm/entities/AssignmentInstansi';
 import { IPaging } from '~/utils/queryHelper';
 
 const listAssignUser = async (instansiId: number, paging: IPaging) => {
-  const connection = getConnection();
-
-  const assignedUser = await connection
+  const assignedUser = await dataSource
     .createQueryBuilder()
     .select(['ai.id', 'user.nik', 'user.role', 'user.nama', 'assignor.nik', 'assignor.role', 'assignor.nama'])
     .from(AssignmentInstansi, 'ai')
@@ -20,9 +18,7 @@ const listAssignUser = async (instansiId: number, paging: IPaging) => {
 };
 
 const listAssignInstansi = async (userNik: string, paging: IPaging) => {
-  const connection = getConnection();
-
-  const assignedUser = await connection
+  const assignedUser = await dataSource
     .createQueryBuilder()
     .select(['ai.id', 'instansi', 'assignor.nik', 'assignor.role', 'assignor.nama'])
     .from(AssignmentInstansi, 'ai')

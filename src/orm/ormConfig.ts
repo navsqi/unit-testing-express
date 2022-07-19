@@ -1,9 +1,9 @@
 import { join } from 'path';
-import { ConnectionOptions } from 'typeorm';
+import { DataSourceOptions } from 'typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import Entities from './entities';
 
-const ormConfig: ConnectionOptions = {
+const ormConfig: DataSourceOptions = {
   type: 'postgres',
   host: process.env.DB_HOST,
   port: Number(process.env.DB_PORT),
@@ -15,11 +15,6 @@ const ormConfig: ConnectionOptions = {
   entities: [...Object.values(Entities)],
   migrations: [join(__dirname, 'migrations', '*.{ts,js}')],
   subscribers: [join(__dirname, 'subscribers', '*.{ts,js}')],
-  cli: {
-    entitiesDir: join(__dirname, 'entities'),
-    migrationsDir: join(__dirname, 'migrations'),
-    subscribersDir: join(__dirname, 'subscribers'),
-  },
   namingStrategy: new SnakeNamingStrategy(),
 };
 

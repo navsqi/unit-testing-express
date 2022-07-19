@@ -1,17 +1,17 @@
-import { Request, Response, NextFunction } from 'express';
-import { getRepository } from 'typeorm';
-import CustomError from '../utils/customError';
-import User from '../orm/entities/User';
-import { signToken } from './../services/tokenSrv';
+import { NextFunction, Request, Response } from 'express';
 import APISSO from '~/apis/sso';
-import { ISSOExchangeTokenResponse } from '~/interfaces/ISso';
 import { objectUpload } from '~/config/minio';
+import { ISSOExchangeTokenResponse } from '~/interfaces/ISso';
+import { dataSource } from '~/orm/dbCreateConnection';
 import { generateFileName } from '~/utils/common';
+import User from '../orm/entities/User';
+import CustomError from '../utils/customError';
+import { signToken } from './../services/tokenSrv';
+
+const userRepo = dataSource.getRepository(User);
 
 export const register = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const userRepo = getRepository(User);
-
     let photo: Express.Multer.File = null;
     const bodies = req.body as User;
     const user = new User();
@@ -51,8 +51,6 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
 };
 
 export const login = async (req: Request, res: Response, next: NextFunction) => {
-  const userRepo = getRepository(User);
-
   try {
     const bodies = req.body as User;
 
@@ -80,8 +78,6 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 };
 
 export const exchangeTokenSso = async (req: Request, res: Response, next: NextFunction) => {
-  const userRepo = getRepository(User);
-
   try {
     const bodies = req.body;
 

@@ -1,13 +1,14 @@
 import { NextFunction, Request, Response } from 'express';
-import { getRepository, ILike } from 'typeorm';
+import { ILike } from 'typeorm';
 import { objectUpload } from '~/config/minio';
+import { dataSource } from '~/orm/dbCreateConnection';
 import Mou from '~/orm/entities/Mou';
 import { generateFileName } from '~/utils/common';
 import queryHelper from '~/utils/queryHelper';
 
-export const createMou = async (req: Request, res: Response, next: NextFunction) => {
-  const mouRepo = getRepository(Mou);
+const mouRepo = dataSource.getRepository(Mou);
 
+export const createMou = async (req: Request, res: Response, next: NextFunction) => {
   try {
     let photo: Express.Multer.File = null;
     const bodies = req.body as Mou;
@@ -49,8 +50,6 @@ export const createMou = async (req: Request, res: Response, next: NextFunction)
 };
 
 export const getMou = async (req: Request, res: Response, next: NextFunction) => {
-  const mouRepo = getRepository(Mou);
-
   try {
     const filter = {
       nama_kerjasama: req.query.nama_instansi || '',
@@ -85,13 +84,11 @@ export const getMou = async (req: Request, res: Response, next: NextFunction) =>
 };
 
 export const getMouById = async (req: Request, res: Response, next: NextFunction) => {
-  const mouRepo = getRepository(Mou);
-
   try {
     const mou = await mouRepo.findOne({
       relations: ['outlet'],
       where: {
-        id: req.params.id,
+        id: +req.params.id,
       },
     });
 
@@ -106,8 +103,6 @@ export const getMouById = async (req: Request, res: Response, next: NextFunction
 };
 
 export const updateMou = async (req: Request, res: Response, next: NextFunction) => {
-  const mouRepo = getRepository(Mou);
-
   try {
     const bodies = req.body as Mou;
     const mou = new Mou();
@@ -129,8 +124,6 @@ export const updateMou = async (req: Request, res: Response, next: NextFunction)
 };
 
 export const deleteMou = async (req: Request, res: Response, next: NextFunction) => {
-  const mouRepo = getRepository(Mou);
-
   try {
     const mou = await mouRepo.delete({ id: +req.params.id });
 

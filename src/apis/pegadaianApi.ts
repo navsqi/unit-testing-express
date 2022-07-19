@@ -1,7 +1,6 @@
 import 'dotenv/config';
 
 import axios, { AxiosPromise } from 'axios';
-import { parseIp } from '~/utils/common';
 
 interface IBadanUsahaByCif {
   cif: string;

@@ -1,9 +1,11 @@
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import CustomError from './../utils/customError';
 import { jwtPayload } from 'types/jwtPayload';
-import { getRepository } from 'typeorm';
+import { dataSource } from '~/orm/dbCreateConnection';
 import User from '~/orm/entities/User';
+import CustomError from './../utils/customError';
+
+const userRepo = dataSource.getRepository(User);
 
 export const isRoleMatch = (roles?: any[], role?: string): boolean => {
   if (roles && !roles.includes(role)) return false;
@@ -20,8 +22,6 @@ export const protect = (roles?: string[]) => {
     }
 
     const token = authHeader.split(' ')[1];
-
-    const userRepo = getRepository(User);
 
     try {
       const jwtPayload: jwtPayload = jwt.verify(token, process.env.JWT_SECRET_KEY as string);

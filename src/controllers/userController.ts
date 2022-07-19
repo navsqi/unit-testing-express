@@ -1,12 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
-import { getRepository } from 'typeorm';
+import { dataSource } from '~/orm/dbCreateConnection';
 import User from '../orm/entities/User';
+
+const userRepo = dataSource.getRepository(User);
 
 export const getUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const userRepository = getRepository(User);
-
-    const [users, count] = await userRepository.findAndCount({ select: ['nama', 'email', 'role'] });
+    const [users, count] = await userRepo.findAndCount({ select: ['nama', 'email', 'role'] });
 
     const dataRes = {
       count,

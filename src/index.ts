@@ -11,6 +11,11 @@ import CustomError from './utils/customError';
 import './utils/customErrorValidation';
 import './utils/customSuccess';
 
+(async () => {
+  // await redisCreateConnection();
+  await dbCreateConnection();
+})();
+
 export const app = express();
 
 app.use(morgan('dev'));
@@ -27,11 +32,19 @@ app.use(globalError);
 
 const port = process.env.PORT || 4000;
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
 
-(async () => {
-  // await redisCreateConnection();
-  await dbCreateConnection();
-})();
+process.on('unhandledRejection', (err: Error) => {
+  console.log(err);
+  server.close(() => {
+    process.exit(1);
+  });
+});
+
+process.on('SIGTERM', () => {
+  server.close(() => {
+    console.log('Process terminated!');
+  });
+});

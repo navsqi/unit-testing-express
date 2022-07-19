@@ -1,14 +1,18 @@
 import { NextFunction, Request, Response } from 'express';
-import { FindManyOptions, getRepository, ILike } from 'typeorm';
+import { ILike } from 'typeorm';
+import { dataSource } from '~/orm/dbCreateConnection';
 import Instansi from '~/orm/entities/Instansi';
 import MasterInstansi from '~/orm/entities/MasterInstansi';
 import OrganisasiPegawai from '~/orm/entities/OrganisasiPegawai';
 import SaranaMedia from '~/orm/entities/SaranaMedia';
 import queryHelper from '~/utils/queryHelper';
 
-export const getOrganisasiPegawai = async (req: Request, res: Response, next: NextFunction) => {
-  const organisasiPegawaiRepo = getRepository(OrganisasiPegawai);
+const organisasiPegawaiRepo = dataSource.getRepository(OrganisasiPegawai);
+const masterInsRepo = dataSource.getRepository(MasterInstansi);
+const instansiRepo = dataSource.getRepository(Instansi);
+const saranaMediaRepo = dataSource.getRepository(SaranaMedia);
 
+export const getOrganisasiPegawai = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const [organisasiPegawai, count] = await organisasiPegawaiRepo.findAndCount();
 
@@ -26,8 +30,6 @@ export const getOrganisasiPegawai = async (req: Request, res: Response, next: Ne
 };
 
 export const getSaranaMedia = async (req: Request, res: Response, next: NextFunction) => {
-  const saranaMediaRepo = getRepository(SaranaMedia);
-
   try {
     const [saranaMedia, count] = await saranaMediaRepo.findAndCount();
 
@@ -45,8 +47,6 @@ export const getSaranaMedia = async (req: Request, res: Response, next: NextFunc
 };
 
 export const getMasterInstansi = async (req: Request, res: Response, next: NextFunction) => {
-  const masterInsRepo = getRepository(MasterInstansi);
-
   try {
     const filter = {
       nama_instansi: req.query.nama_instansi || '',
@@ -78,11 +78,9 @@ export const getMasterInstansi = async (req: Request, res: Response, next: NextF
 };
 
 export const getMasterInstansiById = async (req: Request, res: Response, next: NextFunction) => {
-  const masterInsRepo = getRepository(MasterInstansi);
-
   try {
     const masterInstansiById = await masterInsRepo.findOne({
-      where: { id: req.params.id },
+      where: { id: +req.params.id },
       relations: ['cakupan_instansi'],
     });
 
@@ -97,8 +95,6 @@ export const getMasterInstansiById = async (req: Request, res: Response, next: N
 };
 
 export const createNewMasterInstansi = async (req: Request, res: Response, next: NextFunction) => {
-  const masterInsRepo = getRepository(MasterInstansi);
-
   try {
     const instansi = await masterInsRepo.save({
       ...req.body,
@@ -118,10 +114,6 @@ export const createNewMasterInstansi = async (req: Request, res: Response, next:
 };
 
 export const updateMasterInstansi = async (req: Request, res: Response, next: NextFunction) => {
-  const masterInsRepo = getRepository(MasterInstansi);
-
-  console.log(req.body);
-
   try {
     const instansi = await masterInsRepo.update(req.params.id, {
       ...req.body,
@@ -139,8 +131,6 @@ export const updateMasterInstansi = async (req: Request, res: Response, next: Ne
 };
 
 export const deleteMasterInstansi = async (req: Request, res: Response, next: NextFunction) => {
-  const masterInsRepo = getRepository(MasterInstansi);
-
   try {
     const instansi = await masterInsRepo.delete({ id: +req.params.id });
 
@@ -155,10 +145,8 @@ export const deleteMasterInstansi = async (req: Request, res: Response, next: Ne
 };
 
 export const getInstansi = async (req: Request, res: Response, next: NextFunction) => {
-  const instansiRepo = getRepository(Instansi);
-
   try {
-    const where: FindManyOptions<Instansi> = {};
+    const where = {};
 
     const filter = {
       nama_instansi: req.query.nama_instansi,
@@ -197,11 +185,9 @@ export const getInstansi = async (req: Request, res: Response, next: NextFunctio
 };
 
 export const getInstansiById = async (req: Request, res: Response, next: NextFunction) => {
-  const insRepo = getRepository(Instansi);
-
   try {
-    const instansiById = await insRepo.findOne({
-      where: { id: req.params.id },
+    const instansiById = await instansiRepo.findOne({
+      where: { id: +req.params.id },
       relations: ['master_instansi', 'cakupan_instansi', 'sarana_media', 'organisasi_pegawai'],
     });
 
@@ -216,8 +202,6 @@ export const getInstansiById = async (req: Request, res: Response, next: NextFun
 };
 
 export const createNewInstansi = async (req: Request, res: Response, next: NextFunction) => {
-  const instansiRepo = getRepository(Instansi);
-
   try {
     console.log(req.body.kode_unit_kerja);
     const instansi = await instansiRepo.save({
@@ -238,8 +222,6 @@ export const createNewInstansi = async (req: Request, res: Response, next: NextF
 };
 
 export const updateInstansi = async (req: Request, res: Response, next: NextFunction) => {
-  const instansiRepo = getRepository(Instansi);
-
   try {
     const instansi = await instansiRepo.update(req.params.id, {
       ...req.body,
@@ -257,8 +239,6 @@ export const updateInstansi = async (req: Request, res: Response, next: NextFunc
 };
 
 export const deleteInstansi = async (req: Request, res: Response, next: NextFunction) => {
-  const instansiRepo = getRepository(Instansi);
-
   try {
     const instansi = await instansiRepo.delete({ id: +req.params.id });
 
