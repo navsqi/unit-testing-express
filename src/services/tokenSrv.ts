@@ -10,6 +10,7 @@ export const signToken = async (user: User) => {
   const token = jwt.sign(
     { id: user.id, role: user.role, iat: dayjs().unix(), exp: tokenExpires.unix() },
     process.env.JWT_SECRET_KEY,
+    { algorithm: 'HS512' },
   );
 
   return {

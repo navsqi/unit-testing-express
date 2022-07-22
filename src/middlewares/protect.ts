@@ -24,7 +24,9 @@ export const protect = (roles?: string[]) => {
     const token = authHeader.split(' ')[1];
 
     try {
-      const jwtPayload: jwtPayload = jwt.verify(token, process.env.JWT_SECRET_KEY as string);
+      const jwtPayload = jwt.verify(token, process.env.JWT_SECRET_KEY as string, {
+        algorithms: ['HS512'],
+      }) as jwtPayload;
 
       req.jwtPayload = jwtPayload;
 

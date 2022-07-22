@@ -323,12 +323,14 @@ export const checkNasabahPeroranganByNikPassion = async (req: Request, res: Resp
     const bodies = req.body;
 
     let isNewCif = true;
+    let isKTPValid = false;
 
     const checkToNasabahPerorangan = await nasabahPeroranganRepo.findOne({ where: { nik: bodies.nik } });
 
     if (checkToNasabahPerorangan) {
       const dataRes = {
         isNewCif: false,
+        isKTPValid: true,
         nasabah: checkToNasabahPerorangan,
       };
 
@@ -358,6 +360,7 @@ export const checkNasabahPeroranganByNikPassion = async (req: Request, res: Resp
     let nasabah: any = null;
     if (ktpData) {
       isNewCif = false;
+      isKTPValid = true;
 
       ktpData = JSON.parse(ktpData)[0];
 
@@ -374,6 +377,7 @@ export const checkNasabahPeroranganByNikPassion = async (req: Request, res: Resp
 
     const dataRes = {
       isNewCif,
+      isKTPValid,
       nasabah,
     };
 
