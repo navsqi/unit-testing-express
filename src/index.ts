@@ -38,7 +38,10 @@ app.use(Sentry.Handlers.requestHandler());
 // TracingHandler creates a trace for every incoming request
 app.use(Sentry.Handlers.tracingHandler());
 
-app.use(morgan('dev'));
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+}
+
 app.use(actuator());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true, limit: '200mb' }));
