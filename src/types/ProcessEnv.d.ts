@@ -37,6 +37,7 @@ declare global {
       TSCALE_EXTERNAL_BASIC_PASS: string;
       TSCALE_EXTERNAL_AUTH_USER: string;
       TSCALE_EXTERNAL_AUTH_PASS: string;
+      SENTRY_DSN: string;
     }
   }
 }
