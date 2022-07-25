@@ -5,6 +5,8 @@ import morgan from 'morgan';
 import 'reflect-metadata';
 import globalError from './middlewares/globalError';
 import { dbCreateConnection } from './orm/dbCreateConnection';
+import * as Sentry from '@sentry/node';
+import * as Tracing from '@sentry/tracing';
 // import { redisCreateConnection } from './config/redis';
 import routes from './routes';
 import CustomError from './utils/customError';
@@ -18,6 +20,24 @@ import './utils/customSuccess';
 
 export const app = express();
 
+Sentry.init({
+  dsn: `${process.env.NODE_ENV !== 'development' ? 'https' : 'http'}:${process.env.SENTRY_DSN}`,
+  debug: false,
+  integrations: [
+    // Enable HTTP calls tracing
+    new Sentry.Integrations.Http({ tracing: true }),
+    // Enable Express.js middleware tracing
+    new Tracing.Integrations.Express({ app }),
+  ],
+
+  tracesSampleRate: 1.0,
+});
+
+// transaction/span/breadcrumb is attached to its own Hub instance
+app.use(Sentry.Handlers.requestHandler());
+// TracingHandler creates a trace for every incoming request
+app.use(Sentry.Handlers.tracingHandler());
+
 app.use(morgan('dev'));
 app.use(actuator());
 app.use(express.json());
@@ -27,6 +47,9 @@ app.use('/', routes);
 app.all('/*', (req, res, next) => {
   next(new CustomError(`Not Found (${req.method} ${req.originalUrl})`, 404));
 });
+
+// The error handler must be before any other error middleware and after all controllers
+app.use(Sentry.Handlers.errorHandler());
 
 app.use(globalError);
 
