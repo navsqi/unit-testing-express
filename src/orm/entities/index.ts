@@ -12,6 +12,7 @@ import Leads from './Leads';
 import Produk from './Produk';
 import NasabahBadanUsaha from './NasabahBadanUsaha';
 import NasabahPerorangan from './NasabahPerorangan';
+import Role from './Role';
 
 export default {
   User,
@@ -28,4 +29,5 @@ export default {
   Produk,
   NasabahBadanUsaha,
   NasabahPerorangan,
+  Role,
 };
