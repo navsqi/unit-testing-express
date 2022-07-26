@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import APISSO from '~/apis/sso';
-import { objectUpload } from '~/config/minio';
+import { objectUpload, objectRemove } from '~/config/minio';
 import { ISSOExchangeTokenResponse } from '~/interfaces/ISso';
 import { dataSource } from '~/orm/dbCreateConnection';
 import { generateFileName } from '~/utils/common';
@@ -110,6 +110,73 @@ export const exchangeTokenSso = async (req: Request, res: Response, next: NextFu
     };
 
     return res.customSuccess(200, 'Login success', dataRes);
+  } catch (e) {
+    return next(e);
+  }
+};
+
+export const changePassword = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const bodies = req.body;
+
+    const user = await userRepo.findOne({ where: { nik: req.params.nik } });
+
+    if (!user) return next(new CustomError('User not found', 404));
+
+    if (req.user.nik != user.nik) return next(new CustomError('User is not allowed to change password', 404));
+
+    user.password = bodies.newPass;
+    console.log(user);
+    user.hashPassword();
+
+    await userRepo.update({ nik: req.user.nik }, user);
+
+    const dataRes = {
+      user,
+    };
+
+    return res.customSuccess(200, 'Login success', dataRes);
+  } catch (e) {
+    return next(e);
+  }
+};
+
+export const editUser = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    let photo: Express.Multer.File = null;
+    const bodies = req.body as User;
+    const user = await userRepo.findOne({ where: { nik: req.params.nik } });
+    const userPhoto = user.photo ? user.photo.valueOf() : null;
+
+    let fileName: string = null;
+
+    console.log(req.files);
+    if (req.files && req.files['photo']) {
+      photo = req.files['photo'][0];
+      fileName = 'hbluserprofile/' + generateFileName(photo.originalname);
+
+      await objectUpload(process.env.MINIO_BUCKET, fileName, photo.buffer, {
+        'Content-Type': req.files['photo'][0].mimetype,
+        'Content-Disposision': 'inline',
+      });
+    }
+
+    console.log(user);
+
+    user.nama = bodies.nama;
+    user.email = bodies.email;
+    user.photo = fileName;
+    await userRepo.update({ nik: req.user.nik }, user);
+
+    if (userPhoto) {
+      await objectRemove(process.env.MINIO_BUCKET, userPhoto);
+    }
+
+    const dataRes = {
+      user,
+    };
+
+    return res.customSuccess(200, 'New user created', dataRes);
   } catch (e) {
     return next(e);
   }
