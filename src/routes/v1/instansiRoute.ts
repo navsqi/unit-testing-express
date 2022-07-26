@@ -5,8 +5,8 @@ import protect from '../../middlewares/protect';
 
 const router = Router();
 
-router.get('/sarana-media', protect(), instansiController.getSaranaMedia);
-router.get('/organisasi-pegawai', protect(), instansiController.getOrganisasiPegawai);
+router.get('/sarana-media', instansiController.getSaranaMedia);
+router.get('/organisasi-pegawai', instansiController.getOrganisasiPegawai);
 
 router.get('/parent/', protect(), instansiController.getMasterInstansi);
 router.get('/parent/:id', protect(), instansiController.getMasterInstansiById);

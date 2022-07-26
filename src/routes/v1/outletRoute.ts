@@ -5,6 +5,6 @@ import protect from '../../middlewares/protect';
 
 const router = Router();
 
-router.get('/', outletController.getOutlet);
+router.get('/', protect(), outletController.getOutlet);
 
 export default router;
