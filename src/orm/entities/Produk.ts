@@ -94,7 +94,7 @@ class Produk {
   @Column({ nullable: true })
   updated_by: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { onUpdate: 'CASCADE', onDelete: 'NO ACTION' })
   @JoinColumn([{ name: 'created_by', referencedColumnName: 'nik' }])
   user_created: User;
 }

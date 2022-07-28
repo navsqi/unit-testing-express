@@ -17,6 +17,12 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
     const user = new User();
     let fileName: string = null;
 
+    const checkExistingNik = await userRepo.findOne({ where: [{ email: bodies.email }, { nik: bodies.nik }] });
+
+    if (checkExistingNik) {
+      return next(new CustomError(`NIK / Email sudah ada`, 400));
+    }
+
     if (req.files && req.files['photo']) {
       photo = req.files['photo'][0];
       fileName = 'hbluserprofile/' + generateFileName(photo.originalname);
@@ -52,9 +58,9 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
 
 export const login = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const bodies = req.body as User;
+    const bodies = req.body;
 
-    const user = await userRepo.findOne({ where: [{ email: bodies.email }, { nik: bodies.nik }] });
+    const user = await userRepo.findOne({ where: [{ email: bodies.email }, { nik: bodies.username }] });
 
     if (!user) return next(new CustomError('User not found', 404));
 
@@ -150,7 +156,8 @@ export const editUser = async (req: Request, res: Response, next: NextFunction) 
 
     let fileName: string = null;
 
-    console.log(req.files);
+    if (req.user.nik != user.nik) return next(new CustomError('User is not allowed to change password', 404));
+
     if (req.files && req.files['photo']) {
       photo = req.files['photo'][0];
       fileName = 'hbluserprofile/' + generateFileName(photo.originalname);

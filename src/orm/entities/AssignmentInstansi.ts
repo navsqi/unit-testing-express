@@ -54,11 +54,11 @@ class AssignmentInstansi {
   @JoinColumn([{ name: 'instansi_id', referencedColumnName: 'id' }])
   instansi: Instansi;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { onUpdate: 'CASCADE', onDelete: 'NO ACTION' })
   @JoinColumn([{ name: 'user_nik', referencedColumnName: 'nik' }])
   user: User;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { onUpdate: 'CASCADE', onDelete: 'NO ACTION' })
   @JoinColumn([{ name: 'assignor_nik', referencedColumnName: 'nik' }])
   assignor: User;
 }

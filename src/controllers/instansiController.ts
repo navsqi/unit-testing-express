@@ -6,6 +6,7 @@ import MasterInstansi from '~/orm/entities/MasterInstansi';
 import OrganisasiPegawai from '~/orm/entities/OrganisasiPegawai';
 import SaranaMedia from '~/orm/entities/SaranaMedia';
 import queryHelper from '~/utils/queryHelper';
+import xls from '~/utils/xls';
 
 const organisasiPegawaiRepo = dataSource.getRepository(OrganisasiPegawai);
 const masterInsRepo = dataSource.getRepository(MasterInstansi);
@@ -47,6 +48,37 @@ export const getSaranaMedia = async (req: Request, res: Response, next: NextFunc
 };
 
 export const getMasterInstansi = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const filter = {
+      nama_instansi: req.query.nama_instansi || '',
+    };
+
+    const paging = queryHelper.paging(req.query);
+
+    const [masterInstansi, count] = await masterInsRepo.findAndCount({
+      take: paging.limit,
+      skip: paging.offset,
+      where: {
+        nama_instansi: ILike(`%${filter.nama_instansi}%`),
+      },
+    });
+
+    const dataRes = {
+      meta: {
+        count,
+        limit: paging.limit,
+        offset: paging.offset,
+      },
+      masterInstansi,
+    };
+
+    return res.customSuccess(200, 'Get master instansi', dataRes);
+  } catch (e) {
+    return next(e);
+  }
+};
+
+export const genExcelMasterInstansi = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const filter = {
       nama_instansi: req.query.nama_instansi || '',
@@ -177,6 +209,48 @@ export const getInstansi = async (req: Request, res: Response, next: NextFunctio
       },
       masterInstansi,
     };
+
+    return res.customSuccess(200, 'Get instansi', dataRes);
+  } catch (e) {
+    return next(e);
+  }
+};
+
+export const genExcelInstansi = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const where = {};
+
+    const filter = {
+      nama_instansi: req.query.nama_instansi,
+      is_approved: req.query.is_approved,
+    };
+
+    if (filter.nama_instansi) {
+      where['nama_instansi'] = ILike(`%${filter.nama_instansi}%`);
+    }
+
+    if (filter.is_approved) {
+      where['is_approved'] = +filter.is_approved;
+    }
+
+    const paging = queryHelper.paging(req.query);
+
+    const [masterInstansi, count] = await instansiRepo.findAndCount({
+      take: paging.limit,
+      skip: paging.offset,
+      where,
+    });
+
+    const dataRes = {
+      meta: {
+        count,
+        limit: paging.limit,
+        offset: paging.offset,
+      },
+      masterInstansi,
+    };
+
+    const { workbook, worksheet, headingStyle, outlineHeadingStyle, outlineStyle, outlineStyleWithBg } = xls();
 
     return res.customSuccess(200, 'Get instansi', dataRes);
   } catch (e) {

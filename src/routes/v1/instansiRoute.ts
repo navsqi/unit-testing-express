@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import instansiVal from '~/validations/instansiVal';
 
 import * as instansiController from '../../controllers/instansiController';
 import protect from '../../middlewares/protect';
@@ -10,14 +11,14 @@ router.get('/organisasi-pegawai', instansiController.getOrganisasiPegawai);
 
 router.get('/parent/', protect(), instansiController.getMasterInstansi);
 router.get('/parent/:id', protect(), instansiController.getMasterInstansiById);
-router.post('/parent/', protect(), instansiController.createNewMasterInstansi);
-router.patch('/parent/:id', protect(), instansiController.updateMasterInstansi);
-router.delete('/parent/:id', protect(), instansiController.deleteMasterInstansi);
+router.post('/parent/', protect(), instansiVal.masterInstansi, instansiController.createNewMasterInstansi);
+router.patch('/parent/:id', protect(), instansiVal.masterInstansi, instansiController.updateMasterInstansi);
+router.delete('/parent/:id', protect(), instansiVal.approveInstansi, instansiController.deleteMasterInstansi);
 
 router.get('/child/', protect(), instansiController.getInstansi);
 router.get('/child/:id', protect(), instansiController.getInstansiById);
-router.post('/child/', protect(), instansiController.createNewInstansi);
-router.patch('/child/:id', protect(), instansiController.updateInstansi);
+router.post('/child/', protect(), instansiVal.instansi, instansiController.createNewInstansi);
+router.patch('/child/:id', protect(), instansiVal.instansi, instansiController.updateInstansi);
 router.delete('/child/:id', protect(), instansiController.deleteInstansi);
 
 export default router;
