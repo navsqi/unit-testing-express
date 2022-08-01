@@ -13,6 +13,7 @@ class MasterMenu {
 
   @Column({
     length: 220,
+    nullable: true,
   })
   description: string;
 
@@ -21,6 +22,15 @@ class MasterMenu {
 
   @Column({ type: 'text' })
   navigasi_url: string;
+
+  @Column()
+  unit_kerja: string;
+
+  @Column()
+  orders: number;
+
+  @Column({ default: false })
+  child: boolean;
 
   @Column()
   @CreateDateColumn()

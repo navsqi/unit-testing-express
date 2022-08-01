@@ -1,10 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
-import { ILike } from 'typeorm';
+import { Between, ILike } from 'typeorm';
 import { dataSource } from '~/orm/dbCreateConnection';
 import Instansi from '~/orm/entities/Instansi';
 import MasterInstansi from '~/orm/entities/MasterInstansi';
 import OrganisasiPegawai from '~/orm/entities/OrganisasiPegawai';
 import SaranaMedia from '~/orm/entities/SaranaMedia';
+import { listInstansi, listMasterInstansi } from '~/services/instansiSrv';
+import { tanggal } from '~/utils/common';
 import queryHelper from '~/utils/queryHelper';
 import xls from '~/utils/xls';
 
@@ -51,17 +53,13 @@ export const getMasterInstansi = async (req: Request, res: Response, next: NextF
   try {
     const filter = {
       nama_instansi: req.query.nama_instansi || '',
+      start_date: req.query.start_date || '',
+      end_date: req.query.end_date || '',
     };
 
     const paging = queryHelper.paging(req.query);
 
-    const [masterInstansi, count] = await masterInsRepo.findAndCount({
-      take: paging.limit,
-      skip: paging.offset,
-      where: {
-        nama_instansi: ILike(`%${filter.nama_instansi}%`),
-      },
-    });
+    const [masterInstansi, count] = await listMasterInstansi(filter, paging);
 
     const dataRes = {
       meta: {
@@ -82,30 +80,97 @@ export const genExcelMasterInstansi = async (req: Request, res: Response, next: 
   try {
     const filter = {
       nama_instansi: req.query.nama_instansi || '',
+      start_date: req.query.start_date || '',
+      end_date: req.query.end_date || '',
     };
 
     const paging = queryHelper.paging(req.query);
 
-    const [masterInstansi, count] = await masterInsRepo.findAndCount({
-      take: paging.limit,
-      skip: paging.offset,
-      where: {
-        nama_instansi: ILike(`%${filter.nama_instansi}%`),
-      },
+    const [masterInstansi, count] = await listMasterInstansi(filter, paging);
+
+    const { workbook, worksheet, headingStyle, outlineHeadingStyle, outlineStyle } = xls();
+
+    worksheet.column(1).setWidth(5);
+    worksheet.column(2).setWidth(25);
+    worksheet.column(3).setWidth(25);
+    worksheet.column(4).setWidth(25);
+    worksheet.column(5).setWidth(25);
+    worksheet.column(6).setWidth(25);
+
+    worksheet.cell(1, 1, 1, 9, true).string('DAFTAR NAMA MASTER INSTANSI').style(headingStyle);
+    worksheet
+      .cell(2, 1, 2, 9, true)
+      .string(`TANGGAL ${tanggal(req.query.start_date as string)} S.D. ${tanggal(req.query.end_date as string)}`)
+      .style(headingStyle);
+
+    const barisHeading = 5;
+    let noHeading = 0;
+    worksheet
+      .cell(barisHeading, ++noHeading)
+      .string('NO')
+      .style(outlineHeadingStyle);
+    worksheet
+      .cell(barisHeading, ++noHeading)
+      .string('JENIS INSTANSI')
+      .style(outlineHeadingStyle);
+    worksheet
+      .cell(barisHeading, ++noHeading)
+      .string('NAMA INSTANSI')
+      .style(outlineHeadingStyle);
+    worksheet
+      .cell(barisHeading, ++noHeading)
+      .string('NO TELEPON')
+      .style(outlineHeadingStyle);
+    worksheet
+      .cell(barisHeading, ++noHeading)
+      .string('NAMA KARYAWAN')
+      .style(outlineHeadingStyle);
+    worksheet
+      .cell(barisHeading, ++noHeading)
+      .string('NO TELEPON KARYAWAN')
+      .style(outlineHeadingStyle);
+
+    let rows = 6;
+
+    for (const [index, val] of masterInstansi.entries()) {
+      let bodyLineNum = 1;
+      worksheet
+        .cell(rows, 1)
+        .string(`${index + 1}`)
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(val.jenis_instansi)
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(val.nama_instansi)
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(val.no_telepon_instansi)
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(val.nama_karyawan)
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(val.no_telepon_karyawan)
+        .style(outlineStyle);
+
+      rows++;
+    }
+
+    const fileBuffer = await workbook.writeToBuffer();
+
+    res.set({
+      'Content-Disposition': `attachment; filename="MASTERINSTANSI-${Date.now()}.xlsx"`,
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     });
-
-    const dataRes = {
-      meta: {
-        count,
-        limit: paging.limit,
-        offset: paging.offset,
-      },
-      masterInstansi,
-    };
-
-    return res.customSuccess(200, 'Get master instansi', dataRes);
+    return res.end(fileBuffer);
   } catch (e) {
-    return next(e);
+    next(e);
   }
 };
 
@@ -178,28 +243,16 @@ export const deleteMasterInstansi = async (req: Request, res: Response, next: Ne
 
 export const getInstansi = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const where = {};
-
     const filter = {
-      nama_instansi: req.query.nama_instansi,
-      is_approved: req.query.is_approved,
+      nama_instansi: req.query.nama_instansi || '',
+      start_date: req.query.start_date || '',
+      end_date: req.query.end_date || '',
+      is_approved: req.query.is_approved ? +req.query.is_approved : '',
     };
-
-    if (filter.nama_instansi) {
-      where['nama_instansi'] = ILike(`%${filter.nama_instansi}%`);
-    }
-
-    if (filter.is_approved) {
-      where['is_approved'] = +filter.is_approved;
-    }
 
     const paging = queryHelper.paging(req.query);
 
-    const [masterInstansi, count] = await instansiRepo.findAndCount({
-      take: paging.limit,
-      skip: paging.offset,
-      where,
-    });
+    const [instansi, count] = await listInstansi(filter, paging);
 
     const dataRes = {
       meta: {
@@ -207,7 +260,7 @@ export const getInstansi = async (req: Request, res: Response, next: NextFunctio
         limit: paging.limit,
         offset: paging.offset,
       },
-      masterInstansi,
+      instansi,
     };
 
     return res.customSuccess(200, 'Get instansi', dataRes);
@@ -218,43 +271,115 @@ export const getInstansi = async (req: Request, res: Response, next: NextFunctio
 
 export const genExcelInstansi = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const where = {};
-
     const filter = {
-      nama_instansi: req.query.nama_instansi,
-      is_approved: req.query.is_approved,
+      nama_instansi: req.query.nama_instansi || '',
+      start_date: req.query.start_date || '',
+      end_date: req.query.end_date || '',
     };
-
-    if (filter.nama_instansi) {
-      where['nama_instansi'] = ILike(`%${filter.nama_instansi}%`);
-    }
-
-    if (filter.is_approved) {
-      where['is_approved'] = +filter.is_approved;
-    }
 
     const paging = queryHelper.paging(req.query);
 
-    const [masterInstansi, count] = await instansiRepo.findAndCount({
-      take: paging.limit,
-      skip: paging.offset,
-      where,
+    const [instansi, count] = await listInstansi(filter, paging);
+
+    const { workbook, worksheet, headingStyle, outlineHeadingStyle, outlineStyle } = xls();
+
+    worksheet.column(1).setWidth(5);
+    worksheet.column(2).setWidth(25);
+    worksheet.column(3).setWidth(25);
+    worksheet.column(4).setWidth(25);
+    worksheet.column(5).setWidth(25);
+    worksheet.column(6).setWidth(25);
+
+    worksheet.cell(1, 1, 1, 9, true).string('DAFTAR NAMA INSTANSI').style(headingStyle);
+    worksheet
+      .cell(2, 1, 2, 9, true)
+      .string(`TANGGAL ${tanggal(req.query.start_date as string)} S.D. ${tanggal(req.query.end_date as string)}`)
+      .style(headingStyle);
+
+    const barisHeading = 5;
+    let noHeading = 0;
+    worksheet
+      .cell(barisHeading, ++noHeading)
+      .string('NO')
+      .style(outlineHeadingStyle);
+    worksheet
+      .cell(barisHeading, ++noHeading)
+      .string('JENIS INSTANSI')
+      .style(outlineHeadingStyle);
+    worksheet
+      .cell(barisHeading, ++noHeading)
+      .string('NAMA PARENT INSTANSI')
+      .style(outlineHeadingStyle);
+    worksheet
+      .cell(barisHeading, ++noHeading)
+      .string('NAMA INSTANSI')
+      .style(outlineHeadingStyle);
+    worksheet
+      .cell(barisHeading, ++noHeading)
+      .string('ALAMAT')
+      .style(outlineHeadingStyle);
+    worksheet
+      .cell(barisHeading, ++noHeading)
+      .string('NO TELEPON')
+      .style(outlineHeadingStyle);
+    worksheet
+      .cell(barisHeading, ++noHeading)
+      .string('NAMA KARYAWAN')
+      .style(outlineHeadingStyle);
+    worksheet
+      .cell(barisHeading, ++noHeading)
+      .string('NO TELEPON KARYAWAN')
+      .style(outlineHeadingStyle);
+
+    let rows = 6;
+
+    for (const [index, val] of instansi.entries()) {
+      let bodyLineNum = 1;
+      worksheet
+        .cell(rows, 1)
+        .string(`${index + 1}`)
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(val.jenis_instansi)
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(val.master_instansi.nama_instansi)
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(val.nama_instansi)
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(val.alamat)
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(val.no_telepon_instansi)
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(val.nama_karyawan)
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(val.no_telepon_karyawan)
+        .style(outlineStyle);
+
+      rows++;
+    }
+
+    const fileBuffer = await workbook.writeToBuffer();
+
+    res.set({
+      'Content-Disposition': `attachment; filename="INSTANSI-${Date.now()}.xlsx"`,
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     });
-
-    const dataRes = {
-      meta: {
-        count,
-        limit: paging.limit,
-        offset: paging.offset,
-      },
-      masterInstansi,
-    };
-
-    const { workbook, worksheet, headingStyle, outlineHeadingStyle, outlineStyle, outlineStyleWithBg } = xls();
-
-    return res.customSuccess(200, 'Get instansi', dataRes);
+    return res.end(fileBuffer);
   } catch (e) {
-    return next(e);
+    next(e);
   }
 };
 
@@ -277,7 +402,7 @@ export const getInstansiById = async (req: Request, res: Response, next: NextFun
 
 export const createNewInstansi = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    console.log(req.body.kode_unit_kerja);
+    req.body.nama_instansi = req.body.nama_instansi.toUpperCase();
     const instansi = await instansiRepo.save({
       ...req.body,
       kode_unit_kerja: req.user.kode_unit_kerja,

@@ -9,6 +9,7 @@ import assignmentRoute from './assignmentInstansiRoute';
 import eventRoute from './eventRoute';
 import produkRoute from './produkRoute';
 import leadsRoute from './leadsRoute';
+import masterMenuRoute from './masterMenuRoute';
 
 const router = Router();
 
@@ -21,5 +22,6 @@ router.use('/event', eventRoute);
 router.use('/assignment-instansi', assignmentRoute);
 router.use('/produk', produkRoute);
 router.use('/leads', leadsRoute);
+router.use('/menu', masterMenuRoute);
 
 export default router;

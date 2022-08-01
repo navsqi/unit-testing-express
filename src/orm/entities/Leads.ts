@@ -191,6 +191,7 @@ class Leads {
   @Column({
     type: 'varchar',
     length: 15,
+    nullable: true,
   })
   created_by: string;
 
