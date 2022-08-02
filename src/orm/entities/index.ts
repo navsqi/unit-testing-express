@@ -13,6 +13,8 @@ import Produk from './Produk';
 import NasabahBadanUsaha from './NasabahBadanUsaha';
 import NasabahPerorangan from './NasabahPerorangan';
 import Role from './Role';
+import MasterMenu from './MasterMenu';
+import AccessMenuRole from './AccessMenuRole';
 
 export default {
   User,
@@ -30,4 +32,6 @@ export default {
   NasabahBadanUsaha,
   NasabahPerorangan,
   Role,
+  MasterMenu,
+  AccessMenuRole,
 };

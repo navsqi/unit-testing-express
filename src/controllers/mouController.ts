@@ -1,10 +1,11 @@
 import { NextFunction, Request, Response } from 'express';
-import { ILike } from 'typeorm';
 import { objectUpload } from '~/config/minio';
 import { dataSource } from '~/orm/dbCreateConnection';
 import Mou from '~/orm/entities/Mou';
-import { generateFileName } from '~/utils/common';
+import { listMou } from '~/services/mouSrv';
+import { generateFileName, tanggal } from '~/utils/common';
 import queryHelper from '~/utils/queryHelper';
+import xls from '~/utils/xls';
 
 const mouRepo = dataSource.getRepository(Mou);
 
@@ -52,21 +53,14 @@ export const createMou = async (req: Request, res: Response, next: NextFunction)
 export const getMou = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const filter = {
-      nama_kerjasama: req.query.nama_instansi || '',
+      status: req.query.status || '',
+      start_date: req.query.start_date || '',
+      end_date: req.query.end_date || '',
     };
 
     const paging = queryHelper.paging(req.query);
 
-    const [mou, count] = await mouRepo.findAndCount({
-      take: paging.limit,
-      skip: paging.offset,
-      where: {
-        nama_kerjasama: ILike(`%${filter.nama_kerjasama}%`),
-      },
-      order: {
-        id: 'DESC',
-      },
-    });
+    const [mou, count] = await listMou(filter, paging);
 
     const dataRes = {
       meta: {
@@ -80,6 +74,72 @@ export const getMou = async (req: Request, res: Response, next: NextFunction) =>
     return res.customSuccess(200, 'Get mou', dataRes);
   } catch (e) {
     return next(e);
+  }
+};
+
+export const genExcelMou = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const filter = {
+      status: req.query.status || '',
+      start_date: req.query.start_date || '',
+      end_date: req.query.end_date || '',
+    };
+
+    const paging = queryHelper.paging(req.query);
+
+    const [mou, count] = await listMou(filter, paging);
+
+    const { workbook, worksheet, headingStyle, outlineHeadingStyle, outlineStyle } = xls();
+
+    worksheet.column(1).setWidth(5);
+    worksheet.column(2).setWidth(25);
+    worksheet.column(3).setWidth(25);
+    worksheet.column(4).setWidth(25);
+    worksheet.column(5).setWidth(25);
+    worksheet.column(6).setWidth(25);
+
+    worksheet.cell(1, 1, 1, 9, true).string('DAFTAR MOU').style(headingStyle);
+    worksheet
+      .cell(2, 1, 2, 9, true)
+      .string(`TANGGAL ${tanggal(req.query.start_date as string)} S.D. ${tanggal(req.query.end_date as string)}`)
+      .style(headingStyle);
+
+    const barisHeading = 5;
+    let noHeading = 0;
+    worksheet
+      .cell(barisHeading, ++noHeading)
+      .string('NO')
+      .style(outlineHeadingStyle);
+    worksheet
+      .cell(barisHeading, ++noHeading)
+      .string('NAMA MOU')
+      .style(outlineHeadingStyle);
+
+    let rows = 6;
+
+    for (const [index, val] of mou.entries()) {
+      let bodyLineNum = 1;
+      worksheet
+        .cell(rows, 1)
+        .string(`${index + 1}`)
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(val.nama_kerjasama)
+        .style(outlineStyle);
+
+      rows++;
+    }
+
+    const fileBuffer = await workbook.writeToBuffer();
+
+    res.set({
+      'Content-Disposition': `attachment; filename="MOU-${Date.now()}.xlsx"`,
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+    return res.end(fileBuffer);
+  } catch (e) {
+    next(e);
   }
 };
 

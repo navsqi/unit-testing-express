@@ -144,7 +144,7 @@ class Instansi {
   @UpdateDateColumn()
   updated_at: Date;
 
-  @Column()
+  @Column({ nullable: true })
   created_by: string;
 
   @Column()

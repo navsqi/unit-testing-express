@@ -107,7 +107,7 @@ class Mou {
   @JoinColumn([{ name: 'kode_unit_kerja', referencedColumnName: 'kode' }])
   outlet: Outlet;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { onUpdate: 'CASCADE', onDelete: 'NO ACTION' })
   @JoinColumn([{ name: 'created_by', referencedColumnName: 'nik' }])
   user_created: User;
 }
