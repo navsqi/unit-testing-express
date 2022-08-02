@@ -1,16 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
-import { ILike } from 'typeorm';
 import { dataSource } from '~/orm/dbCreateConnection';
-import Instansi from '~/orm/entities/Instansi';
 import MasterInstansi from '~/orm/entities/MasterInstansi';
-import OrganisasiPegawai from '~/orm/entities/OrganisasiPegawai';
-import SaranaMedia from '~/orm/entities/SaranaMedia';
-import queryHelper from '~/utils/queryHelper';
 
-const organisasiPegawaiRepo = dataSource.getRepository(OrganisasiPegawai);
 const masterInsRepo = dataSource.getRepository(MasterInstansi);
-const instansiRepo = dataSource.getRepository(Instansi);
-const saranaMediaRepo = dataSource.getRepository(SaranaMedia);
 
 export const getMasterInstansiById = async (req: Request, res: Response, next: NextFunction) => {
   try {

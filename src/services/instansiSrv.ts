@@ -1,4 +1,4 @@
-import { Between, ILike } from 'typeorm';
+import { Between, ILike, In } from 'typeorm';
 import { dataSource } from '~/orm/dbCreateConnection';
 import Instansi from '~/orm/entities/Instansi';
 import MasterInstansi from '~/orm/entities/MasterInstansi';
@@ -41,7 +41,9 @@ export const listInstansi = async (filter: any, paging: any): Promise<[Instansi[
     f['created_at'] = Between(new Date(`${filter.start_date} 00:00:00`), new Date(`${filter.end_date} 00:00:00`));
   }
 
-  console.log(f);
+  if (filter.outlet_id && filter.outlet_id.length > 0) {
+    f['kode_unit_kerja'] = In(filter.outlet_id);
+  }
 
   const [instansi, count] = await instansiRepo.findAndCount({
     take: paging.limit,

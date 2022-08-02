@@ -1,8 +1,6 @@
 import { dataSource } from '~/orm/dbCreateConnection';
-import AssignmentInstansi from '~/orm/entities/AssignmentInstansi';
-import { IPaging } from '~/utils/queryHelper';
 
-export const konsolidasiTopBottom = async (outletId: number, isIdOnly = true) => {
+export const konsolidasiTopBottom = async (outletId: string, isIdOnly = true): Promise<string[]> => {
   const queryRunner = dataSource.createQueryRunner();
   await queryRunner.connect();
   const manager = queryRunner.manager;
@@ -10,12 +8,12 @@ export const konsolidasiTopBottom = async (outletId: number, isIdOnly = true) =>
   try {
     const konsolidasi: any[] = await manager.query(
       `with recursive cte as (
-             select id,parent from outlet where id = $1
+             select kode,parent from outlet where kode = $1
              union
-             select o2.id, o2.parent from outlet o2
-             inner join cte s on o2.parent = s.id
+             select o2.kode, o2.parent from outlet o2
+             inner join cte s on o2.parent = s.kode
          )
-         select id from cte
+         select kode from cte
            `,
       [outletId],
     );
@@ -26,7 +24,7 @@ export const konsolidasiTopBottom = async (outletId: number, isIdOnly = true) =>
       return konsolidasi;
     }
 
-    return konsolidasi.map((e) => e.id);
+    return konsolidasi.map((e) => e.kode);
   } catch (error) {
     await queryRunner.release();
     return error;

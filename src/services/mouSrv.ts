@@ -1,11 +1,7 @@
-import { Between, ILike } from 'typeorm';
+import { Between } from 'typeorm';
 import { dataSource } from '~/orm/dbCreateConnection';
-import Instansi from '~/orm/entities/Instansi';
-import MasterInstansi from '~/orm/entities/MasterInstansi';
 import Mou from '~/orm/entities/Mou';
 
-const masterInsRepo = dataSource.getRepository(MasterInstansi);
-const instansiRepo = dataSource.getRepository(Instansi);
 const mouRepo = dataSource.getRepository(Mou);
 
 export const listMou = async (filter: any, paging: any): Promise<[Mou[], number]> => {

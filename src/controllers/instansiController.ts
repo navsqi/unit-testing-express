@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response } from 'express';
-import { Between, ILike } from 'typeorm';
 import { dataSource } from '~/orm/dbCreateConnection';
 import Instansi from '~/orm/entities/Instansi';
 import MasterInstansi from '~/orm/entities/MasterInstansi';
 import OrganisasiPegawai from '~/orm/entities/OrganisasiPegawai';
 import SaranaMedia from '~/orm/entities/SaranaMedia';
 import { listInstansi, listMasterInstansi } from '~/services/instansiSrv';
+import { konsolidasiTopBottom } from '~/services/konsolidasiSrv';
 import { tanggal } from '~/utils/common';
 import queryHelper from '~/utils/queryHelper';
 import xls from '~/utils/xls';
@@ -193,6 +193,7 @@ export const getMasterInstansiById = async (req: Request, res: Response, next: N
 
 export const createNewMasterInstansi = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    req.body.nama_instansi = req.body.nama_instansi.toUpperCase();
     const instansi = await masterInsRepo.save({
       ...req.body,
       kode_unit_kerja: req.user.kode_unit_kerja,
@@ -243,11 +244,19 @@ export const deleteMasterInstansi = async (req: Request, res: Response, next: Ne
 
 export const getInstansi = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const outletId = req.query.outlet_id || req.user.kode_unit_kerja;
+    let outletIds = [];
+
+    if (outletId != '00002') {
+      outletIds = await konsolidasiTopBottom(outletId as string);
+    }
+
     const filter = {
       nama_instansi: req.query.nama_instansi || '',
       start_date: req.query.start_date || '',
       end_date: req.query.end_date || '',
       is_approved: req.query.is_approved ? +req.query.is_approved : '',
+      outlet_id: outletIds,
     };
 
     const paging = queryHelper.paging(req.query);

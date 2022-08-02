@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from 'express';
-import { ILike } from 'typeorm';
 import { objectUpload } from '~/config/minio';
 import { dataSource } from '~/orm/dbCreateConnection';
 import Mou from '~/orm/entities/Mou';
