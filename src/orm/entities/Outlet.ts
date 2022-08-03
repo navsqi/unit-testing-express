@@ -23,6 +23,7 @@ class Outlet {
 
   @Column({
     type: 'int4',
+    nullable: true,
   })
   parent: number;
 

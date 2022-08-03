@@ -391,7 +391,7 @@ export const getNasabahByCif = async (req: Request, res: Response, next: NextFun
   try {
     const bodies = req.body;
 
-    const checkToNasabahPerorangan = await nasabahPeroranganRepo.findOne({ where: { nik: bodies.nik } });
+    const checkToNasabahPerorangan = await nasabahPeroranganRepo.findOne({ where: { cif: bodies.cif } });
 
     if (checkToNasabahPerorangan) {
       const dataRes = {
