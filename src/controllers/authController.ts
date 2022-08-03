@@ -89,7 +89,7 @@ export const exchangeTokenSso = async (req: Request, res: Response, next: NextFu
 
     const loginSSO = await APISSO.exchangeTokenSso(bodies.code);
 
-    if (loginSSO.status !== 200) throw new Error(loginSSO.data.toString());
+    if (loginSSO.status !== 200) return next(new CustomError(loginSSO.data.error_description, 400));
 
     const ssoRes = loginSSO.data as ISSOExchangeTokenResponse;
 

@@ -194,6 +194,8 @@ export const getMasterInstansiById = async (req: Request, res: Response, next: N
 export const createNewMasterInstansi = async (req: Request, res: Response, next: NextFunction) => {
   try {
     req.body.nama_instansi = req.body.nama_instansi.toUpperCase();
+    const kodeUnitKerja = req.body.kode_unit_kerja;
+    req.body.kode_unit_kerja = kodeUnitKerja || req.user.kode_unit_kerja;
     const instansi = await masterInsRepo.save({
       ...req.body,
       kode_unit_kerja: req.user.kode_unit_kerja,
@@ -247,6 +249,8 @@ export const getInstansi = async (req: Request, res: Response, next: NextFunctio
     const outletId = req.query.outlet_id || req.user.kode_unit_kerja;
     let outletIds = [];
 
+    console.log(outletId);
+
     if (outletId != '00002') {
       outletIds = await konsolidasiTopBottom(outletId as string);
     }
@@ -258,6 +262,8 @@ export const getInstansi = async (req: Request, res: Response, next: NextFunctio
       is_approved: req.query.is_approved ? +req.query.is_approved : '',
       outlet_id: outletIds,
     };
+
+    console.log(filter);
 
     const paging = queryHelper.paging(req.query);
 

@@ -8,6 +8,7 @@ class NasabahPerorangan {
   @Column({
     length: 16,
     nullable: true,
+    unique: true,
   })
   nik: string;
 
@@ -26,6 +27,7 @@ class NasabahPerorangan {
   @Column({
     length: 12,
     nullable: true,
+    unique: true,
   })
   cif: string;
 
