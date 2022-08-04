@@ -3,7 +3,7 @@ import protect from '~/middlewares/protect';
 import { uploadBuffer } from '~/utils/uploadFile';
 
 import * as leadsController from '../../controllers/leadsController';
-import { inputLeadsVal } from '../../validations/leadsVal';
+import { inputLeadsBadanUsahaVal, inputLeadsVal } from '../../validations/leadsVal';
 
 const router = Router();
 
@@ -19,8 +19,10 @@ router.post(
   leadsController.createNewLeadsByCsv,
 );
 router.get('/:leadsId', leadsController.getLeadsById);
-router.get('/', leadsController.getLeads);
-router.post('/', protect(), inputLeadsVal, leadsController.createNewLeads);
+router.get('/', protect(), leadsController.getLeads);
+router.post('/perorangan', protect(), inputLeadsVal, leadsController.createNewLeadsPerorangan);
+router.post('/badan-usaha', protect(), inputLeadsBadanUsahaVal, leadsController.createNewLeadsBadanUsaha);
+router.patch('/:id/approve', protect(), leadsController.checkKTPAndApprove);
 router.patch('/:id', protect(), leadsController.updateLeads);
 
 export default router;

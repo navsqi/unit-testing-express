@@ -132,7 +132,7 @@ export const changePassword = async (req: Request, res: Response, next: NextFunc
     if (req.user.nik != user.nik) return next(new CustomError('User is not allowed to change password', 404));
 
     user.password = bodies.newPass;
-    console.log(user);
+
     user.hashPassword();
 
     await userRepo.update({ nik: req.user.nik }, user);
@@ -167,8 +167,6 @@ export const editUser = async (req: Request, res: Response, next: NextFunction) 
         'Content-Disposision': 'inline',
       });
     }
-
-    console.log(user);
 
     user.nama = bodies.nama;
     user.email = bodies.email;
