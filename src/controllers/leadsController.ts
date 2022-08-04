@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { FindOptionsWhere, ILike } from 'typeorm';
+import { FindOptionsWhere, ILike, In } from 'typeorm';
 import APIPegadaian from '~/apis/pegadaianApi';
 import Leads from '~/orm/entities/Leads';
 import CustomError from '~/utils/customError';
@@ -11,6 +11,7 @@ import NasabahPerorangan from '~/orm/entities/NasabahPerorangan';
 import { IKTPPassion } from '~/types/APIPegadaianTypes';
 import { addDays, bufferToStream, parseIp } from '~/utils/common';
 import validationCsv from '~/utils/validationCsv';
+import { konsolidasiTopBottom } from '~/services/konsolidasiSrv';
 
 const leadsRepo = dataSource.getRepository(Leads);
 const nasabahPeroranganRepo = dataSource.getRepository(NasabahPerorangan);
@@ -22,6 +23,9 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
     const filter = {
       nama: req.query.nama,
       status: req.query.status,
+      kode_unit_kerja: req.query.kode_unit_kerja,
+      is_session: req.query.is_session ? +req.query.is_session : null,
+      is_badan_usaha: req.query.is_badan_usaha ? +req.query.is_badan_usaha : null,
     };
 
     if (filter.nama) {
@@ -30,6 +34,25 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
 
     if (filter.status) {
       where['status'] = +filter.status;
+    }
+
+    if (filter.kode_unit_kerja && filter.is_session == 0) {
+      const outletId = req.query.kode_unit_kerja || req.user.kode_unit_kerja;
+      let outletIds = [];
+
+      if (outletId != '00002') {
+        outletIds = await konsolidasiTopBottom(outletId as string);
+      }
+
+      where['kode_unit_kerja'] = In(outletIds);
+    }
+
+    if (filter.is_session == 1) {
+      where['created_by'] = req.user.nik;
+    }
+
+    if (filter.is_badan_usaha != null) {
+      where['is_badan_usaha'] = filter.is_badan_usaha;
     }
 
     const paging = queryHelper.paging(req.query);
@@ -77,13 +100,51 @@ export const getLeadsById = async (req: Request, res: Response, next: NextFuncti
 
 export const updateLeads = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const instansi = await leadsRepo.update(req.params.id, {
+    const leads = await leadsRepo.update(req.params.id, {
       ...req.body,
       updated_by: req.user.nik,
     });
 
     const dataRes = {
-      instansi: instansi,
+      leads: leads,
+    };
+
+    return res.customSuccess(200, 'Update leads success', dataRes);
+  } catch (e) {
+    return next(e);
+  }
+};
+
+export const checkKTPAndApprove = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const currentLeads = await leadsRepo.findOne({ where: { id: +req.params.id } });
+
+    const getIp = parseIp(req);
+
+    if (currentLeads.is_ktp_valid == 0) {
+      const checkKTP = await APIPegadaian.checkEktpDukcapil({
+        nama: currentLeads.nama,
+        nik: currentLeads.nik_ktp,
+        ipUser: getIp,
+      });
+
+      if (checkKTP.status !== 200) throw new Error(checkKTP.data.toString());
+
+      const ktpData = checkKTP?.data?.data;
+
+      if (!ktpData) return next(new CustomError('Data NIK EKTP tidak ditemukan', 404));
+
+      if (ktpData.namaLengkap.toUpperCase().includes('TIDAK'))
+        return next(new CustomError('Data NIK EKTP Tidak Valid', 400));
+    }
+
+    const leads = await leadsRepo.update(req.params.id, {
+      status: 1,
+      updated_by: req.user.nik,
+    });
+
+    const dataRes = {
+      leads: leads,
     };
 
     return res.customSuccess(200, 'Update leads success', dataRes);
@@ -128,33 +189,81 @@ export const getKtpByInstansiId = async (req: Request, res: Response, next: Next
   }
 };
 
-export const createNewLeads = async (req: Request, res: Response, next: NextFunction) => {
+export const createNewLeadsPerorangan = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const bodies = req.body as Leads;
-
-    const getExistingLeads = await leadsRepo.findOne({
-      where: { nik_ktp: bodies.nik_ktp, kode_produk: bodies.kode_produk, step: 'CLP' },
-      relations: ['user_created'],
-    });
-
-    if (!bodies.is_ktp_valid) return next(new CustomError('NIK KTP harus valid', 400));
-
-    if (getExistingLeads) {
-      return next(
-        new CustomError(
-          `NIK ${getExistingLeads.nik_ktp} dengan kode produk ${bodies.kode_produk} sedang diprospek oleh ${getExistingLeads.user_created.nik}`,
-          400,
-        ),
-      );
-    }
 
     if (!bodies.cif && !bodies.nik_ktp) {
       return next(new CustomError('CIF atau NIK wajib di-isi', 400));
     }
 
+    if (!bodies.is_ktp_valid) return next(new CustomError('NIK KTP harus valid', 400));
+
+    const getExistingLeads = await leadsRepo.findOne({
+      where: { nik_ktp: bodies.nik_ktp },
+      relations: ['user_created'],
+    });
+
+    if (getExistingLeads) {
+      return next(
+        new CustomError(
+          `NIK ${getExistingLeads.nik_ktp} dengan kode produk ${bodies.kode_produk} telah diprospek oleh ${getExistingLeads.user_created.nik}`,
+          400,
+        ),
+      );
+    }
+
     if (!bodies.nik_ktp_karyawan) {
       bodies.is_karyawan = 1;
     }
+
+    req.body.nama = bodies.nama.toUpperCase();
+    const leads = await leadsRepo.save({
+      ...req.body,
+      kode_unit_kerja: req.user.kode_unit_kerja,
+      created_by: req.user.nik,
+      updated_by: req.user.nik,
+      source_data: 'FORM INPUT DATA',
+      expired_referral: addDays(30),
+    });
+
+    const dataRes = {
+      leads: leads,
+    };
+
+    return res.customSuccess(200, 'Create leads success', dataRes);
+  } catch (e) {
+    return next(e);
+  }
+};
+
+export const createNewLeadsBadanUsaha = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const bodies = req.body as Leads;
+
+    if (!bodies.cif) {
+      return next(new CustomError('CIF wajib di-isi', 400));
+    }
+
+    const getExistingLeads = await leadsRepo.findOne({
+      where: { cif: bodies.cif, is_badan_usaha: 1 },
+      relations: ['user_created'],
+    });
+
+    if (getExistingLeads) {
+      return next(
+        new CustomError(
+          `CIF ${getExistingLeads.cif} dengan kode produk ${bodies.kode_produk} telah diprospek oleh ${getExistingLeads.user_created.nik}`,
+          400,
+        ),
+      );
+    }
+
+    if (!bodies.nik_ktp_karyawan) {
+      bodies.is_karyawan = 1;
+    }
+
+    req.body.nama = bodies.nama.toUpperCase();
 
     const leads = await leadsRepo.save({
       ...req.body,
@@ -210,6 +319,7 @@ export const createNewLeadsByCsv = async (req: Request, res: Response, next: Nex
         leads.kode_unit_kerja = req.user.kode_unit_kerja;
         leads.source_data = 'BULK CSV';
         leads.expired_referral = addDays(30);
+        leads.is_ktp_valid = 0;
 
         dataInput.push(leads);
       })
@@ -427,12 +537,19 @@ export const checkBadanUsahaByCif = async (req: Request, res: Response, next: Ne
   try {
     const bodies = req.body;
 
-    const badanUsahaReq = await APIPegadaian.getBadanUsahaByCif({
+    let badanUsahaReq = await APIPegadaian.getBadanUsahaByCif({
       cif: bodies.cif,
-      flag: bodies.flag,
+      flag: 'K',
     });
 
     if (badanUsahaReq.status !== 200) throw new Error(badanUsahaReq.data.toString());
+
+    if (!badanUsahaReq.data.data) {
+      badanUsahaReq = await APIPegadaian.getBadanUsahaByCif({
+        cif: bodies.cif,
+        flag: 'S',
+      });
+    }
 
     const badanUsaha = JSON.parse(badanUsahaReq.data.data);
 

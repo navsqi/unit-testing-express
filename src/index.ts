@@ -14,7 +14,6 @@ import './utils/customErrorValidation';
 import './utils/customSuccess';
 
 (async () => {
-  // await redisCreateConnection();
   await dbCreateConnection();
 })();
 

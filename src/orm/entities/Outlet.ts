@@ -22,10 +22,9 @@ class Outlet {
   unit_kerja: number;
 
   @Column({
-    type: 'int4',
     nullable: true,
   })
-  parent: number;
+  parent: string;
 
   @Column()
   @CreateDateColumn()

@@ -33,7 +33,6 @@ export const exchangeTokenSso = async (code: string): Promise<AxiosPromise> => {
 
     return getToken;
   } catch (e) {
-    console.log(e.response);
     return e.response;
   }
 };
