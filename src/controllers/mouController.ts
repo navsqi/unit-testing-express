@@ -1,9 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
-import { objectUpload } from '~/config/minio';
+import { objectRemove, objectUpload } from '~/config/minio';
 import { dataSource } from '~/orm/dbCreateConnection';
 import Mou from '~/orm/entities/Mou';
 import { listMou } from '~/services/mouSrv';
 import { generateFileName, tanggal } from '~/utils/common';
+import CustomError from '~/utils/customError';
 import queryHelper from '~/utils/queryHelper';
 import xls from '~/utils/xls';
 
@@ -185,10 +186,17 @@ export const updateMou = async (req: Request, res: Response, next: NextFunction)
 
 export const deleteMou = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const mou = await mouRepo.delete({ id: +req.params.id });
+    const idMou = +req.params.id;
+
+    const getCurrentMou = await mouRepo.findOne({ where: { id: idMou } });
+
+    if (!getCurrentMou) return next(new CustomError('Data MoU tidak ditemukan', 404));
+
+    const mou = await mouRepo.delete({ id: idMou });
 
     if (mou.affected > 0) {
-      // delete photo
+      // delete mou
+      await objectRemove(process.env.MINIO_BUCKET, getCurrentMou.file);
     }
 
     const dataRes = {

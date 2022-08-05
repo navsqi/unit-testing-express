@@ -10,6 +10,7 @@ const axiosError = (msg: string) => new CustomError(msg, 400);
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default (err: CustomError | any, req: Request, res: Response, next: NextFunction) => {
   console.log(err);
+
   const stack = err.stack;
 
   if (err.name === 'JsonWebTokenError') err = handleJWTError();
@@ -25,7 +26,13 @@ export default (err: CustomError | any, req: Request, res: Response, next: NextF
   if (err.name === 'AxiosError') err = axiosError(JSON.stringify(err.response.data));
 
   const statusCode = err.statusCode ? err.statusCode : 500;
-  const error = err.JSON ? err.JSON : err;
+  const error = err.JSON
+    ? err.JSON
+    : {
+        statusCode: 500,
+        status: 'fail',
+        message: err.message,
+      };
 
   return res.status(statusCode).json(error);
 };
