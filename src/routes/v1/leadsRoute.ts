@@ -18,6 +18,7 @@ router.post(
   uploadBuffer([{ name: 'csv', maxCount: 1 }], false),
   leadsController.createNewLeadsByCsv,
 );
+router.get('/nik-karyawan', protect(), leadsController.getNIKKaryawan);
 router.get('/:leadsId', leadsController.getLeadsById);
 router.get('/', protect(), leadsController.getLeads);
 router.post('/perorangan', protect(), inputLeadsVal, leadsController.createNewLeadsPerorangan);
