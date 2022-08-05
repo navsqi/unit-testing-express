@@ -152,6 +152,9 @@ export const editUser = async (req: Request, res: Response, next: NextFunction) 
     let photo: Express.Multer.File = null;
     const bodies = req.body as User;
     const user = await userRepo.findOne({ where: { nik: req.params.nik } });
+
+    if (!user) return next(new CustomError(`User tidak ditemukan`, 404));
+
     const userPhoto = user.photo ? user.photo.valueOf() : null;
 
     let fileName: string = null;
@@ -171,6 +174,10 @@ export const editUser = async (req: Request, res: Response, next: NextFunction) 
     user.nama = bodies.nama;
     user.email = bodies.email;
     user.photo = fileName;
+    user.role = bodies.role;
+    user.kode_role = bodies.kode_role;
+    user.unit_kerja = bodies.unit_kerja;
+    user.kode_unit_kerja = bodies.kode_unit_kerja;
     await userRepo.update({ nik: req.user.nik }, user);
 
     if (userPhoto) {

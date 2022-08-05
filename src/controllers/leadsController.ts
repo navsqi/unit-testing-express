@@ -555,9 +555,49 @@ export const checkBadanUsahaByCif = async (req: Request, res: Response, next: Ne
 
     const dataRes = {
       badanUsaha,
+      originalReponse: badanUsahaReq?.data?.responseDesc,
     };
 
     return res.customSuccess(200, 'Get badan usaha', dataRes);
+  } catch (e) {
+    return next(e);
+  }
+};
+
+export const getNIKKaryawan = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const where: FindOptionsWhere<Leads> = {};
+
+    const filter = {
+      nama: req.query.nama,
+      event_id: req.query.event_id ? +req.query.event_id : null,
+    };
+
+    if (filter.nama) {
+      where['nama'] = ILike(`%${filter.nama}%`);
+    }
+
+    if (filter.event_id) {
+      where['event_id'] = filter.event_id;
+    }
+
+    where['is_ktp_valid'] = 1;
+    where['is_badan_usaha'] = 0;
+    where['is_karyawan'] = 1;
+
+    const nik_karyawan = await leadsRepo.find({
+      select: {
+        nik_ktp: true,
+        nama: true,
+      },
+      where,
+    });
+
+    const dataRes = {
+      nik_karyawan,
+    };
+
+    return res.customSuccess(200, 'Get leads', dataRes);
   } catch (e) {
     return next(e);
   }

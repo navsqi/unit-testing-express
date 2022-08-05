@@ -11,5 +11,6 @@ router.get('/', protect(), mouController.getMou);
 router.get('/:id', protect(), mouController.getMouById);
 router.post('/', protect(), uploadBuffer([{ name: 'file', maxCount: 4 }]), mouController.createMou);
 router.patch('/:id', protect(), mouController.updateMou);
+router.delete('/:id', protect(), mouController.deleteMou);
 
 export default router;
