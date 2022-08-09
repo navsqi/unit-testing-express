@@ -1,8 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { dataSource } from '~/orm/dbCreateConnection';
 import Role from '~/orm/entities/Role';
-import { listInstansi } from '~/services/instansiSrv';
-import { konsolidasiTopBottom } from '~/services/konsolidasiSrv';
 import queryHelper from '~/utils/queryHelper';
 
 const roleRepo = dataSource.getRepository(Role);
