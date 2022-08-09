@@ -1,18 +1,44 @@
 import { NextFunction, Request, Response } from 'express';
 import { dataSource } from '~/orm/dbCreateConnection';
-import MasterInstansi from '~/orm/entities/MasterInstansi';
+import Role from '~/orm/entities/Role';
+import { listInstansi } from '~/services/instansiSrv';
+import { konsolidasiTopBottom } from '~/services/konsolidasiSrv';
+import queryHelper from '~/utils/queryHelper';
 
-const masterInsRepo = dataSource.getRepository(MasterInstansi);
+const roleRepo = dataSource.getRepository(Role);
 
-export const getMasterInstansiById = async (req: Request, res: Response, next: NextFunction) => {
+export const getRole = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const masterInstansiById = await masterInsRepo.findOne({
-      where: { id: +req.params.id },
-      relations: ['cakupan_instansi'],
+    const paging = queryHelper.paging(req.query);
+
+    const [role, count] = await roleRepo.findAndCount({
+      take: paging.limit,
+      skip: paging.offset,
     });
 
     const dataRes = {
-      masterInstansi: masterInstansiById,
+      meta: {
+        count,
+        limit: paging.limit,
+        offset: paging.offset,
+      },
+      role,
+    };
+
+    return res.customSuccess(200, 'Get role', dataRes);
+  } catch (e) {
+    return next(e);
+  }
+};
+
+export const getRoleById = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const roleById = await roleRepo.findOne({
+      where: { id: +req.params.id },
+    });
+
+    const dataRes = {
+      role: roleById,
     };
 
     return res.customSuccess(200, 'Get master instansi', dataRes);
@@ -21,9 +47,9 @@ export const getMasterInstansiById = async (req: Request, res: Response, next: N
   }
 };
 
-export const createNewMasterInstansi = async (req: Request, res: Response, next: NextFunction) => {
+export const createNewRole = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const instansi = await masterInsRepo.save({
+    const instansi = await roleRepo.save({
       ...req.body,
       kode_unit_kerja: req.user.kode_unit_kerja,
       created_by: req.user.nik,
@@ -40,32 +66,31 @@ export const createNewMasterInstansi = async (req: Request, res: Response, next:
   }
 };
 
-export const updateMasterInstansi = async (req: Request, res: Response, next: NextFunction) => {
+export const updateRole = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const instansi = await masterInsRepo.update(req.params.id, {
+    const role = await roleRepo.update(req.params.id, {
       ...req.body,
-      updated_by: req.user.nik,
     });
 
     const dataRes = {
-      instansi: instansi,
+      role: role,
     };
 
-    return res.customSuccess(200, 'Update instansi success', dataRes);
+    return res.customSuccess(200, 'Update role success', dataRes);
   } catch (e) {
     return next(e);
   }
 };
 
-export const deleteMasterInstansi = async (req: Request, res: Response, next: NextFunction) => {
+export const deleteRole = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const instansi = await masterInsRepo.delete({ id: +req.params.id });
+    const role = await roleRepo.delete({ id: +req.params.id });
 
     const dataRes = {
-      instansi: instansi,
+      role: role,
     };
 
-    return res.customSuccess(200, 'Delete instansi success', dataRes);
+    return res.customSuccess(200, 'Delete role success', dataRes);
   } catch (e) {
     return next(e);
   }

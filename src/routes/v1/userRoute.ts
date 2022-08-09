@@ -5,6 +5,6 @@ import protect from './../../middlewares/protect';
 
 const router = Router();
 
-router.get('/', protect(['ADMINISTRATOR', 'STANDARD']), userController.getUser);
+router.get('/', protect(), userController.getUser);
 
 export default router;

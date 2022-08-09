@@ -1,4 +1,6 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import AccessMenuRole from './AccessMenuRole';
+import MasterMenu from './MasterMenu';
 
 @Entity('role')
 class Role {
@@ -26,6 +28,9 @@ class Role {
   @Column()
   @UpdateDateColumn()
   updated_at: Date;
+
+  @OneToMany(() => AccessMenuRole, (amr) => amr.role_id)
+  access_menu_role: MasterMenu[];
 }
 
 export default Role;
