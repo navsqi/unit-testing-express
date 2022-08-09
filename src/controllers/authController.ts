@@ -4,6 +4,7 @@ import { objectUpload, objectRemove } from '~/config/minio';
 import { ISSOExchangeTokenResponse } from '~/interfaces/ISso';
 import { dataSource } from '~/orm/dbCreateConnection';
 import { generateFileName } from '~/utils/common';
+import ssoHelper from '~/utils/ssoHelper';
 import User from '../orm/entities/User';
 import CustomError from '../utils/customError';
 import { signToken } from './../services/tokenSrv';
@@ -38,6 +39,8 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
     user.password = bodies.password;
     user.photo = fileName;
     user.nik = bodies.nik;
+    user.kode_role = bodies.kode_role;
+    user.kode_unit_kerja = bodies.kode_unit_kerja;
     user.hashPassword();
     await userRepo.save(user);
 
@@ -60,7 +63,20 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
   try {
     const bodies = req.body;
 
-    const user = await userRepo.findOne({ where: [{ email: bodies.email }, { nik: bodies.username }] });
+    const user = await userRepo.findOne({
+      select: {
+        role: {
+          nama: true,
+          kode: true,
+        },
+        unit_kerja: {
+          nama: true,
+          kode: true,
+        },
+      },
+      where: [{ email: bodies.email }, { nik: bodies.username }],
+      relations: { role: true, unit_kerja: true },
+    });
 
     if (!user) return next(new CustomError('User not found', 404));
 
@@ -95,23 +111,37 @@ export const exchangeTokenSso = async (req: Request, res: Response, next: NextFu
 
     let user = await userRepo.findOne({ where: { nik: ssoRes.nik } });
 
+    const kodeRole = ssoHelper.setRole(ssoRes.kode_jabatan);
+
     if (!user) {
       user = await userRepo.save({
         nama: ssoRes.nama_lengkap,
         nik: ssoRes.nik,
         email: ssoRes.email,
-        role: ssoRes.nama_jabatan,
-        kode_role: ssoRes.kode_jabatan,
-        unit_kerja: ssoRes.nama_unit_kerja,
+        kode_role: kodeRole,
         kode_unit_kerja: ssoRes.kode_unit_kerja,
         photo: ssoRes.path_foto,
       });
     }
 
     const token = await signToken(user);
+    const session = await userRepo.findOne({
+      select: {
+        role: {
+          nama: true,
+          kode: true,
+        },
+        unit_kerja: {
+          nama: true,
+          kode: true,
+        },
+      },
+      relations: { role: true, unit_kerja: true },
+      where: { id: user.id },
+    });
 
     const dataRes = {
-      user,
+      user: session,
       bearer: token,
     };
 
@@ -174,9 +204,7 @@ export const editUser = async (req: Request, res: Response, next: NextFunction) 
     user.nama = bodies.nama;
     user.email = bodies.email;
     user.photo = fileName;
-    user.role = bodies.role;
     user.kode_role = bodies.kode_role;
-    user.unit_kerja = bodies.unit_kerja;
     user.kode_unit_kerja = bodies.kode_unit_kerja;
     await userRepo.update({ nik: req.user.nik }, user);
 

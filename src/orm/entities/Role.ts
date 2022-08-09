@@ -18,7 +18,7 @@ class Role {
   })
   nama: string;
 
-  @Column({})
+  @Column({ nullable: true })
   keterangan: string;
 
   @Column()

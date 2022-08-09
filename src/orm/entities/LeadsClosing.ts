@@ -12,8 +12,8 @@ import Instansi from './Instansi';
 import Outlet from './Outlet';
 import User from './User';
 
-@Entity('leads')
-class Leads {
+@Entity('leads_closing')
+class LeadsClosing {
   @PrimaryGeneratedColumn()
   id?: number;
 
@@ -209,4 +209,4 @@ class Leads {
   user_created: User;
 }
 
-export default Leads;
+export default LeadsClosing;
