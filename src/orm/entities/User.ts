@@ -1,5 +1,16 @@
 import bcrypt from 'bcryptjs';
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import Outlet from './Outlet';
+import Role from './Role';
 
 @Entity('users')
 class User {
@@ -28,26 +39,16 @@ class User {
   photo: string;
 
   @Column({
-    length: 100,
-    nullable: true,
-  })
-  role: string;
-
-  @Column({
     length: 12,
     nullable: true,
+    unique: false,
   })
   kode_role: string;
 
   @Column({
-    length: 100,
+    length: 10,
     nullable: true,
-  })
-  unit_kerja: string;
-
-  @Column({
-    length: 12,
-    nullable: true,
+    unique: false,
   })
   kode_unit_kerja: string;
 
@@ -72,6 +73,14 @@ class User {
   checkIfPasswordMatch(unencryptedPassword: string) {
     return bcrypt.compareSync(unencryptedPassword, this.password);
   }
+
+  @ManyToOne(() => Role)
+  @JoinColumn([{ name: 'kode_role', referencedColumnName: 'kode' }])
+  role: Role;
+
+  @ManyToOne(() => Outlet)
+  @JoinColumn([{ name: 'kode_unit_kerja', referencedColumnName: 'kode' }])
+  unit_kerja: Outlet;
 }
 
 export default User;
