@@ -13,6 +13,7 @@ export const getOutlet = async (req: Request, res: Response, next: NextFunction)
     const filter = {
       nama: req.query.nama,
       parent: req.query.parent,
+      kode: req.query.kode,
     };
 
     if (filter.nama) {
@@ -21,6 +22,10 @@ export const getOutlet = async (req: Request, res: Response, next: NextFunction)
 
     if (filter.parent) {
       where['parent'] = +filter.parent;
+    }
+
+    if (filter.kode) {
+      where['kode'] = filter.kode;
     }
 
     const paging = queryHelper.paging(req.query);

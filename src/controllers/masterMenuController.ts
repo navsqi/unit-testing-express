@@ -57,7 +57,6 @@ export const updateMasterMenu = async (req: Request, res: Response, next: NextFu
   try {
     const masterMenu = await masterMenuRepo.update(req.params.id, {
       ...req.body,
-      updated_by: req.user.nik,
     });
 
     const dataRes = {

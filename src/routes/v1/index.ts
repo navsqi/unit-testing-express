@@ -10,6 +10,9 @@ import eventRoute from './eventRoute';
 import produkRoute from './produkRoute';
 import leadsRoute from './leadsRoute';
 import masterMenuRoute from './masterMenuRoute';
+import masterMenuRoleRoute from './masterMenuRoleRoute';
+import roleRoute from './roleRoute';
+import reportRoute from './reportRoute';
 
 const router = Router();
 
@@ -22,6 +25,9 @@ router.use('/event', eventRoute);
 router.use('/assignment-instansi', assignmentRoute);
 router.use('/produk', produkRoute);
 router.use('/leads', leadsRoute);
-router.use('/menu', masterMenuRoute);
+router.use('/master-menu', masterMenuRoute);
+router.use('/master-menu-role', masterMenuRoleRoute);
+router.use('/role', roleRoute);
+router.use('/report', reportRoute);
 
 export default router;
