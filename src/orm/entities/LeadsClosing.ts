@@ -7,6 +7,7 @@ class LeadsClosing {
 
   @Column({
     type: 'int4',
+    nullable: true,
   })
   leads_id: number;
 
@@ -21,6 +22,12 @@ class LeadsClosing {
     nullable: true,
   })
   cif: string;
+
+  @Column({
+    length: 16,
+    nullable: true,
+  })
+  channel: string;
 
   @Column({
     length: 40,
@@ -69,6 +76,18 @@ class LeadsClosing {
     nullable: true,
   })
   up: number;
+
+  @Column({
+    type: 'double precision',
+    nullable: true,
+  })
+  osl: number;
+
+  @Column({
+    type: 'double precision',
+    nullable: true,
+  })
+  saldo_tabemas: number;
 
   @Column({
     length: 10,
