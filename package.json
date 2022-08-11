@@ -28,6 +28,7 @@
     "@types/validator": "^13.7.4",
     "axios": "^0.27.2",
     "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
     "csv-parse": "^5.2.2",
     "csv-parser": "^3.0.0",
     "dayjs": "^1.10.7",

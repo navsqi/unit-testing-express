@@ -3,6 +3,7 @@ import express from 'express';
 import actuator from 'express-actuator';
 import morgan from 'morgan';
 import 'reflect-metadata';
+import cors from 'cors';
 import globalError from './middlewares/globalError';
 import { dbCreateConnection } from './orm/dbCreateConnection';
 import * as Sentry from '@sentry/node';
@@ -18,6 +19,8 @@ import './utils/customSuccess';
 })();
 
 export const app = express();
+
+app.enable('trust proxy');
 
 Sentry.init({
   dsn: `${process.env.NODE_ENV !== 'development' ? 'https' : 'http'}:${process.env.SENTRY_DSN}`,
@@ -40,6 +43,9 @@ app.use(Sentry.Handlers.tracingHandler());
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
+
+app.use(cors());
+app.options('*', cors());
 
 app.use(actuator());
 app.use(express.json());

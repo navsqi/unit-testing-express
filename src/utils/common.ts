@@ -71,4 +71,10 @@ export const getMonthName = (month: string) => {
   return months[+month + 1];
 };
 
+export const getDiffDateCount = (start_date: string, end_date: string) => {
+  const dateDiff = Math.abs(dayjs(start_date).diff(dayjs(end_date), 'days'));
+
+  return dateDiff;
+};
+
 export const parseIp = (req) => req.headers['x-forwarded-for']?.split(',').shift() || req.socket?.remoteAddress;

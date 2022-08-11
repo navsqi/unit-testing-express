@@ -1,14 +1,10 @@
 import { Router } from 'express';
 
-import * as masterMenuController from '../../controllers/masterMenuController';
+import * as reportController from '../../controllers/reportController';
 import protect from '../../middlewares/protect';
 
 const router = Router();
 
-router.get('/', protect(), masterMenuController.getMasterMenu);
-router.get('/:id', protect(), masterMenuController.getMasterMenuById);
-router.post('/', protect(), masterMenuController.createNewMasterMenu);
-router.patch('/:id', protect(), masterMenuController.updateMasterMenu);
-router.delete('/:id', protect(), masterMenuController.deleteMasterMenu);
+router.get('/leads', protect(), reportController.getReportLeads);
 
 export default router;

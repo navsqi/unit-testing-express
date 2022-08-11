@@ -119,10 +119,9 @@ class Instansi {
   scoring_instansi: number;
 
   @Column({
-    type: 'smallint',
-    default: '0',
+    nullable: true,
   })
-  status_potensial: number;
+  status_potensial: string;
 
   @Column({
     type: 'smallint',

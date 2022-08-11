@@ -1,19 +1,30 @@
 import { NextFunction, Request, Response } from 'express';
+import { ILike } from 'typeorm';
 import { dataSource } from '~/orm/dbCreateConnection';
 import Role from '~/orm/entities/Role';
-import { listInstansi } from '~/services/instansiSrv';
-import { konsolidasiTopBottom } from '~/services/konsolidasiSrv';
 import queryHelper from '~/utils/queryHelper';
 
 const roleRepo = dataSource.getRepository(Role);
 
 export const getRole = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const filter = {
+      nama: req.query.nama,
+    };
+
+    const where = {};
+
+    if (filter.nama) where['nama'] = ILike(`%${filter.nama}%`);
+
     const paging = queryHelper.paging(req.query);
 
     const [role, count] = await roleRepo.findAndCount({
       take: paging.limit,
       skip: paging.offset,
+      where,
+      order: {
+        nama: 'ASC',
+      },
     });
 
     const dataRes = {

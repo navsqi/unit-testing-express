@@ -11,6 +11,10 @@ export default {
       return 'MKTO';
     }
 
+    if (kodeRole && kodeRole.includes('ADM')) {
+      return 'ADMN';
+    }
+
     return kodeRole;
   },
 };

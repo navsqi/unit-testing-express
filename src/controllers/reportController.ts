@@ -1,51 +1,39 @@
 import { NextFunction, Request, Response } from 'express';
-import { dataSource } from '~/orm/dbCreateConnection';
-import Instansi from '~/orm/entities/Instansi';
-import MasterInstansi from '~/orm/entities/MasterInstansi';
-import OrganisasiPegawai from '~/orm/entities/OrganisasiPegawai';
-import SaranaMedia from '~/orm/entities/SaranaMedia';
-import { listInstansi, listMasterInstansi } from '~/services/instansiSrv';
 import { konsolidasiTopBottom } from '~/services/konsolidasiSrv';
-import { tanggal } from '~/utils/common';
-import queryHelper from '~/utils/queryHelper';
-import xls from '~/utils/xls';
+import { leadsReport } from '~/services/reportSrv';
+import * as common from '~/utils/common';
+import CustomError from '~/utils/customError';
 
-const organisasiPegawaiRepo = dataSource.getRepository(OrganisasiPegawai);
-const masterInsRepo = dataSource.getRepository(MasterInstansi);
-const instansiRepo = dataSource.getRepository(Instansi);
-const saranaMediaRepo = dataSource.getRepository(SaranaMedia);
-
-export const getReportInstansi = async (req: Request, res: Response, next: NextFunction) => {
+export const getReportLeads = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const outletId = req.query.outlet_id || req.user.kode_unit_kerja;
     let outletIds = [];
 
-    if (outletId != '00002') {
+    if (outletId != '00002' && outletId != '00042') {
       outletIds = await konsolidasiTopBottom(outletId as string);
     }
 
     const filter = {
-      nama_instansi: req.query.nama_instansi || '',
-      start_date: req.query.start_date || '',
-      end_date: req.query.end_date || '',
-      is_approved: req.query.is_approved ? +req.query.is_approved : '',
+      start_date: (req.query.start_date as string) || '',
+      end_date: (req.query.end_date as string) || '',
       outlet_id: outletIds,
     };
 
-    const paging = queryHelper.paging(req.query);
+    if (!filter.start_date || !filter.end_date) return next(new CustomError('Pilih tanggal awal dan akhir', 400));
 
-    const [instansi, count] = await listInstansi(filter, paging);
+    const dateDiff = common.getDiffDateCount(filter.start_date, filter.end_date);
+
+    if (dateDiff > 31) return next(new CustomError('Maksimal 31 hari', 400));
+
+    const report = await leadsReport();
+
+    if (report.err) return next(new CustomError(report.err, 400));
 
     const dataRes = {
-      meta: {
-        count,
-        limit: paging.limit,
-        offset: paging.offset,
-      },
-      instansi,
+      report: report.data,
     };
 
-    return res.customSuccess(200, 'Get instansi', dataRes);
+    return res.customSuccess(200, 'Get report leads', dataRes);
   } catch (e) {
     return next(e);
   }

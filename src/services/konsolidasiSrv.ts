@@ -70,12 +70,12 @@ export const getOutletParent = async (outletId: number, isIdOnly = true) => {
   try {
     const konsolidasi: any[] = await manager.query(
       `with recursive cte as (
-            select kode,parent from outlet where kode = $1
+            select kode,parent,nama,unit_kerja from outlet where kode = $1
             union
-            select o2.kode, o2.parent from outlet o2
+            select o2.kode, o2.parent,unit_kerja o2.nama from outlet o2
             inner join cte s on o2.kode = s.parent
         )
-        select kode from cte where kode <> $1
+        select kode,nama,unit_kerja from cte where kode <> $1 and unit_kerja <> 1
            `,
       [outletId],
     );

@@ -9,6 +9,7 @@ import Mou from './Mou';
 import JenisAktivitas from './JenisAktivitas';
 import Event from './Event';
 import Leads from './Leads';
+import LeadsClosing from './LeadsClosing';
 import Produk from './Produk';
 import NasabahBadanUsaha from './NasabahBadanUsaha';
 import NasabahPerorangan from './NasabahPerorangan';
@@ -34,4 +35,5 @@ export default {
   Role,
   MasterMenu,
   AccessMenuRole,
+  LeadsClosing,
 };
