@@ -7,12 +7,28 @@ export default {
       return 'PNCA';
     }
 
-    if (kodeRole && (kodeRole.includes('MAX') || kodeRole.includes('MSP'))) {
+    if (kodeRole && kodeRole.includes('MAX')) {
       return 'MKTO';
     }
 
     if (kodeRole && kodeRole.includes('ADM')) {
       return 'ADMN';
+    }
+
+    if (kodeRole && kodeRole.includes('DPT')) {
+      return 'DPTA';
+    }
+
+    if (kodeRole && kodeRole.includes('MSP')) {
+      return 'MSPG';
+    }
+
+    if (kodeRole && kodeRole.includes('PNT')) {
+      return 'PNTA';
+    }
+
+    if (kodeRole && kodeRole.includes('PNW')) {
+      return 'PNWA';
     }
 
     return kodeRole;
