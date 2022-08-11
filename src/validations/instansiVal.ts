@@ -6,8 +6,8 @@ import Leads from '~/orm/entities/Leads';
 export const masterInstansi = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const schema: Joi.ObjectSchema<Leads> = Joi.object().keys({
-      nama_instansi: Joi.string(),
-      jenis_instansi: Joi.string(),
+      nama_instansi: Joi.string().required(),
+      cakupan_instansi: Joi.string().required(),
       alamat: Joi.string(),
       email: Joi.string().email(),
       no_telepon_instansi: Joi.string(),
@@ -46,8 +46,9 @@ export const approveInstansi = async (req: Request, res: Response, next: NextFun
 export const instansi = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const schema: Joi.ObjectSchema<Leads> = Joi.object().keys({
-      master_instansi_id: Joi.number(),
-      nama_instansi: Joi.string(),
+      master_instansi_id: Joi.number().required(),
+      nama_instansi: Joi.string().required(),
+      cakupan_instansi: Joi.string().required(),
       jenis_instansi: Joi.string(),
       alamat: Joi.string(),
       email: Joi.string().email(),
@@ -62,7 +63,7 @@ export const instansi = async (req: Request, res: Response, next: NextFunction) 
       jumlah_kantor_cabang: Joi.number(),
       jumlah_kerjasama: Joi.number(),
       scoring_instansi: Joi.number(),
-      status_potensial: Joi.number(),
+      status_potensial: Joi.string(),
       sarana_media_id: Joi.number(),
       organisasi_pegawai_id: Joi.number(),
     });
