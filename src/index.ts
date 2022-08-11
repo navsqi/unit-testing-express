@@ -13,9 +13,15 @@ import routes from './routes';
 import CustomError from './utils/customError';
 import './utils/customErrorValidation';
 import './utils/customSuccess';
+// import cronJob from './config/cron';
 
 (async () => {
   await dbCreateConnection();
+
+  // if (!cronJob.running) {
+  //   cronJob.start();
+  //   console.log('Cron is running...');
+  // }
 })();
 
 export const app = express();
