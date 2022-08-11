@@ -112,6 +112,7 @@ export const exchangeTokenSso = async (req: Request, res: Response, next: NextFu
     let user = await userRepo.findOne({ where: { nik: ssoRes.nik } });
 
     const kodeRole = ssoHelper.setRole(ssoRes.kode_jabatan);
+    const kodeOutlet = ssoHelper.setOutlet(ssoRes.kode_unit_kerja);
 
     if (!user) {
       user = await userRepo.save({
@@ -119,7 +120,7 @@ export const exchangeTokenSso = async (req: Request, res: Response, next: NextFu
         nik: ssoRes.nik,
         email: ssoRes.email,
         kode_role: kodeRole,
-        kode_unit_kerja: ssoRes.kode_unit_kerja,
+        kode_unit_kerja: kodeOutlet,
         photo: ssoRes.path_foto,
       });
     }

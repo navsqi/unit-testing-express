@@ -17,4 +17,13 @@ export default {
 
     return kodeRole;
   },
+  setOutlet: (kode_outlet: string) => {
+    const kodeOutlet = kode_outlet;
+
+    if (kodeOutlet && kodeOutlet.startsWith('000')) {
+      return '00002';
+    }
+
+    return kodeOutlet;
+  },
 };

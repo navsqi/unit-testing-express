@@ -21,6 +21,8 @@ import './utils/customSuccess';
 export const app = express();
 
 app.enable('trust proxy');
+app.use(cors());
+app.options('*', cors());
 
 Sentry.init({
   dsn: `${process.env.NODE_ENV !== 'development' ? 'https' : 'http'}:${process.env.SENTRY_DSN}`,
@@ -43,9 +45,6 @@ app.use(Sentry.Handlers.tracingHandler());
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
-
-app.use(cors());
-app.options('*', cors());
 
 app.use(actuator());
 app.use(express.json());
