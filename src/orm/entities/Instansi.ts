@@ -124,10 +124,11 @@ class Instansi {
   status_potensial: string;
 
   @Column({
-    type: 'smallint',
-    default: '0',
+    nullable: true,
+    enum: ['BINAAN', 'NON BINAAN'],
+    default: 'BINAAN',
   })
-  kategori_instansi: number;
+  kategori_instansi: string;
 
   @Column({
     type: 'smallint',

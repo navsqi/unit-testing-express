@@ -419,6 +419,7 @@ export const createNewInstansi = async (req: Request, res: Response, next: NextF
 
     const instansi = await instansiRepo.save({
       ...req.body,
+      kategori_instansi: req.body.status_potensial === 'C' ? 'NON BINAAN' : 'BINAAN',
       kode_unit_kerja: kodeUnitKerja,
       created_by: req.user.nik,
       updated_by: req.user.nik,
