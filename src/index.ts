@@ -13,14 +13,22 @@ import routes from './routes';
 import CustomError from './utils/customError';
 import './utils/customErrorValidation';
 import './utils/customSuccess';
+// import cronJob from './config/cron';
 
 (async () => {
   await dbCreateConnection();
+
+  // if (!cronJob.running) {
+  //   cronJob.start();
+  //   console.log('Cron is running...');
+  // }
 })();
 
 export const app = express();
 
 app.enable('trust proxy');
+app.use(cors());
+app.options('*', cors());
 
 Sentry.init({
   dsn: `${process.env.NODE_ENV !== 'development' ? 'https' : 'http'}:${process.env.SENTRY_DSN}`,
@@ -42,12 +50,9 @@ app.use(Sentry.Handlers.tracingHandler());
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
+  app.use(actuator());
 }
 
-app.use(cors());
-app.options('*', cors());
-
-app.use(actuator());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true, limit: '200mb' }));
 app.use('/', routes);

@@ -11,11 +11,12 @@ import xls from '~/utils/xls';
 const mouRepo = dataSource.getRepository(Mou);
 
 export const createMou = async (req: Request, res: Response, next: NextFunction) => {
+  let fileName: string = null;
+
   try {
     let photo: Express.Multer.File = null;
     const bodies = req.body as Mou;
     const mou = new Mou();
-    let fileName: string = null;
 
     if (req.files && req.files['file']) {
       photo = req.files['file'][0];

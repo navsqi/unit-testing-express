@@ -1,6 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
 import { FindOptionsWhere, In } from 'typeorm';
+import { objectRemove, objectUpload } from '~/config/minio';
 import { dataSource } from '~/orm/dbCreateConnection';
+import { generateFileName } from '~/utils/common';
+import CustomError from '~/utils/customError';
 import queryHelper from '~/utils/queryHelper';
 import User from '../orm/entities/User';
 
@@ -41,6 +44,51 @@ export const getUser = async (req: Request, res: Response, next: NextFunction) =
     };
 
     return res.customSuccess(200, 'Get users success', dataRes);
+  } catch (e) {
+    return next(e);
+  }
+};
+
+export const editUser = async (req: Request, res: Response, next: NextFunction) => {
+  let fileName: string = null;
+
+  try {
+    let photo: Express.Multer.File = null;
+    const bodies = req.body as User;
+    const user = await userRepo.findOne({ where: { nik: req.params.nik } });
+
+    if (!user) return next(new CustomError(`User tidak ditemukan`, 404));
+
+    const userPhoto = user.photo ? user.photo.valueOf() : null;
+
+    if (req.user.nik != user.nik) return next(new CustomError('User is not allowed to change password', 404));
+
+    if (req.files && req.files['photo']) {
+      photo = req.files['photo'][0];
+      fileName = 'hbluserprofile/' + generateFileName(photo.originalname);
+
+      await objectUpload(process.env.MINIO_BUCKET, fileName, photo.buffer, {
+        'Content-Type': req.files['photo'][0].mimetype,
+        'Content-Disposision': 'inline',
+      });
+    }
+
+    user.nama = bodies.nama;
+    user.email = bodies.email;
+    user.photo = fileName;
+    user.kode_role = bodies.kode_role;
+    user.kode_unit_kerja = bodies.kode_unit_kerja;
+    await userRepo.update({ nik: req.user.nik }, user);
+
+    if (userPhoto) {
+      await objectRemove(process.env.MINIO_BUCKET, userPhoto);
+    }
+
+    const dataRes = {
+      user,
+    };
+
+    return res.customSuccess(200, 'New user created', dataRes);
   } catch (e) {
     return next(e);
   }

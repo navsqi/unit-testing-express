@@ -7,7 +7,7 @@ export default {
       return 'PNCA';
     }
 
-    if (kodeRole && (kodeRole.includes('MAX') || kodeRole.includes('MSP'))) {
+    if (kodeRole && kodeRole.includes('MAX')) {
       return 'MKTO';
     }
 
@@ -15,6 +15,31 @@ export default {
       return 'ADMN';
     }
 
+    if (kodeRole && kodeRole.includes('DPT')) {
+      return 'DPTA';
+    }
+
+    if (kodeRole && kodeRole.includes('MSP')) {
+      return 'MSPG';
+    }
+
+    if (kodeRole && kodeRole.includes('PNT')) {
+      return 'PNTA';
+    }
+
+    if (kodeRole && kodeRole.includes('PNW')) {
+      return 'PNWA';
+    }
+
     return kodeRole;
+  },
+  setOutlet: (kode_outlet: string) => {
+    const kodeOutlet = kode_outlet;
+
+    if (kodeOutlet && kodeOutlet.startsWith('000')) {
+      return '00002';
+    }
+
+    return kodeOutlet;
   },
 };

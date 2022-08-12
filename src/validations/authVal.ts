@@ -51,23 +51,6 @@ export const changePasswordVal = async (req: Request, res: Response, next: NextF
   }
 };
 
-export const editUserVal = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const schema = Joi.object().keys({
-      email: Joi.string().email(),
-      nama: Joi.string(),
-    });
-
-    const result = await schema.validate(req.body, { abortEarly: false, allowUnknown: true });
-    if (result.error) throw result.error.details;
-
-    return next();
-  } catch (e) {
-    console.log(e);
-    return next({ stack: e, name: 'PayloadValidationError' });
-  }
-};
-
 export const registerVal = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const schema = Joi.object().keys({
@@ -92,7 +75,6 @@ const authVal = {
   registerVal,
   ssoVal,
   changePasswordVal,
-  editUserVal,
 };
 
 export default authVal;

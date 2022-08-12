@@ -12,11 +12,12 @@ import { signToken } from './../services/tokenSrv';
 const userRepo = dataSource.getRepository(User);
 
 export const register = async (req: Request, res: Response, next: NextFunction) => {
+  let fileName: string = null;
+
   try {
     let photo: Express.Multer.File = null;
     const bodies = req.body as User;
     const user = new User();
-    let fileName: string = null;
 
     const checkExistingNik = await userRepo.findOne({ where: [{ email: bodies.email }, { nik: bodies.nik }] });
 
@@ -112,6 +113,7 @@ export const exchangeTokenSso = async (req: Request, res: Response, next: NextFu
     let user = await userRepo.findOne({ where: { nik: ssoRes.nik } });
 
     const kodeRole = ssoHelper.setRole(ssoRes.kode_jabatan);
+    const kodeOutlet = ssoHelper.setOutlet(ssoRes.kode_unit_kerja);
 
     if (!user) {
       user = await userRepo.save({
@@ -119,7 +121,7 @@ export const exchangeTokenSso = async (req: Request, res: Response, next: NextFu
         nik: ssoRes.nik,
         email: ssoRes.email,
         kode_role: kodeRole,
-        kode_unit_kerja: ssoRes.kode_unit_kerja,
+        kode_unit_kerja: kodeOutlet,
         photo: ssoRes.path_foto,
       });
     }
@@ -172,51 +174,6 @@ export const changePassword = async (req: Request, res: Response, next: NextFunc
     };
 
     return res.customSuccess(200, 'Login success', dataRes);
-  } catch (e) {
-    return next(e);
-  }
-};
-
-export const editUser = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    let photo: Express.Multer.File = null;
-    const bodies = req.body as User;
-    const user = await userRepo.findOne({ where: { nik: req.params.nik } });
-
-    if (!user) return next(new CustomError(`User tidak ditemukan`, 404));
-
-    const userPhoto = user.photo ? user.photo.valueOf() : null;
-
-    let fileName: string = null;
-
-    if (req.user.nik != user.nik) return next(new CustomError('User is not allowed to change password', 404));
-
-    if (req.files && req.files['photo']) {
-      photo = req.files['photo'][0];
-      fileName = 'hbluserprofile/' + generateFileName(photo.originalname);
-
-      await objectUpload(process.env.MINIO_BUCKET, fileName, photo.buffer, {
-        'Content-Type': req.files['photo'][0].mimetype,
-        'Content-Disposision': 'inline',
-      });
-    }
-
-    user.nama = bodies.nama;
-    user.email = bodies.email;
-    user.photo = fileName;
-    user.kode_role = bodies.kode_role;
-    user.kode_unit_kerja = bodies.kode_unit_kerja;
-    await userRepo.update({ nik: req.user.nik }, user);
-
-    if (userPhoto) {
-      await objectRemove(process.env.MINIO_BUCKET, userPhoto);
-    }
-
-    const dataRes = {
-      user,
-    };
-
-    return res.customSuccess(200, 'New user created', dataRes);
   } catch (e) {
     return next(e);
   }

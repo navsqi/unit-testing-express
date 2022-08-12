@@ -194,7 +194,8 @@ export const getMasterInstansiById = async (req: Request, res: Response, next: N
 export const createNewMasterInstansi = async (req: Request, res: Response, next: NextFunction) => {
   try {
     req.body.nama_instansi = req.body.nama_instansi.toUpperCase();
-    const kodeUnitKerja = req.body.kode_unit_kerja;
+    const kodeUnitKerja = req.body.cakupan_instansi || req.user.kode_unit_kerja;
+
     req.body.kode_unit_kerja = kodeUnitKerja || req.user.kode_unit_kerja;
     const instansi = await masterInsRepo.save({
       ...req.body,
@@ -414,9 +415,12 @@ export const getInstansiById = async (req: Request, res: Response, next: NextFun
 export const createNewInstansi = async (req: Request, res: Response, next: NextFunction) => {
   try {
     req.body.nama_instansi = req.body.nama_instansi.toUpperCase();
+    const kodeUnitKerja = req.body.cakupan_instansi || req.user.kode_unit_kerja;
+
     const instansi = await instansiRepo.save({
       ...req.body,
-      kode_unit_kerja: req.user.kode_unit_kerja,
+      kategori_instansi: req.body.status_potensial === 'C' ? 'NON BINAAN' : 'BINAAN',
+      kode_unit_kerja: kodeUnitKerja,
       created_by: req.user.nik,
       updated_by: req.user.nik,
     });
