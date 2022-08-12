@@ -50,9 +50,9 @@ app.use(Sentry.Handlers.tracingHandler());
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
+  app.use(actuator());
 }
 
-app.use(actuator());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true, limit: '200mb' }));
 app.use('/', routes);

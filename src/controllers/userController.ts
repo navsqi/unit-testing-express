@@ -50,6 +50,8 @@ export const getUser = async (req: Request, res: Response, next: NextFunction) =
 };
 
 export const editUser = async (req: Request, res: Response, next: NextFunction) => {
+  let fileName: string = null;
+
   try {
     let photo: Express.Multer.File = null;
     const bodies = req.body as User;
@@ -58,8 +60,6 @@ export const editUser = async (req: Request, res: Response, next: NextFunction) 
     if (!user) return next(new CustomError(`User tidak ditemukan`, 404));
 
     const userPhoto = user.photo ? user.photo.valueOf() : null;
-
-    let fileName: string = null;
 
     if (req.user.nik != user.nik) return next(new CustomError('User is not allowed to change password', 404));
 

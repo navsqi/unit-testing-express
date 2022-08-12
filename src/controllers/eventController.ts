@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { ILike } from 'typeorm';
-import { objectUpload } from '~/config/minio';
+import { objectRemove, objectUpload } from '~/config/minio';
 import { dataSource } from '~/orm/dbCreateConnection';
 import Event from '~/orm/entities/Event';
 import { generateFileName } from '~/utils/common';
@@ -9,11 +9,12 @@ import queryHelper from '~/utils/queryHelper';
 const eventRepo = dataSource.getRepository(Event);
 
 export const createEvent = async (req: Request, res: Response, next: NextFunction) => {
+  let fileName: string = null;
+
   try {
     let photo: Express.Multer.File = null;
     const bodies = req.body as Event;
     const ev = new Event();
-    let fileName: string = null;
 
     if (req.files && req.files['file']) {
       photo = req.files['file'][0];
@@ -114,13 +115,17 @@ export const getEventById = async (req: Request, res: Response, next: NextFuncti
 
 export const updateEvent = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const findEvent = await eventRepo.findOne({ where: { id: +req.params.id } });
+
     const event = await eventRepo.update(req.params.id, {
       ...req.body,
       updated_by: req.user.nik,
     });
 
     if (event.affected > 0) {
-      // update photo
+      if (findEvent.foto_dokumentasi) {
+        await objectRemove(process.env.MINIO_BUCKET, findEvent.foto_dokumentasi);
+      }
     }
 
     const dataRes = {
@@ -135,10 +140,14 @@ export const updateEvent = async (req: Request, res: Response, next: NextFunctio
 
 export const deleteEvent = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const findEvent = await eventRepo.findOne({ where: { id: +req.params.id } });
+
     const event = await eventRepo.delete({ id: +req.params.id });
 
     if (event.affected > 0) {
-      // delete photo
+      if (findEvent.foto_dokumentasi) {
+        await objectRemove(process.env.MINIO_BUCKET, findEvent.foto_dokumentasi);
+      }
     }
 
     const dataRes = {

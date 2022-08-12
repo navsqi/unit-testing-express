@@ -12,11 +12,12 @@ import { signToken } from './../services/tokenSrv';
 const userRepo = dataSource.getRepository(User);
 
 export const register = async (req: Request, res: Response, next: NextFunction) => {
+  let fileName: string = null;
+
   try {
     let photo: Express.Multer.File = null;
     const bodies = req.body as User;
     const user = new User();
-    let fileName: string = null;
 
     const checkExistingNik = await userRepo.findOne({ where: [{ email: bodies.email }, { nik: bodies.nik }] });
 

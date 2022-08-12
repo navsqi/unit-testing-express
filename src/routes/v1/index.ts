@@ -13,6 +13,7 @@ import masterMenuRoute from './masterMenuRoute';
 import masterMenuRoleRoute from './masterMenuRoleRoute';
 import roleRoute from './roleRoute';
 import reportRoute from './reportRoute';
+import testingRoute from './testingRoute';
 
 const router = Router();
 
@@ -29,5 +30,6 @@ router.use('/master-menu', masterMenuRoute);
 router.use('/master-menu-role', masterMenuRoleRoute);
 router.use('/role', roleRoute);
 router.use('/report', reportRoute);
+router.use('/testing', testingRoute);
 
 export default router;

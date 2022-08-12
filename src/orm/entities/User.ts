@@ -57,6 +57,12 @@ class User {
   })
   is_approved: number;
 
+  @Column({
+    type: 'smallint',
+    default: 1,
+  })
+  is_active: number;
+
   @Column()
   @CreateDateColumn()
   created_at: Date;
