@@ -19,7 +19,6 @@ export const registerVal = async (req: Request, res: Response, next: NextFunctio
 
     return next();
   } catch (e) {
-    console.log(e);
     return next({ stack: e, name: 'PayloadValidationError' });
   }
 };
@@ -36,7 +35,6 @@ export const editUserVal = async (req: Request, res: Response, next: NextFunctio
 
     return next();
   } catch (e) {
-    console.log(e);
     return next({ stack: e, name: 'PayloadValidationError' });
   }
 };

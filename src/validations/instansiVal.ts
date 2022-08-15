@@ -22,7 +22,6 @@ export const masterInstansi = async (req: Request, res: Response, next: NextFunc
 
     return next();
   } catch (e) {
-    console.log(e);
     return next({ stack: e, name: 'PayloadValidationError' });
   }
 };
@@ -38,7 +37,6 @@ export const approveInstansi = async (req: Request, res: Response, next: NextFun
 
     return next();
   } catch (e) {
-    console.log(e);
     return next({ stack: e, name: 'PayloadValidationError' });
   }
 };
@@ -73,7 +71,6 @@ export const instansi = async (req: Request, res: Response, next: NextFunction) 
 
     return next();
   } catch (e) {
-    console.log(e);
     return next({ stack: e, name: 'PayloadValidationError' });
   }
 };

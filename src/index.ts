@@ -13,6 +13,7 @@ import routes from './routes';
 import CustomError from './utils/customError';
 import './utils/customErrorValidation';
 import './utils/customSuccess';
+import logger from './utils/logger';
 // import cronJob from './config/cron';
 
 (async () => {
@@ -20,7 +21,7 @@ import './utils/customSuccess';
 
   // if (!cronJob.running) {
   //   cronJob.start();
-  //   console.log('Cron is running...');
+  //   logger.info('CRON', 'CRON is running...');
   // }
 })();
 
@@ -69,11 +70,11 @@ app.use(globalError);
 const port = process.env.PORT || 4000;
 
 const server = app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+  logger.info('EXPRESS', `Server is running on port ${port}`);
 });
 
 process.on('unhandledRejection', (err: Error) => {
-  console.log(err);
+  logger.error(err, 'EXPRESS_UNHANDLED_ERR');
   server.close(() => {
     process.exit(1);
   });
@@ -81,6 +82,6 @@ process.on('unhandledRejection', (err: Error) => {
 
 process.on('SIGTERM', () => {
   server.close(() => {
-    console.log('Process terminated!');
+    logger.error('Process terminated!', 'EXPRESS_SIGTERM');
   });
 });

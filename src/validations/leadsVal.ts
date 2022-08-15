@@ -20,7 +20,6 @@ export const inputLeadsVal = async (req: Request, res: Response, next: NextFunct
 
     return next();
   } catch (e) {
-    console.log(e);
     return next({ stack: e, name: 'PayloadValidationError' });
   }
 };
@@ -42,7 +41,6 @@ export const inputLeadsBadanUsahaVal = async (req: Request, res: Response, next:
 
     return next();
   } catch (e) {
-    console.log(e);
     return next({ stack: e, name: 'PayloadValidationError' });
   }
 };
