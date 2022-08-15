@@ -20,7 +20,7 @@ export const listMou = async (filter: any, paging: any): Promise<[Mou[], number]
   }
 
   if (filter.start_date && filter.end_date) {
-    f['created_at'] = Between(new Date(`${filter.start_date} 00:00:00`), new Date(`${filter.end_date} 00:00:00`));
+    f['created_at'] = Between(new Date(`${filter.start_date} 00:00:00`), new Date(`${filter.end_date} 23:59:59`));
   }
 
   const [mou, count] = await mouRepo.findAndCount({
