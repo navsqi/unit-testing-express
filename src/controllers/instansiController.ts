@@ -7,8 +7,10 @@ import SaranaMedia from '~/orm/entities/SaranaMedia';
 import { listInstansi, listMasterInstansi } from '~/services/instansiSrv';
 import { konsolidasiTopBottom } from '~/services/konsolidasiSrv';
 import { tanggal } from '~/utils/common';
+import CustomError from '~/utils/customError';
 import queryHelper from '~/utils/queryHelper';
 import xls from '~/utils/xls';
+import * as common from '~/utils/common';
 
 const organisasiPegawaiRepo = dataSource.getRepository(OrganisasiPegawai);
 const masterInsRepo = dataSource.getRepository(MasterInstansi);
@@ -80,9 +82,15 @@ export const genExcelMasterInstansi = async (req: Request, res: Response, next: 
   try {
     const filter = {
       nama_instansi: req.query.nama_instansi || '',
-      start_date: req.query.start_date || '',
-      end_date: req.query.end_date || '',
+      start_date: (req.query.start_date as string) || '',
+      end_date: (req.query.end_date as string) || '',
     };
+
+    if (!filter.start_date || !filter.end_date) return next(new CustomError('Pilih tanggal awal dan akhir', 400));
+
+    const dateDiff = common.getDiffDateCount(filter.start_date, filter.end_date);
+
+    if (dateDiff > 180) return next(new CustomError('Maksimal 180 hari', 400));
 
     const paging = queryHelper.paging(req.query);
 
@@ -286,9 +294,15 @@ export const genExcelInstansi = async (req: Request, res: Response, next: NextFu
   try {
     const filter = {
       nama_instansi: req.query.nama_instansi || '',
-      start_date: req.query.start_date || '',
-      end_date: req.query.end_date || '',
+      start_date: (req.query.start_date as string) || '',
+      end_date: (req.query.end_date as string) || '',
     };
+
+    if (!filter.start_date || !filter.end_date) return next(new CustomError('Pilih tanggal awal dan akhir', 400));
+
+    const dateDiff = common.getDiffDateCount(filter.start_date, filter.end_date);
+
+    if (dateDiff > 180) return next(new CustomError('Maksimal 180 hari', 400));
 
     const paging = queryHelper.paging(req.query);
 
