@@ -260,6 +260,7 @@ export const getInstansi = async (req: Request, res: Response, next: NextFunctio
       end_date: req.query.end_date || '',
       is_approved: req.query.is_approved ? +req.query.is_approved : '',
       outlet_id: outletIds,
+      kategori_instansi: req.query.kategori_instansi || '',
     };
 
     const paging = queryHelper.paging(req.query);

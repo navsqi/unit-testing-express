@@ -14,7 +14,6 @@ export const loginVal = async (req: Request, res: Response, next: NextFunction) 
 
     return next();
   } catch (e) {
-    console.log(e);
     return next({ stack: e, name: 'PayloadValidationError' });
   }
 };
@@ -30,7 +29,6 @@ export const ssoVal = async (req: Request, res: Response, next: NextFunction) =>
 
     return next();
   } catch (e) {
-    console.log(e);
     return next({ stack: e, name: 'PayloadValidationError' });
   }
 };
@@ -46,7 +44,6 @@ export const changePasswordVal = async (req: Request, res: Response, next: NextF
 
     return next();
   } catch (e) {
-    console.log(e);
     return next({ stack: e, name: 'PayloadValidationError' });
   }
 };
@@ -65,7 +62,6 @@ export const registerVal = async (req: Request, res: Response, next: NextFunctio
 
     return next();
   } catch (e) {
-    console.log(e);
     return next({ stack: e, name: 'PayloadValidationError' });
   }
 };

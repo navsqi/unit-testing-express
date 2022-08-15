@@ -56,6 +56,7 @@ export const getMou = async (req: Request, res: Response, next: NextFunction) =>
   try {
     const filter = {
       status: req.query.status || '',
+      nomor_kerjasama: req.query.nomor_kerjasama || '',
       start_date: req.query.start_date || '',
       end_date: req.query.end_date || '',
     };

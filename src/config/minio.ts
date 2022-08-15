@@ -1,4 +1,5 @@
 import * as Minio from 'minio';
+import logger from '~/utils/logger';
 
 let minioSSL = !!Number(process.env.MINIO_SSL);
 if (minioSSL) {
@@ -17,7 +18,7 @@ try {
     secretKey: process.env.MINIO_KEY,
   });
 } catch (error) {
-  console.log('minio-init', error, 'init');
+  logger.error(error, 'MINIO_CLIENT');
   process.exit(1);
 }
 
@@ -27,7 +28,8 @@ const isBucketExist = (bucketName) => {
   return new Promise((resolve, reject) => {
     minioClient.bucketExists(bucketName, (err, exists) => {
       if (err) {
-        console.log('minioSdk-isBucketExist', err.message, 'error check bucket');
+        logger.error(err.message, 'MINIO_ISBUCKETEXIST');
+
         reject(err);
       }
       resolve(exists ? true : false);
@@ -43,7 +45,7 @@ const bucketCreate = async (bucketName, region = 'us-east-1') => {
     await minioClient.makeBucket(bucketName, region);
     return true;
   } catch (err) {
-    console.log('minioSdk-bucketCreate', err.message, 'error create bucket');
+    logger.error(err.message, 'MINIO_BUCKETCREATE');
     return false;
   }
 };
@@ -52,7 +54,7 @@ export const bucketRemove = async (bucketName) => {
     await minioClient.removeBucket(bucketName);
     return true;
   } catch (err) {
-    console.log('minioSdk-bucketRemove', err.message, 'error remove bucket');
+    logger.error(err.message, 'MINIO_BUCKETREMOVE');
     return false;
   }
 };
@@ -67,7 +69,7 @@ export const objectUpload = async (
     const isUploaded = await minioClient.putObject(bucketName, objectName, filePath, metaData);
     return isUploaded;
   } catch (err) {
-    console.log('minioSdk-objectUpload', err.message, 'error upload object');
+    logger.error(err.message, 'MINIO_OBJECTUPLOAD');
     return { err: true, data: null };
   }
 };
@@ -76,7 +78,7 @@ export const objectDownload = async (bucketName, objectName, filePath) => {
     const isDownloaded = await minioClient.fGetObject(bucketName, objectName, filePath);
     return isDownloaded;
   } catch (err) {
-    console.log('minioSdk-objectDownload', err.message, 'error download object');
+    logger.error(err.message, 'MINIO_OBJECTDOWNLOAD');
     return { err: true, data: null };
   }
 };
@@ -85,7 +87,7 @@ export const objectRemove = async (bucketName, objectName) => {
     await minioClient.removeObject(bucketName, objectName);
     return true;
   } catch (err) {
-    console.log('minioSdk-objectRemove', err.message, 'error remove object');
+    logger.error(err.message, 'MINIO_OBJECTREMOVE');
     return false;
   }
 };
@@ -94,7 +96,7 @@ export const objectGetUrl = async (bucketName, objectName, expiry = 86400) => {
     const getUrl = await minioClient.presignedGetObject(bucketName, objectName, expiry);
     return { err: false, data: getUrl };
   } catch (err) {
-    console.log('minioSdk-objectUrl', err.message, 'error get object url');
+    logger.error(err.message, 'MINIO_OBJECTURL');
     return { err: true, data: null };
   }
 };
@@ -122,14 +124,11 @@ export const minioPublicBucketConfig = async (bucketName) => {
   };
   minioClient.setBucketPolicy(bucketName, JSON.stringify(policy), (err) => {
     if (err) {
-      console.log('minioSdk-minioPublicBucketConfig', err.message, 'error config public bucket');
+      logger.error(err.message, 'MINIO_BUCKETPOLICY');
+
       return;
     }
-    console.log(
-      'minioSdk-minioPublicBucketConfig',
-      `Bucket '${bucketName}' policy set`,
-      'success config public bucket',
-    );
+    logger.info('MINIO_BUCKETPOLICY', `Bucket '${bucketName}' policy set`);
   });
 };
 export const createPublicBucket = async (bucketName) => {

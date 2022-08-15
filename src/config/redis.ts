@@ -1,6 +1,7 @@
 import * as redis from 'redis';
 import * as dotenv from 'dotenv';
 import { promisify } from 'util';
+import logger from '~/utils/logger';
 
 // Initiate dotenv config
 dotenv.config();
@@ -11,14 +12,14 @@ const redisClient = redis.createClient({
   auth_pass: process.env.REDIS_AUTH,
   retry_strategy: (options: redis.RetryStrategyOptions) => {
     if (options.error && options.error.code === 'ECONNREFUSED') {
-      console.log('[REDIS] The server refused the connection');
+      logger.info('REDIS', 'The server refused the connection');
     }
     if (options.total_retry_time > 10000 * 60 * 60) {
-      console.log('[REDIS] Retry time exhausted');
+      logger.info('REDIS', 'Retry time exhausted');
       return new Error('Retry time exhausted');
     }
     if (options.attempt >= 100) {
-      console.log('[REDIS] Retry attempt exhausted');
+      logger.info('REDIS', 'Retry attempt exhausted');
       return new Error('Retry time exhausted');
     }
     return Math.min(options.attempt * 100, 3000);
@@ -26,14 +27,14 @@ const redisClient = redis.createClient({
 });
 
 export const redisCreateConnection = async (): Promise<void> => {
-  redisClient.on('error', (err) => {
-    console.log(`[REDIS] `, JSON.stringify(err));
+  redisClient.on('error', (err: redis.RedisError) => {
+    logger.info('REDIS', err.message);
   });
   redisClient.on('reconnecting', () => {
-    console.log('[REDIS] Reconnecting...');
+    logger.info('REDIS', 'Reconnecting...');
   });
   redisClient.on('ready', () => {
-    console.log('[REDIS] Ready');
+    logger.info('REDIS', 'Ready');
   });
 };
 

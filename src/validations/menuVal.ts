@@ -6,7 +6,7 @@ export const updateAccessMenuVal = async (req: Request, res: Response, next: Nex
   try {
     const access_menu_role = Joi.object()
       .keys({
-        role_id: Joi.string().required(),
+        kode_role: Joi.string().required(),
         master_menu_id: Joi.string().required(),
       })
       .required();
@@ -18,7 +18,6 @@ export const updateAccessMenuVal = async (req: Request, res: Response, next: Nex
 
     return next();
   } catch (e) {
-    console.log(e);
     return next({ stack: e, name: 'PayloadValidationError' });
   }
 };

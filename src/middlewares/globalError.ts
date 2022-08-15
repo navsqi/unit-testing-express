@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
+import logger from '~/utils/logger';
 import CustomError from '../utils/customError';
 
 const handleJWTError = () => new CustomError('Invalid token or JWT malformed', 401);
@@ -9,7 +10,7 @@ const axiosError = (msg: string) => new CustomError(msg, 400);
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default (err: CustomError | any, req: Request, res: Response, next: NextFunction) => {
-  console.log(err);
+  logger.error(err);
 
   const stack = err.stack;
 
@@ -29,7 +30,7 @@ export default (err: CustomError | any, req: Request, res: Response, next: NextF
   const error = err.JSON
     ? err.JSON
     : {
-        statusCode: 500,
+        statusCode: err.statusCode,
         status: 'fail',
         message: err.message,
       };

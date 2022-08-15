@@ -45,6 +45,10 @@ export const listInstansi = async (filter: any, paging: any): Promise<[Instansi[
     f['kode_unit_kerja'] = In(filter.outlet_id);
   }
 
+  if (filter.kategori_instansi) {
+    f['kategori_instansi'] = filter.kategori_instansi;
+  }
+
   const [instansi, count] = await instansiRepo.findAndCount({
     take: paging.limit,
     skip: paging.offset,

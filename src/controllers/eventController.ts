@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { ILike } from 'typeorm';
+import { Between, FindOptionsWhere, ILike } from 'typeorm';
 import { objectRemove, objectUpload } from '~/config/minio';
 import { dataSource } from '~/orm/dbCreateConnection';
 import Event from '~/orm/entities/Event';
@@ -51,13 +51,15 @@ export const createEvent = async (req: Request, res: Response, next: NextFunctio
 
 export const getEvent = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const where = {};
+    const where: FindOptionsWhere<Event> = {};
     const qs = req.query;
 
     const filter = {
       nama_event: qs.nama_event,
       is_session: +qs.is_session,
       instansi_id: +qs.instansi_id,
+      start_date: (qs.start_date as string) || '',
+      end_date: (qs.end_date as string) || '',
     };
 
     if (filter.nama_event) {
@@ -70,6 +72,10 @@ export const getEvent = async (req: Request, res: Response, next: NextFunction) 
 
     if (filter.instansi_id) {
       where['instansi_id'] = filter.instansi_id;
+    }
+
+    if (filter.start_date && filter.end_date) {
+      where['tanggal_event'] = Between(filter.start_date, filter.end_date);
     }
 
     const paging = queryHelper.paging(req.query);

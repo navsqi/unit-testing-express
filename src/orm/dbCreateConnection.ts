@@ -1,4 +1,5 @@
 import { DataSource } from 'typeorm';
+import logger from '~/utils/logger';
 
 import config from './ormConfig';
 
@@ -8,9 +9,9 @@ export const dbCreateConnection = async (): Promise<DataSource | null> => {
   let conn: DataSource;
   try {
     conn = await dataSource.initialize();
-    console.log(`[ORM] Database: '${conn.options.database}'`);
+    logger.info('ORM', `Database: '${conn.options.database}'`);
   } catch (e) {
-    console.log(`[ORM] Connection to database failed: `, e.message.toString());
+    logger.error(e.message, 'ORM');
   }
 
   return conn;

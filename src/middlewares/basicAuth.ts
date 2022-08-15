@@ -1,4 +1,5 @@
 import CustomError from '~/utils/customError';
+import logger from '~/utils/logger';
 
 export const basicAuth = async (req, res, next) => {
   try {
@@ -18,8 +19,8 @@ export const basicAuth = async (req, res, next) => {
     res.set('WWW-Authenticate', 'Basic realm="401"'); // change this
     res.status(401).json({ status: 'fail', message: 'Authentication required' }); // custom message
   } catch (e) {
-    console.log(e);
-    return next(new CustomError('Something went wrong', 401));
+    logger.error(e, 'BASIC_AUTH');
+    return next(new CustomError('Something went wrong', 500));
   }
 
   // -----------------------------------------------------------------------

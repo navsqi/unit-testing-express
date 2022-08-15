@@ -1,5 +1,6 @@
 import { CronJob } from 'cron';
 import * as common from '~/utils/common';
+import logger from '~/utils/logger';
 
 const CRON_PATTERN = {
   every10s: '*/10 * * * * *',
@@ -8,9 +9,9 @@ const CRON_PATTERN = {
 
 const cronJob: CronJob = new CronJob(CRON_PATTERN.every10s, async () => {
   try {
-    console.log('cron', `[${common.tanggal(new Date(), true)}] cron info`);
+    logger.info('CRON', common.tanggal(new Date(), true));
   } catch (e) {
-    console.log('cron', `[${common.tanggal(new Date(), true)}] ${JSON.stringify(e.message)}`);
+    logger.error(common.tanggal(new Date(), true), 'CRON');
   }
 });
 

@@ -1,4 +1,4 @@
-import { Between } from 'typeorm';
+import { Between, ILike } from 'typeorm';
 import { dataSource } from '~/orm/dbCreateConnection';
 import Mou from '~/orm/entities/Mou';
 
@@ -9,6 +9,14 @@ export const listMou = async (filter: any, paging: any): Promise<[Mou[], number]
 
   if (filter.status) {
     f['status'] = filter.status;
+  }
+
+  if (filter.nomor_kerjasama) {
+    f['nomor_kerjasama'] = ILike(`%${filter.nomor_kerjasama}%`);
+  }
+
+  if (filter.nama_kerjasama) {
+    f['nama_kerjasama'] = ILike(`%${filter.nama_kerjasama}%`);
   }
 
   if (filter.start_date && filter.end_date) {

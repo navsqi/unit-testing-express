@@ -16,7 +16,7 @@ class AccessMenuRole {
   id: number;
 
   @Column({})
-  role_id: number;
+  kode_role: string;
 
   @Column({})
   master_menu_id: number;
@@ -34,7 +34,7 @@ class AccessMenuRole {
   master_menu?: MasterMenu;
 
   @ManyToOne(() => Role)
-  @JoinColumn([{ name: 'role_id', referencedColumnName: 'id' }])
+  @JoinColumn([{ name: 'kode_role', referencedColumnName: 'kode' }])
   role: Role;
 }
 
