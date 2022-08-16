@@ -59,8 +59,9 @@ export const getAssignedUserByInstansi = async (req: Request, res: Response, nex
 export const getInstansiByAssignedUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const paging = queryHelper.paging(req.query);
+    const nikUser = req.params.userNik || req.user.nik;
 
-    const [assignUser, count] = await assignmentInstansiSrv.listAssignInstansi(req.params.userNik, paging);
+    const [assignUser, count] = await assignmentInstansiSrv.listAssignInstansi(nikUser, paging);
 
     const dataRes = {
       meta: {
