@@ -13,6 +13,7 @@ export enum JenisInstansi {
   PEMERINTAH = 'PEMERINTAH',
   SWASTA = 'SWASTA',
   BUMN = 'BUMN',
+  KOMUNITAS = 'KOMUNITAS',
 }
 
 export enum CakupanInstansi {
