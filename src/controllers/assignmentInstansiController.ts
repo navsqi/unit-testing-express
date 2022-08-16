@@ -62,7 +62,7 @@ export const getInstansiByAssignedUser = async (req: Request, res: Response, nex
     const nikUser = req.params.userNik || req.user.nik;
 
     const filter: IFilterInstansi = {
-      nama: (req.query.nama as string) || '',
+      nama_instansi: (req.query.nama as string) || '',
     };
 
     const [assignUser, count] = await assignmentInstansiSrv.listAssignInstansi(nikUser, paging, filter);

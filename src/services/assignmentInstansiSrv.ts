@@ -4,7 +4,7 @@ import Instansi from '~/orm/entities/Instansi';
 import { IPaging } from '~/utils/queryHelper';
 
 export interface IFilterInstansi {
-  nama?: string;
+  nama_instansi?: string;
 }
 
 const listAssignUser = async (instansiId: number, paging: IPaging) => {
@@ -31,8 +31,8 @@ const listAssignInstansi = async (userNik: string, paging: IPaging, filter?: IFi
     .leftJoin('ai.assignor', 'assignor')
     .where('ai.user_nik = :userNik', { userNik });
 
-  if (filter.nama) {
-    assignedUser.andWhere('instansi.nama_instansi ~* :nama', { nama: filter.nama });
+  if (filter.nama_instansi) {
+    assignedUser.andWhere('instansi.nama_instansi ~* :nama', { nama: filter.nama_instansi });
   }
 
   const res = await assignedUser.take(paging.limit).skip(paging.offset).getManyAndCount();
