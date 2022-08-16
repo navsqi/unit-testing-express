@@ -3,6 +3,10 @@ import AssignmentInstansi from '~/orm/entities/AssignmentInstansi';
 import Instansi from '~/orm/entities/Instansi';
 import { IPaging } from '~/utils/queryHelper';
 
+export interface IFilterInstansi {
+  nama?: string;
+}
+
 const listAssignUser = async (instansiId: number, paging: IPaging) => {
   const assignedUser = await dataSource
     .createQueryBuilder()
@@ -18,19 +22,22 @@ const listAssignUser = async (instansiId: number, paging: IPaging) => {
   return assignedUser;
 };
 
-const listAssignInstansi = async (userNik: string, paging: IPaging) => {
-  const assignedUser = await dataSource
+const listAssignInstansi = async (userNik: string, paging: IPaging, filter?: IFilterInstansi) => {
+  const assignedUser = dataSource
     .createQueryBuilder()
     .select(['instansi', 'ai.user_nik', 'ai.assignor_nik'])
     .from(Instansi, 'instansi')
     .innerJoin('instansi.assignment_instansi', 'ai')
     .leftJoin('ai.assignor', 'assignor')
-    .where('ai.user_nik = :userNik', { userNik })
-    .take(paging.limit)
-    .skip(paging.offset)
-    .getManyAndCount();
+    .where('ai.user_nik = :userNik', { userNik });
 
-  return assignedUser;
+  if (filter.nama) {
+    assignedUser.andWhere('instansi.nama_instansi ~* :nama', { nama: filter.nama });
+  }
+
+  const res = await assignedUser.take(paging.limit).skip(paging.offset).getManyAndCount();
+
+  return res;
 };
 
 const assignmentInstansiSrv = {

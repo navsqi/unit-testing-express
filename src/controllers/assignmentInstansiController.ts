@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { dataSource } from '~/orm/dbCreateConnection';
 import AssignmentInstansi from '~/orm/entities/AssignmentInstansi';
-import assignmentInstansiSrv from '~/services/assignmentInstansiSrv';
+import assignmentInstansiSrv, { IFilterInstansi } from '~/services/assignmentInstansiSrv';
 import CustomError from '~/utils/customError';
 import queryHelper from '~/utils/queryHelper';
 
@@ -61,7 +61,11 @@ export const getInstansiByAssignedUser = async (req: Request, res: Response, nex
     const paging = queryHelper.paging(req.query);
     const nikUser = req.params.userNik || req.user.nik;
 
-    const [assignUser, count] = await assignmentInstansiSrv.listAssignInstansi(nikUser, paging);
+    const filter: IFilterInstansi = {
+      nama: (req.query.nama as string) || '',
+    };
+
+    const [assignUser, count] = await assignmentInstansiSrv.listAssignInstansi(nikUser, paging, filter);
 
     const dataRes = {
       meta: {
