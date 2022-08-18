@@ -530,7 +530,7 @@ export const getNasabahByCif = async (req: Request, res: Response, next: NextFun
         },
       };
 
-      return res.customSuccess(200, 'Check data KTP success', dataRes);
+      return res.customSuccess(200, 'Check data CIF success', dataRes);
     }
 
     const nasabahReq = await APIPegadaian.getNasabahByCif({
@@ -568,7 +568,7 @@ export const getNasabahByCif = async (req: Request, res: Response, next: NextFun
       },
     };
 
-    return res.customSuccess(200, 'Get nasabah by cif', dataRes);
+    return res.customSuccess(200, 'Check data CIF success', dataRes);
   } catch (e) {
     return next(e);
   }
