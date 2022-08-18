@@ -1,6 +1,7 @@
 import 'dotenv/config';
 
 import axios, { AxiosPromise } from 'axios';
+import logger from '~/utils/logger';
 
 interface IBadanUsahaByCif {
   cif: string;
@@ -26,7 +27,7 @@ const pegadaianApiEnv = {
     username: 'aplikasijs',
     password: 'aplikasi123',
   },
-  url: 'https://devpds.pegadaian.co.id:9090',
+  url: process.env.PEGADAIANAPI_URL,
   channelId: '6017',
   clientId: '9997',
   treshold: '75',
@@ -148,7 +149,8 @@ export const getNasabahByIdKtpPassion = async (body: IKTPPassion): Promise<Axios
 
   const bearerToken = reqBearerToken.data.access_token;
 
-  const badanUsaha = await axios.post(
+  logger.info('HIT_API_MW_IDKTP', 'HITTING....');
+  const nasabah = await axios.post(
     pegadaianApiEnv.url + '/customer/checkktp',
     {
       channelId: pegadaianApiEnv.channelId,
@@ -163,7 +165,9 @@ export const getNasabahByIdKtpPassion = async (body: IKTPPassion): Promise<Axios
     },
   );
 
-  return badanUsaha;
+  logger.info('PASSION_IDKTP', nasabah.data);
+
+  return nasabah;
 };
 
 export const getNasabahByCif = async (body): Promise<AxiosPromise> => {
@@ -171,7 +175,8 @@ export const getNasabahByCif = async (body): Promise<AxiosPromise> => {
 
   const bearerToken = reqBearerToken.data.access_token;
 
-  const badanUsaha = await axios.post(
+  logger.info('HIT_API_MW_CIF', 'HITTING....');
+  const nasabah = await axios.post(
     pegadaianApiEnv.url + '/customer/inquiry',
     {
       channelId: pegadaianApiEnv.channelId,
@@ -185,7 +190,9 @@ export const getNasabahByCif = async (body): Promise<AxiosPromise> => {
     },
   );
 
-  return badanUsaha;
+  logger.info('PASSION_CIF', nasabah.data);
+
+  return nasabah;
 };
 
 export const getBadanUsahaByCif = async (body: IBadanUsahaByCif): Promise<AxiosPromise> => {

@@ -492,8 +492,6 @@ export const checkNasabahPeroranganByNikPassion = async (req: Request, res: Resp
       });
     }
 
-    console.log(nasabah);
-
     const dataRes = {
       isNewCif,
       isKTPValid,
@@ -554,8 +552,6 @@ export const getNasabahByCif = async (req: Request, res: Response, next: NextFun
 
       isNewCif = false;
     }
-
-    console.log('HELOE');
 
     const dataRes = {
       isNewCif,
