@@ -59,7 +59,7 @@ export const getAssignedUserByInstansi = async (req: Request, res: Response, nex
 export const getInstansiByAssignedUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const paging = queryHelper.paging(req.query);
-    const nikUser = req.params.userNik || req.user.nik;
+    const nikUser = req.params.userNik == '0' ? req.user.nik : req.params.userNik;
 
     const filter: IFilterInstansi = {
       nama_instansi: (req.query.nama_instansi as string) || '',

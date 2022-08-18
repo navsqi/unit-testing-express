@@ -433,6 +433,7 @@ export const checkNasabahPeroranganByNikPassion = async (req: Request, res: Resp
     const bodies = req.body;
 
     let isNewCif = true;
+    let isCifValid = false;
     let isKTPValid = false;
 
     const checkToNasabahPerorangan = await nasabahPeroranganRepo.findOne({ where: { nik: bodies.nik } });
@@ -441,7 +442,12 @@ export const checkNasabahPeroranganByNikPassion = async (req: Request, res: Resp
       const dataRes = {
         isNewCif: false,
         isKTPValid: true,
-        nasabah: checkToNasabahPerorangan,
+        isCifValid: true,
+        nasabah: {
+          nik: checkToNasabahPerorangan.nik || null,
+          cif: checkToNasabahPerorangan.cif || null,
+          nama: checkToNasabahPerorangan.nama || '',
+        },
       };
 
       return res.customSuccess(200, 'Check data KTP success', dataRes);
@@ -471,6 +477,7 @@ export const checkNasabahPeroranganByNikPassion = async (req: Request, res: Resp
     if (ktpData) {
       isNewCif = false;
       isKTPValid = true;
+      isCifValid = true;
 
       ktpData = JSON.parse(ktpData)[0];
 
@@ -485,10 +492,17 @@ export const checkNasabahPeroranganByNikPassion = async (req: Request, res: Resp
       });
     }
 
+    console.log(nasabah);
+
     const dataRes = {
       isNewCif,
       isKTPValid,
-      nasabah,
+      isCifValid,
+      nasabah: {
+        nik: nasabah?.nik || req.body.nik,
+        cif: nasabah?.cif || null,
+        nama: nasabah?.nama || '',
+      },
     };
 
     return res.customSuccess(200, 'Check data KTP success', dataRes);
@@ -500,13 +514,20 @@ export const checkNasabahPeroranganByNikPassion = async (req: Request, res: Resp
 export const getNasabahByCif = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const bodies = req.body;
+    let isNewCif = true;
 
     const checkToNasabahPerorangan = await nasabahPeroranganRepo.findOne({ where: { cif: bodies.cif } });
 
     if (checkToNasabahPerorangan) {
       const dataRes = {
+        isNewCif: false,
         isCifValid: true,
-        ktp: checkToNasabahPerorangan,
+        isKTPValid: true,
+        nasabah: {
+          nik: checkToNasabahPerorangan.nik || null,
+          cif: checkToNasabahPerorangan.cif || req.body.cif,
+          nama: checkToNasabahPerorangan.nama || '',
+        },
       };
 
       return res.customSuccess(200, 'Check data KTP success', dataRes);
@@ -522,9 +543,29 @@ export const getNasabahByCif = async (req: Request, res: Response, next: NextFun
 
     if (!nasabah) return next(new CustomError(`Data CIF tidak ditemukan`, 404));
 
+    if (nasabah) {
+      await nasabahPeroranganRepo.save({
+        nik: nasabah.noIdentitas,
+        cif: nasabah.cif,
+        nama: nasabah.namaNasabah,
+        created_by: req.user.nik,
+        source_data: 'PASSION',
+      });
+
+      isNewCif = false;
+    }
+
+    console.log('HELOE');
+
     const dataRes = {
+      isNewCif,
       isCifValid: true,
-      nasabah,
+      isKTPValid: true,
+      nasabah: {
+        nik: nasabah.noIdentitas || null,
+        cif: nasabah.cif || req.body.cif,
+        nama: nasabah.namaNasabah || '',
+      },
     };
 
     return res.customSuccess(200, 'Get nasabah by cif', dataRes);
