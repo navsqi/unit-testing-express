@@ -13,6 +13,10 @@ export const listMasterInstansi = async (filter: any, paging: any): Promise<[Mas
     f['nama_instansi'] = ILike(`%${filter.nama_instansi}%`);
   }
 
+  if (filter.jenis_instansi) {
+    f['jenis_instansi'] = filter.jenis_instansi;
+  }
+
   if (filter.start_date && filter.end_date) {
     f['created_at'] = Between(new Date(`${filter.start_date} 00:00:00`), new Date(`${filter.end_date} 23:59:59`));
   }
@@ -47,6 +51,14 @@ export const listInstansi = async (filter: any, paging: any): Promise<[Instansi[
 
   if (filter.kategori_instansi) {
     f['kategori_instansi'] = filter.kategori_instansi;
+  }
+
+  if (filter.jenis_instansi) {
+    f['jenis_instansi'] = filter.jenis_instansi;
+  }
+
+  if (filter.status_potensial) {
+    f['status_potensial'] = filter.status_potensial;
   }
 
   const [instansi, count] = await instansiRepo.findAndCount({

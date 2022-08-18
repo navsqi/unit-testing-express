@@ -57,6 +57,7 @@ export const getMasterInstansi = async (req: Request, res: Response, next: NextF
       nama_instansi: req.query.nama_instansi || '',
       start_date: req.query.start_date || '',
       end_date: req.query.end_date || '',
+      jenis_instansi: req.query.jenis_instansi || '',
     };
 
     const paging = queryHelper.paging(req.query);
@@ -269,6 +270,8 @@ export const getInstansi = async (req: Request, res: Response, next: NextFunctio
       is_approved: req.query.is_approved ? +req.query.is_approved : '',
       outlet_id: outletIds,
       kategori_instansi: req.query.kategori_instansi || '',
+      jenis_instansi: req.query.jenis_instansi || '',
+      status_potensial: req.query.status_potensial || '',
     };
 
     const paging = queryHelper.paging(req.query);
