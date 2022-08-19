@@ -65,7 +65,7 @@ export const bodyEktp = {
 
 export const getToken = async (): Promise<AxiosPromise> => {
   const getToken = await axios.post(
-    pegadaianApiEnv.url + '/oauth/token',
+    `${pegadaianApiEnv.url}:${process.env.PEGADAIANAPI_PORT_OAUTH}` + '/oauth/token',
     new URLSearchParams({
       grant_type: pegadaianApiEnv.grantType,
       username: pegadaianApiEnv.oauthUsername,
@@ -151,7 +151,7 @@ export const getNasabahByIdKtpPassion = async (body: IKTPPassion): Promise<Axios
 
   logger.info('HIT_API_MW_IDKTP', 'HITTING....');
   const nasabah = await axios.post(
-    pegadaianApiEnv.url + '/customer/checkktp',
+    `${pegadaianApiEnv.url}:${process.env.PEGADAIANAPI_PORT}` + '/customer/checkktp',
     {
       channelId: pegadaianApiEnv.channelId,
       clientId: pegadaianApiEnv.clientId,
@@ -177,7 +177,7 @@ export const getNasabahByCif = async (body): Promise<AxiosPromise> => {
 
   logger.info('HIT_API_MW_CIF', 'HITTING....');
   const nasabah = await axios.post(
-    pegadaianApiEnv.url + '/customer/inquiry',
+    `${pegadaianApiEnv.url}:${process.env.PEGADAIANAPI_PORT}` + '/customer/inquiry',
     {
       channelId: pegadaianApiEnv.channelId,
       clientId: pegadaianApiEnv.clientId,
@@ -201,7 +201,7 @@ export const getBadanUsahaByCif = async (body: IBadanUsahaByCif): Promise<AxiosP
   const bearerToken = reqBearerToken.data.access_token;
 
   const badanUsaha = await axios.post(
-    pegadaianApiEnv.url + '/customer/corporate/detailbadanusaha',
+    `${pegadaianApiEnv.url}:${process.env.PEGADAIANAPI_PORT}` + '/customer/corporate/detailbadanusaha',
     {
       channelId: pegadaianApiEnv.channelId,
       clientId: pegadaianApiEnv.clientId,
