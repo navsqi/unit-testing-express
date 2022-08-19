@@ -24,7 +24,7 @@ export default (err: CustomError | any, req: Request, res: Response, next: NextF
     err.stack = stack;
   }
 
-  if (err.name === 'AxiosError') err = axiosError(JSON.stringify(err.response.data));
+  if (err.name === 'AxiosError') err = axiosError(JSON.stringify(err?.response?.data));
 
   const statusCode = err.statusCode ? err.statusCode : 500;
   const error = err.JSON
@@ -32,7 +32,7 @@ export default (err: CustomError | any, req: Request, res: Response, next: NextF
     : {
         statusCode: err.statusCode,
         status: 'fail',
-        message: err.message,
+        message: err.message || 'Something went wrong',
       };
 
   return res.status(statusCode).json(error);

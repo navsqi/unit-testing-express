@@ -24,7 +24,7 @@ class CustomError extends Error {
     return {
       statusCode: this.statusCode,
       status: this.status,
-      message: this.message,
+      message: this.message || 'Something went wrong',
       error: this.stack,
       isOperational: this.isOperational,
       isAxiosError: this.isAxiosError,
