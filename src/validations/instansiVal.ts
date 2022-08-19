@@ -7,7 +7,7 @@ export const masterInstansi = async (req: Request, res: Response, next: NextFunc
   try {
     const schema: Joi.ObjectSchema<Leads> = Joi.object().keys({
       nama_instansi: Joi.string().required(),
-      cakupan_instansi: Joi.string().required(),
+      kode_unit_kerja: Joi.string().required(),
       alamat: Joi.string(),
       email: Joi.string().email(),
       no_telepon_instansi: Joi.string(),
@@ -46,7 +46,7 @@ export const instansi = async (req: Request, res: Response, next: NextFunction) 
     const schema: Joi.ObjectSchema<Leads> = Joi.object().keys({
       master_instansi_id: Joi.number().required(),
       nama_instansi: Joi.string().required(),
-      cakupan_instansi: Joi.string().required(),
+      kode_unit_kerja: Joi.string().required(),
       jenis_instansi: Joi.string(),
       alamat: Joi.string(),
       email: Joi.string().email(),
