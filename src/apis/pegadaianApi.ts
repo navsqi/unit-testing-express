@@ -64,6 +64,7 @@ export const bodyEktp = {
 };
 
 export const getToken = async (): Promise<AxiosPromise> => {
+  logger.info('GET_TOKEN_API', 'HITTING OAUTH API...');
   const getToken = await axios.post(
     `${pegadaianApiEnv.url}:${process.env.PEGADAIANAPI_PORT_OAUTH}` + '/oauth/token',
     new URLSearchParams({
@@ -72,9 +73,13 @@ export const getToken = async (): Promise<AxiosPromise> => {
       password: pegadaianApiEnv.oauthPass,
     }),
     {
-      auth: pegadaianApiEnv.basic,
+      auth: {
+        username: process.env.PEGADAIANAPI_BASIC_USER_OAUTH,
+        password: process.env.PEGADAIANAPI_BASIC_PASS_OAUTH,
+      },
     },
   );
+  logger.info('GET_TOKEN_API_RESPONSE', getToken.data);
 
   return getToken;
 };
