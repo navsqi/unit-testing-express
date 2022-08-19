@@ -72,7 +72,10 @@ export const getToken = async (): Promise<AxiosPromise> => {
       password: pegadaianApiEnv.oauthPass,
     }),
     {
-      auth: pegadaianApiEnv.basic,
+      auth: {
+        username: process.env.PEGADAIANAPI_BASIC_USER_OAUTH,
+        password: process.env.PEGADAIANAPI_BASIC_PASS_OAUTH,
+      },
     },
   );
 

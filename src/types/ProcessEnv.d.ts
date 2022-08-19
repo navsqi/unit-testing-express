@@ -37,6 +37,17 @@ declare global {
       TSCALE_EXTERNAL_BASIC_PASS: string;
       TSCALE_EXTERNAL_AUTH_USER: string;
       TSCALE_EXTERNAL_AUTH_PASS: string;
+      PEGADAIANAPI_URL: string;
+      PEGADAIANAPI_PORT: string;
+      PEGADAIANAPI_PORT_OAUTH: string;
+      PEGADAIANAPI_BASIC_USER: string;
+      PEGADAIANAPI_BASIC_PASS: string;
+      PEGADAIANAPI_BASIC_USER_OAUTH: string;
+      PEGADAIANAPI_BASIC_PASS_OAUTH: string;
+      PEGADAIANAPI_AUTH_PASS: string;
+      PEGADAIANAPI_AUTH_USER: string;
+      PEGADAIANAPI_CHANNELID: string;
+      PEGADAIANAPI_CLIENTID: string;
       SENTRY_DSN: string;
     }
   }
