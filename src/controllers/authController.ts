@@ -81,6 +81,8 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
     if (!user) return next(new CustomError('User not found', 404));
 
+    if (user.is_active === 0) return next(new CustomError('User inactive', 404));
+
     const isPassMatch = user.checkIfPasswordMatch(bodies.password);
 
     if (!isPassMatch) return next(new CustomError('Invalid password', 404));

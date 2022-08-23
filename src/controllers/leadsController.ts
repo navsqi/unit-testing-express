@@ -28,6 +28,10 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
       is_badan_usaha: req.query.is_badan_usaha ? +req.query.is_badan_usaha : null,
     };
 
+    if (req.user.kode_role == 'MKTO') {
+      filter.is_session = 1;
+    }
+
     if (filter.nama) {
       where['nama'] = ILike(`%${filter.nama}%`);
     }

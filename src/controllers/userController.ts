@@ -78,6 +78,7 @@ export const editUser = async (req: Request, res: Response, next: NextFunction) 
     user.photo = fileName;
     user.kode_role = bodies.kode_role;
     user.kode_unit_kerja = bodies.kode_unit_kerja;
+    user.is_active = bodies.is_active;
     await userRepo.update({ nik: req.user.nik }, user);
 
     if (userPhoto) {
