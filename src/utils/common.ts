@@ -1,6 +1,8 @@
+/* eslint-disable no-array-reduce/no-reduce */
 import { Readable } from 'stream';
 import crypto from 'crypto';
 import dayjs from 'dayjs';
+import { IGenerateNestedArrOfObj } from '~/types/commonTypes';
 
 export const generateRandomStr = (length: number) => {
   const id = crypto.randomBytes(length).toString('hex').toUpperCase();
@@ -78,3 +80,19 @@ export const getDiffDateCount = (start_date: string, end_date: string) => {
 };
 
 export const parseIp = (req) => req.headers['x-forwarded-for']?.split(',').shift() || req.socket?.remoteAddress;
+
+export const generateNestedMenu = (arr: IGenerateNestedArrOfObj[]) => {
+  const result = arr
+    .reduce((acc: Map<any, any>, item) => {
+      acc.set(item.id, item);
+
+      const parent = item.parent_id === null ? acc.get('root') : (acc.get(item.parent_id).children ??= []);
+
+      parent.push(item);
+
+      return acc;
+    }, new Map([['root', []]]))
+    .get('root');
+
+  console.log(result);
+};

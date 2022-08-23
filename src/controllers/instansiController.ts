@@ -91,7 +91,7 @@ export const genExcelMasterInstansi = async (req: Request, res: Response, next: 
 
     const dateDiff = common.getDiffDateCount(filter.start_date, filter.end_date);
 
-    if (dateDiff > 180) return next(new CustomError('Maksimal 180 hari', 400));
+    if (dateDiff > 90) return next(new CustomError('Maksimal 90 hari', 400));
 
     const paging = queryHelper.paging(req.query);
 
@@ -304,7 +304,7 @@ export const genExcelInstansi = async (req: Request, res: Response, next: NextFu
 
     const dateDiff = common.getDiffDateCount(filter.start_date, filter.end_date);
 
-    if (dateDiff > 180) return next(new CustomError('Maksimal 180 hari', 400));
+    if (dateDiff > 90) return next(new CustomError('Maksimal 90 hari', 400));
 
     const paging = queryHelper.paging(req.query);
 

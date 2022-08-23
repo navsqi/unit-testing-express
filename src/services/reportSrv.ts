@@ -4,8 +4,99 @@ import { dataSource } from '~/orm/dbCreateConnection';
 interface IFilter {
   start_date: string;
   end_date: string;
-  outlet_id: string[];
+  outlet_id?: string[];
+  user_id?: any;
 }
+
+export const instansiReport = async (filter?: IFilter) => {
+  const queryRunner = dataSource.createQueryRunner();
+  await queryRunner.connect();
+  const manager = queryRunner.manager;
+
+  try {
+    const q = manager.createQueryBuilder();
+    q.from('instansi', 'i');
+    q.select('i.created_at', 'i.created_at');
+    q.addSelect('i.id', 'id_instansi');
+    q.addSelect('i.nama_instansi', 'nama_instansi');
+    q.addSelect('i.master_instansi_id', 'master_instansi_id');
+    q.addSelect('mi.nama_instansi', 'nama_master_instansi');
+    q.addSelect('i.jenis_instansi', 'jenis_instansi');
+    q.addSelect('i.kategori_instansi', 'kategori_instansi');
+    q.addSelect('i.status_potensial', 'status_potensial');
+    q.addSelect('i.kode_unit_kerja', 'kode_unit_kerja');
+    q.addSelect('outlet.nama', 'nama_unit_kerja');
+    q.addSelect('outlet_p3.nama', 'nama_unit_kerja_parent_3');
+    q.addSelect('outlet_p2.nama', 'nama_unit_kerja_parent_2');
+
+    q.leftJoin('master_instansi', 'mi', 'mi.id = i.master_instansi_id');
+    q.leftJoin('outlet', 'outlet', 'outlet.kode = i.kode_unit_kerja');
+    q.leftJoin('outlet', 'outlet_p3', 'outlet_p3.kode = outlet.parent');
+    q.leftJoin('outlet', 'outlet_p2', 'outlet_p2.kode = outlet_p3.parent');
+
+    q.where('CAST(i.created_at AS date) >= :startDate', { startDate: filter.start_date });
+    q.andWhere('CAST(i.created_at AS date) <= :endDate', { endDate: filter.end_date });
+
+    if (filter.outlet_id && filter.outlet_id.length > 0) {
+      q.andWhere('i.kode_unit_kerja IN (:...kodeUnitKerja)', { kodeUnitKerja: filter.outlet_id });
+    }
+
+    const data = await q.getRawMany();
+
+    return {
+      err: false,
+      data,
+    };
+  } catch (error) {
+    await queryRunner.release();
+    return { err: error.message, data: null };
+  }
+};
+
+export const eventReport = async (filter?: IFilter) => {
+  const queryRunner = dataSource.createQueryRunner();
+  await queryRunner.connect();
+  const manager = queryRunner.manager;
+
+  try {
+    const q = manager.createQueryBuilder();
+    q.from('event', 'e');
+    q.select('e.created_at', 'e.created_at');
+    q.addSelect('e.id', 'id_instansi');
+    q.addSelect('e.nama_instansi', 'nama_instansi');
+    q.addSelect('e.master_instansi_id', 'master_instansi_id');
+    q.addSelect('mi.nama_instansi', 'nama_master_instansi');
+    q.addSelect('e.jenis_instansi', 'jenis_instansi');
+    q.addSelect('e.kategori_instansi', 'kategori_instansi');
+    q.addSelect('e.status_potensial', 'status_potensial');
+    q.addSelect('e.kode_unit_kerja', 'kode_unit_kerja');
+    q.addSelect('outlet.nama', 'nama_unit_kerja');
+    q.addSelect('outlet_p3.nama', 'nama_unit_kerja_parent_3');
+    q.addSelect('outlet_p2.nama', 'nama_unit_kerja_parent_2');
+
+    q.leftJoin('master_instansi', 'mi', 'mi.id = i.master_instansi_id');
+    q.leftJoin('outlet', 'outlet', 'outlet.kode = i.kode_unit_kerja');
+    q.leftJoin('outlet', 'outlet_p3', 'outlet_p3.kode = outlet.parent');
+    q.leftJoin('outlet', 'outlet_p2', 'outlet_p2.kode = outlet_p3.parent');
+
+    q.where('CAST(i.created_at AS date) >= :startDate', { startDate: filter.start_date });
+    q.andWhere('CAST(i.created_at AS date) <= :endDate', { endDate: filter.end_date });
+
+    if (filter.outlet_id && filter.outlet_id.length > 0) {
+      q.andWhere('i.kode_unit_kerja IN (:...kodeUnitKerja)', { kodeUnitKerja: filter.outlet_id });
+    }
+
+    const data = await q.getRawMany();
+
+    return {
+      err: false,
+      data,
+    };
+  } catch (error) {
+    await queryRunner.release();
+    return { err: error.message, data: null };
+  }
+};
 
 export const leadsReport = async (filter?: IFilter) => {
   const queryRunner = dataSource.createQueryRunner();
@@ -65,7 +156,10 @@ export const leadsReport = async (filter?: IFilter) => {
 
     q.where('CAST(leads.created_at AS date) >= :startDate', { startDate: filter.start_date });
     q.andWhere('CAST(leads.created_at AS date) <= :endDate', { endDate: filter.end_date });
-    q.andWhere('leads.kode_unit_kerja IN (:...kodeUnitKerja)', { kodeUnitKerja: filter.outlet_id });
+
+    if (filter.outlet_id && filter.outlet_id.length > 0) {
+      q.andWhere('leads.kode_unit_kerja IN (:...kodeUnitKerja)', { kodeUnitKerja: filter.outlet_id });
+    }
 
     const data = await q.getRawMany();
 
@@ -140,8 +234,11 @@ export const closingReport = async (filter?: IFilter) => {
 
     q.where('CAST(leads.created_at AS date) >= :startDate', { startDate: filter.start_date });
     q.andWhere('CAST(leads.created_at AS date) <= :endDate', { endDate: filter.end_date });
-    q.andWhere('leads.kode_unit_kerja IN (:...kodeUnitKerja)', { kodeUnitKerja: filter.outlet_id });
     q.andWhere('leads.step != :step', { step: 'CLP' });
+
+    if (filter.outlet_id && filter.outlet_id.length > 0) {
+      q.andWhere('leads.kode_unit_kerja IN (:...kodeUnitKerja)', { kodeUnitKerja: filter.outlet_id });
+    }
 
     const data = await q.getRawMany();
 
