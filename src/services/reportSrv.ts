@@ -42,6 +42,7 @@ export const instansiReport = async (filter?: IFilter) => {
     }
 
     const data = await q.getRawMany();
+    await queryRunner.release();
 
     return {
       err: false,
@@ -61,23 +62,41 @@ export const eventReport = async (filter?: IFilter) => {
   try {
     const q = manager.createQueryBuilder();
     q.from('event', 'e');
-    q.select('e.created_at', 'e.created_at');
-    q.addSelect('e.id', 'id_instansi');
-    q.addSelect('e.nama_instansi', 'nama_instansi');
-    q.addSelect('e.master_instansi_id', 'master_instansi_id');
-    q.addSelect('mi.nama_instansi', 'nama_master_instansi');
-    q.addSelect('e.jenis_instansi', 'jenis_instansi');
-    q.addSelect('e.kategori_instansi', 'kategori_instansi');
-    q.addSelect('e.status_potensial', 'status_potensial');
-    q.addSelect('e.kode_unit_kerja', 'kode_unit_kerja');
+    q.select('e.created_at', 'created_at');
+    q.addSelect('e.id', 'id_event');
+    q.addSelect('e.instansi_id', 'instansi_id');
+    q.addSelect('e.jenis_event', 'jenis_event');
+    q.addSelect('i.nama_instansi', 'nama_instansi');
+    q.addSelect('e.foto_dokumentasi', 'foto_dokumentasi');
+    q.addSelect('i.nama_karyawan', 'nama_karyawan');
+    q.addSelect('e.nama_event', 'nama_event');
+    q.addSelect('e.tanggal_event', 'tanggal_event');
+    q.addSelect('i.nama_karyawan', 'nama_karyawan');
+    q.addSelect('i.no_telepon_karyawan', 'no_telepon_karyawan');
     q.addSelect('outlet.nama', 'nama_unit_kerja');
     q.addSelect('outlet_p3.nama', 'nama_unit_kerja_parent_3');
     q.addSelect('outlet_p2.nama', 'nama_unit_kerja_parent_2');
-
-    q.leftJoin('master_instansi', 'mi', 'mi.id = i.master_instansi_id');
+    q.addSelect('leads.countall', 'jumlah_prospek');
+    q.leftJoin('instansi', 'i', 'i.id = e.instansi_id');
     q.leftJoin('outlet', 'outlet', 'outlet.kode = i.kode_unit_kerja');
     q.leftJoin('outlet', 'outlet_p3', 'outlet_p3.kode = outlet.parent');
     q.leftJoin('outlet', 'outlet_p2', 'outlet_p2.kode = outlet_p3.parent');
+
+    q.leftJoin(
+      (qb) => {
+        const qb2 = qb as SelectQueryBuilder<any>;
+
+        qb2
+          .from('leads', 'l')
+          .addSelect('l.event_id', 'event_id')
+          .addSelect('count(*)', 'countall')
+          .groupBy('l.event_id');
+
+        return qb2;
+      },
+      'leads',
+      'leads.event_id = e.id',
+    );
 
     q.where('CAST(i.created_at AS date) >= :startDate', { startDate: filter.start_date });
     q.andWhere('CAST(i.created_at AS date) <= :endDate', { endDate: filter.end_date });
@@ -87,6 +106,7 @@ export const eventReport = async (filter?: IFilter) => {
     }
 
     const data = await q.getRawMany();
+    await queryRunner.release();
 
     return {
       err: false,
@@ -162,6 +182,7 @@ export const leadsReport = async (filter?: IFilter) => {
     }
 
     const data = await q.getRawMany();
+    await queryRunner.release();
 
     return {
       err: false,
@@ -241,6 +262,7 @@ export const closingReport = async (filter?: IFilter) => {
     }
 
     const data = await q.getRawMany();
+    await queryRunner.release();
 
     return {
       err: false,
