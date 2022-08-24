@@ -7,11 +7,11 @@ import protect from './../../middlewares/protect';
 
 const router = Router();
 
-router.get('/', protect(), userController.getUser);
+router.get('/', protect(['ADMN', 'SADM']), userController.getUser);
 
 router.put(
   '/edit-profile/:nik',
-  protect(),
+  protect(['ADMN', 'SADM']),
   userVal.editUserVal,
   uploadBuffer([{ name: 'photo', maxCount: 1 }]),
   userController.editUser,

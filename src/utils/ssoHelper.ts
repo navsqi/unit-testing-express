@@ -15,23 +15,39 @@ export default {
       return 'ADMN';
     }
 
-    if (kodeRole && kodeRole.includes('DPT')) {
-      return 'DPTA';
-    }
-
     if (kodeRole && kodeRole.includes('MSP')) {
       return 'MSPG';
     }
 
-    if (kodeRole && kodeRole.includes('PNT')) {
-      return 'PNTA';
+    if (kodeRole && kodeRole.includes('DPT')) {
+      return 'DPTA';
+    }
+
+    if (kodeRole && kodeRole.includes('KAB')) {
+      return 'KABG';
     }
 
     if (kodeRole && kodeRole.includes('PNW')) {
       return 'PNWA';
     }
 
-    return kodeRole;
+    if (kodeRole && kodeRole.includes('PNT')) {
+      return 'PNTA';
+    }
+
+    if (kodeRole && kodeRole.includes('KAD')) {
+      return 'KADP';
+    }
+
+    if (kodeRole && kodeRole.includes('KDI')) {
+      return 'KDIV';
+    }
+
+    if (kodeRole && kodeRole.includes('PF')) {
+      return 'ADMN';
+    }
+
+    return null;
   },
   setOutlet: (kode_outlet: string) => {
     const kodeOutlet = kode_outlet;

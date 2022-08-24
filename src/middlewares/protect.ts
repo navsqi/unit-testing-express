@@ -13,7 +13,7 @@ export const isRoleMatch = (roles?: any[], role?: string): boolean => {
   return true;
 };
 
-export const protect = (roles?: string[]) => {
+export const protect = (roles?: string[], isExclude = false) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.get('Authorization');
     if (!authHeader) {
@@ -35,7 +35,11 @@ export const protect = (roles?: string[]) => {
         select: ['id', 'nik', 'email', 'nama', 'kode_role', 'kode_unit_kerja'],
       });
 
-      if (!isRoleMatch(roles, jwtPayload.role as string)) return next(new CustomError(`Access denied`, 403));
+      if (isExclude && roles && roles.includes(req.user.kode_role))
+        return next(new CustomError(`Role ${req.user.kode_role} is not permitted`, 403));
+
+      if (!isRoleMatch(roles, req.user.kode_role))
+        return next(new CustomError(`Role ${req.user.kode_role} is not permitted`, 403));
 
       next();
     } catch (e) {

@@ -16,7 +16,7 @@ export const instansiReport = async (filter?: IFilter) => {
   try {
     const q = manager.createQueryBuilder();
     q.from('instansi', 'i');
-    q.select('i.created_at', 'i.created_at');
+    q.select('i.created_at', 'created_at');
     q.addSelect('i.id', 'id_instansi');
     q.addSelect('i.nama_instansi', 'nama_instansi');
     q.addSelect('i.master_instansi_id', 'master_instansi_id');
@@ -26,8 +26,11 @@ export const instansiReport = async (filter?: IFilter) => {
     q.addSelect('i.status_potensial', 'status_potensial');
     q.addSelect('i.kode_unit_kerja', 'kode_unit_kerja');
     q.addSelect('outlet.nama', 'nama_unit_kerja');
+    q.addSelect('outlet.unit_kerja', 'unit');
     q.addSelect('outlet_p3.nama', 'nama_unit_kerja_parent_3');
+    q.addSelect('outlet_p3.unit_kerja', 'unit_parent_3');
     q.addSelect('outlet_p2.nama', 'nama_unit_kerja_parent_2');
+    q.addSelect('outlet_p2.unit_kerja', 'unit_parent_2');
 
     q.leftJoin('master_instansi', 'mi', 'mi.id = i.master_instansi_id');
     q.leftJoin('outlet', 'outlet', 'outlet.kode = i.kode_unit_kerja');
@@ -74,8 +77,11 @@ export const eventReport = async (filter?: IFilter) => {
     q.addSelect('i.nama_karyawan', 'nama_karyawan');
     q.addSelect('i.no_telepon_karyawan', 'no_telepon_karyawan');
     q.addSelect('outlet.nama', 'nama_unit_kerja');
+    q.addSelect('outlet.unit_kerja', 'unit');
     q.addSelect('outlet_p3.nama', 'nama_unit_kerja_parent_3');
+    q.addSelect('outlet_p3.unit_kerja', 'unit_parent_3');
     q.addSelect('outlet_p2.nama', 'nama_unit_kerja_parent_2');
+    q.addSelect('outlet_p2.unit_kerja', 'unit_parent_2');
     q.addSelect('leads.countall', 'jumlah_prospek');
     q.leftJoin('instansi', 'i', 'i.id = e.instansi_id');
     q.leftJoin('outlet', 'outlet', 'outlet.kode = i.kode_unit_kerja');
@@ -145,8 +151,11 @@ export const leadsReport = async (filter?: IFilter) => {
     q.addSelect('leads.flag_app', 'flag_app');
     q.addSelect('leads.kode_unit_kerja', 'kode_unit_kerja');
     q.addSelect('outlet.nama', 'nama_unit_kerja');
+    q.addSelect('outlet.unit_kerja', 'unit');
     q.addSelect('outlet_p3.nama', 'nama_unit_kerja_parent_3');
+    q.addSelect('outlet_p3.unit_kerja', 'unit_parent_3');
     q.addSelect('outlet_p2.nama', 'nama_unit_kerja_parent_2');
+    q.addSelect('outlet_p2.unit_kerja', 'unit_parent_2');
     q.addSelect('COALESCE(leadsclosing.omset, 0)', 'omset');
     q.addSelect('COALESCE(leadsclosing.osl, 0)', 'osl');
 
@@ -221,8 +230,11 @@ export const closingReport = async (filter?: IFilter) => {
     q.addSelect('leads.flag_app', 'flag_app');
     q.addSelect('leads.kode_unit_kerja', 'kode_unit_kerja');
     q.addSelect('outlet.nama', 'nama_unit_kerja');
+    q.addSelect('outlet.unit_kerja', 'unit');
     q.addSelect('outlet_p3.nama', 'nama_unit_kerja_parent_3');
+    q.addSelect('outlet_p3.unit_kerja', 'unit_parent_3');
     q.addSelect('outlet_p2.nama', 'nama_unit_kerja_parent_2');
+    q.addSelect('outlet_p2.unit_kerja', 'unit_parent_2');
     q.addSelect('COALESCE(leadsclosing.omset, 0)', 'omset');
     q.addSelect('COALESCE(leadsclosing.osl, 0)', 'osl');
     q.addSelect('leadsclosing.channel', 'channel');
