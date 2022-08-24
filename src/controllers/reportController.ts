@@ -31,6 +31,9 @@ export const getReportEvent = async (req: Request, res: Response, next: NextFunc
     if (report.err) return next(new CustomError(report.err, 400));
 
     const dataRes = {
+      meta: {
+        count: report.data.length,
+      },
       report: report.data,
     };
 
@@ -67,6 +70,9 @@ export const getReportInstansi = async (req: Request, res: Response, next: NextF
     if (report.err) return next(new CustomError(report.err, 400));
 
     const dataRes = {
+      meta: {
+        count: report.data.length,
+      },
       report: report.data,
     };
 
@@ -103,6 +109,9 @@ export const getReportLeads = async (req: Request, res: Response, next: NextFunc
     if (report.err) return next(new CustomError(report.err, 400));
 
     const dataRes = {
+      meta: {
+        count: report.data.length,
+      },
       report: report.data,
     };
 
@@ -139,6 +148,9 @@ export const getReportClosing = async (req: Request, res: Response, next: NextFu
     if (report.err) return next(new CustomError(report.err, 400));
 
     const dataRes = {
+      meta: {
+        count: report.data.length,
+      },
       report: report.data,
     };
 

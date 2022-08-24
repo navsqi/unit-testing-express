@@ -12,9 +12,23 @@ router.get('/organisasi-pegawai', instansiController.getOrganisasiPegawai);
 router.get('/parent/excel', protect(), instansiController.genExcelMasterInstansi);
 router.get('/parent/', protect(), instansiController.getMasterInstansi);
 router.get('/parent/:id', protect(), instansiController.getMasterInstansiById);
-router.post('/parent/', protect(), instansiVal.masterInstansi, instansiController.createNewMasterInstansi);
-router.patch('/parent/:id', protect(), instansiVal.masterInstansi, instansiController.updateMasterInstansi);
-router.delete('/parent/:id', protect(), instansiController.deleteMasterInstansi);
+router.post(
+  '/parent/',
+  protect(['PNTA', 'KADP', 'KDIV', 'ADMN', 'SADM']),
+  instansiVal.masterInstansi,
+  instansiController.createNewMasterInstansi,
+);
+router.patch(
+  '/parent/:id',
+  protect(['PNTA', 'KADP', 'KDIV', 'ADMN', 'SADM']),
+  instansiVal.masterInstansi,
+  instansiController.updateMasterInstansi,
+);
+router.delete(
+  '/parent/:id',
+  protect(['PNTA', 'KADP', 'KDIV', 'ADMN', 'SADM']),
+  instansiController.deleteMasterInstansi,
+);
 
 router.get('/child/excel', protect(), instansiController.genExcelInstansi);
 router.get('/child/', protect(), instansiController.getInstansi);

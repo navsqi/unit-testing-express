@@ -115,6 +115,12 @@ export const exchangeTokenSso = async (req: Request, res: Response, next: NextFu
     let user = await userRepo.findOne({ where: { nik: ssoRes.nik } });
 
     const kodeRole = ssoHelper.setRole(ssoRes.kode_jabatan);
+
+    if (!kodeRole)
+      return next(
+        new CustomError(`Kode jabatan sso ${ssoRes.kode_jabatan} belum di-daftarkan pada service KAMILA`, 401),
+      );
+
     const kodeOutlet = ssoHelper.setOutlet(ssoRes.kode_unit_kerja);
 
     if (!user) {
