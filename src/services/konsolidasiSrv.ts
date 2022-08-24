@@ -1,4 +1,10 @@
 import { dataSource } from '~/orm/dbCreateConnection';
+import Outlet from '~/orm/entities/Outlet';
+
+interface IFilter {
+  nama?: string;
+  kode?: string;
+}
 
 export const konsolidasiTopBottom = async (outletId: string, isIdOnly = true): Promise<string[]> => {
   const queryRunner = dataSource.createQueryRunner();
@@ -25,6 +31,33 @@ export const konsolidasiTopBottom = async (outletId: string, isIdOnly = true): P
     }
 
     return konsolidasi.map((e) => e.kode);
+  } catch (error) {
+    await queryRunner.release();
+    return error;
+  }
+};
+
+export const konsolidasiTopBottomFull = async (outletId: string, filter: IFilter): Promise<Outlet[]> => {
+  const queryRunner = dataSource.createQueryRunner();
+  await queryRunner.connect();
+  const manager = queryRunner.manager;
+
+  try {
+    const konsolidasi: any[] = await manager.query(
+      `with recursive cte as (
+             select kode,nama,parent from outlet where kode = $1
+             union
+             select o2.kode, o2.nama, o2.parent from outlet o2
+             inner join cte s on o2.parent = s.kode
+         )
+         select * from cte where nama ~* $2 and kode ~* $3
+           `,
+      [outletId, filter.nama, filter.kode],
+    );
+
+    await queryRunner.release();
+
+    return konsolidasi;
   } catch (error) {
     await queryRunner.release();
     return error;

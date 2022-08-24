@@ -11,7 +11,7 @@ router.get('/', (req, res) => {
 });
 
 router.put('/closing-scheduler', basicAuth, (req, res) => {
-  res.send('Updated at 16/08/2022 14:02');
+  res.send('Updated at 24/08/2022 11:35');
 });
 
 export default router;
