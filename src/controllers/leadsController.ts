@@ -41,10 +41,10 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
     }
 
     if (filter.kode_unit_kerja && filter.is_session == 0) {
-      const outletId = req.query.kode_unit_kerja || req.user.kode_unit_kerja;
+      const outletId = (req.query.kode_unit_kerja || req.user.kode_unit_kerja) as string;
       let outletIds = [];
 
-      if (outletId != '00002') {
+      if (!outletId.startsWith('000')) {
         outletIds = await konsolidasiTopBottom(outletId as string);
       }
 

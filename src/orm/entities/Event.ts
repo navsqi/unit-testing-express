@@ -37,6 +37,12 @@ class Event {
   nama_event: string;
 
   @Column({
+    length: 255,
+    nullable: true,
+  })
+  keterangan: string;
+
+  @Column({
     type: 'date',
   })
   tanggal_event: string;

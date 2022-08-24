@@ -6,10 +6,10 @@ import CustomError from '~/utils/customError';
 
 export const getReportEvent = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const outletId = req.query.outlet_id || req.user.kode_unit_kerja;
+    const outletId = (req.query.kode_unit_kerja || req.user.kode_unit_kerja) as string;
     let outletIds = [];
 
-    if (outletId != '00002' && outletId != '00042') {
+    if (!outletId.startsWith('000')) {
       outletIds = await konsolidasiTopBottom(outletId as string);
     }
 
@@ -42,10 +42,10 @@ export const getReportEvent = async (req: Request, res: Response, next: NextFunc
 
 export const getReportInstansi = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const outletId = req.query.outlet_id || req.user.kode_unit_kerja;
+    const outletId = (req.query.kode_unit_kerja || req.user.kode_unit_kerja) as string;
     let outletIds = [];
 
-    if (outletId != '00002' && outletId != '00042') {
+    if (!outletId.startsWith('000')) {
       outletIds = await konsolidasiTopBottom(outletId as string);
     }
 
@@ -78,10 +78,10 @@ export const getReportInstansi = async (req: Request, res: Response, next: NextF
 
 export const getReportLeads = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const outletId = req.query.outlet_id || req.user.kode_unit_kerja;
+    const outletId = (req.query.kode_unit_kerja || req.user.kode_unit_kerja) as string;
     let outletIds = [];
 
-    if (outletId != '00002' && outletId != '00042') {
+    if (!outletId.startsWith('000')) {
       outletIds = await konsolidasiTopBottom(outletId as string);
     }
 
@@ -114,10 +114,10 @@ export const getReportLeads = async (req: Request, res: Response, next: NextFunc
 
 export const getReportClosing = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const outletId = req.query.outlet_id || req.user.kode_unit_kerja;
+    const outletId = (req.query.kode_unit_kerja || req.user.kode_unit_kerja) as string;
     let outletIds = [];
 
-    if (outletId != '00002' && outletId != '00042') {
+    if (!outletId.startsWith('000')) {
       outletIds = await konsolidasiTopBottom(outletId as string);
     }
 

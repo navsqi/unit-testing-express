@@ -1,4 +1,4 @@
-import { Between, ILike } from 'typeorm';
+import { Between, ILike, In } from 'typeorm';
 import { dataSource } from '~/orm/dbCreateConnection';
 import Mou from '~/orm/entities/Mou';
 
@@ -21,6 +21,10 @@ export const listMou = async (filter: any, paging: any): Promise<[Mou[], number]
 
   if (filter.start_date && filter.end_date) {
     f['created_at'] = Between(new Date(`${filter.start_date} 00:00:00`), new Date(`${filter.end_date} 23:59:59`));
+  }
+
+  if (filter.outlet_id && filter.outlet_id.length > 0) {
+    f['kode_unit_kerja'] = In(filter.outlet_id);
   }
 
   const [mou, count] = await mouRepo.findAndCount({

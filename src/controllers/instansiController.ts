@@ -255,10 +255,10 @@ export const deleteMasterInstansi = async (req: Request, res: Response, next: Ne
 
 export const getInstansi = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const outletId = req.query.outlet_id || req.user.kode_unit_kerja;
     let outletIds = [];
+    const outletId = (req.query.kode_unit_kerja || req.user.kode_unit_kerja) as string;
 
-    if (outletId != '00002') {
+    if (!outletId.startsWith('000')) {
       outletIds = await konsolidasiTopBottom(outletId as string);
     }
 

@@ -1,7 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
 import { objectRemove, objectUpload } from '~/config/minio';
 import { dataSource } from '~/orm/dbCreateConnection';
+import Instansi from '~/orm/entities/Instansi';
 import Mou from '~/orm/entities/Mou';
+import { konsolidasiTopBottom } from '~/services/konsolidasiSrv';
 import { listMou } from '~/services/mouSrv';
 import { generateFileName, tanggal } from '~/utils/common';
 import CustomError from '~/utils/customError';
@@ -9,6 +11,7 @@ import queryHelper from '~/utils/queryHelper';
 import xls from '~/utils/xls';
 
 const mouRepo = dataSource.getRepository(Mou);
+const instansiRepo = dataSource.getRepository(Instansi);
 
 export const createMou = async (req: Request, res: Response, next: NextFunction) => {
   let fileName: string = null;
@@ -17,6 +20,10 @@ export const createMou = async (req: Request, res: Response, next: NextFunction)
     let photo: Express.Multer.File = null;
     const bodies = req.body as Mou;
     const mou = new Mou();
+
+    const getKodeUnitKerjaInstansi = await instansiRepo.findOne({ where: { id: bodies.instansi_id } });
+
+    if (!getKodeUnitKerjaInstansi) return next(new CustomError('Instansi tidak ditemukan', 400));
 
     if (req.files && req.files['file']) {
       photo = req.files['file'][0];
@@ -38,7 +45,7 @@ export const createMou = async (req: Request, res: Response, next: NextFunction)
     mou.nama_pic = bodies.nama_pic ? bodies.nama_pic : req.user.nama;
     mou.file = fileName;
     mou.created_by = req.user.nik;
-    mou.kode_unit_kerja = bodies.kode_unit_kerja ? bodies.kode_unit_kerja : req.user.kode_unit_kerja;
+    mou.kode_unit_kerja = getKodeUnitKerjaInstansi.kode_unit_kerja;
 
     await mouRepo.save(mou);
 
@@ -54,11 +61,19 @@ export const createMou = async (req: Request, res: Response, next: NextFunction)
 
 export const getMou = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const outletId = (req.query.kode_unit_kerja || req.user.kode_unit_kerja) as string;
+    let outletIds = [];
+
+    if (!outletId.startsWith('000')) {
+      outletIds = await konsolidasiTopBottom(outletId as string);
+    }
+
     const filter = {
       status: req.query.status || '',
       nomor_kerjasama: req.query.nomor_kerjasama || '',
       start_date: req.query.start_date || '',
       end_date: req.query.end_date || '',
+      outlet_id: outletIds,
     };
 
     const paging = queryHelper.paging(req.query);

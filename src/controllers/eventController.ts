@@ -1,12 +1,16 @@
 import { NextFunction, Request, Response } from 'express';
-import { Between, FindOptionsWhere, ILike } from 'typeorm';
+import { Between, FindOptionsWhere, ILike, In } from 'typeorm';
 import { objectRemove, objectUpload } from '~/config/minio';
 import { dataSource } from '~/orm/dbCreateConnection';
 import Event from '~/orm/entities/Event';
+import Instansi from '~/orm/entities/Instansi';
+import { konsolidasiTopBottom } from '~/services/konsolidasiSrv';
 import { generateFileName } from '~/utils/common';
+import CustomError from '~/utils/customError';
 import queryHelper from '~/utils/queryHelper';
 
 const eventRepo = dataSource.getRepository(Event);
+const instansiRepo = dataSource.getRepository(Instansi);
 
 export const createEvent = async (req: Request, res: Response, next: NextFunction) => {
   let fileName: string = null;
@@ -15,6 +19,10 @@ export const createEvent = async (req: Request, res: Response, next: NextFunctio
     let photo: Express.Multer.File = null;
     const bodies = req.body as Event;
     const ev = new Event();
+
+    const getKodeUnitKerjaInstansi = await instansiRepo.findOne({ where: { id: bodies.instansi_id } });
+
+    if (!getKodeUnitKerjaInstansi) return next(new CustomError('Instansi tidak ditemukan', 400));
 
     if (req.files && req.files['file']) {
       photo = req.files['file'][0];
@@ -27,11 +35,12 @@ export const createEvent = async (req: Request, res: Response, next: NextFunctio
     }
 
     ev.instansi_id = bodies.instansi_id;
-    ev.kode_unit_kerja = bodies.kode_unit_kerja ? bodies.kode_unit_kerja : req.user.kode_unit_kerja;
+    ev.kode_unit_kerja = getKodeUnitKerjaInstansi.kode_unit_kerja;
     ev.nama_event = bodies.nama_event;
     ev.nama_pic = bodies.nama_pic;
     ev.nomor_hp_pic = bodies.nomor_hp_pic;
     ev.jenis_event = bodies.jenis_event;
+    ev.keterangan = bodies.keterangan;
     ev.foto_dokumentasi = fileName;
     ev.tanggal_event = bodies.tanggal_event;
     ev.flag_app = bodies.flag_app ? bodies.flag_app : 'KAMILA';
@@ -53,6 +62,7 @@ export const getEvent = async (req: Request, res: Response, next: NextFunction) 
   try {
     const where: FindOptionsWhere<Event> = {};
     const qs = req.query;
+    let outletIds = [];
 
     const filter = {
       nama_event: qs.nama_event,
@@ -68,6 +78,18 @@ export const getEvent = async (req: Request, res: Response, next: NextFunction) 
 
     if (filter.is_session === 1) {
       where['created_by'] = req.user.nik;
+    }
+
+    if (!filter.is_session) {
+      const outletId = (req.query.kode_unit_kerja || req.user.kode_unit_kerja) as string;
+
+      if (!outletId.startsWith('000')) {
+        outletIds = await konsolidasiTopBottom(outletId as string);
+      }
+
+      if (outletIds.length > 0) {
+        where['kode_unit_kerja'] = In(outletIds);
+      }
     }
 
     if (filter.instansi_id) {

@@ -6,5 +6,6 @@ import protect from '../../middlewares/protect';
 const router = Router();
 
 router.get('/', protect(), outletController.getOutlet);
+router.get('/session-konsol', protect(), outletController.getOutletSessionWithChild);
 
 export default router;
