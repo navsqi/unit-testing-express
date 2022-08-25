@@ -25,8 +25,8 @@ const updateMenuRole = async (data: AccessMenuRole[]) => {
   }
 };
 
-const menuRoleSrv = {
+const menuRoleSvc = {
   updateMenuRole,
 };
 
-export default menuRoleSrv;
+export default menuRoleSvc;

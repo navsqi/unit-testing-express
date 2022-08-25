@@ -19,8 +19,8 @@ const findOrCreate = async (instansiId: number, paging: IPaging) => {
   return assignedUser;
 };
 
-const leadsSrv = {
+const leadsSvc = {
   findOrCreate,
 };
 
-export default leadsSrv;
+export default leadsSvc;

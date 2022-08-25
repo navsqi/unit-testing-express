@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
-import { konsolidasiTopBottom } from '~/services/konsolidasiSrv';
-import { closingReport, eventReport, instansiReport, leadsReport } from '~/services/reportSrv';
+import { konsolidasiTopBottom } from '~/services/konsolidasiSvc';
+import { closingReport, eventReport, instansiReport, leadsReport } from '~/services/reportSvc';
 import * as common from '~/utils/common';
 import CustomError from '~/utils/customError';
 

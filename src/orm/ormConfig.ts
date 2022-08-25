@@ -11,7 +11,7 @@ const ormConfig: DataSourceOptions = {
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
   synchronize: false,
-  logging: false,
+  logging: true,
   entities: [...Object.values(Entities)],
   migrations: [join(__dirname, 'migrations', '*.{ts,js}')],
   subscribers: [join(__dirname, 'subscribers', '*.{ts,js}')],

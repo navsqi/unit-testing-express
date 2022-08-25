@@ -7,7 +7,7 @@ import { generateFileName } from '~/utils/common';
 import ssoHelper from '~/utils/ssoHelper';
 import User from '../orm/entities/User';
 import CustomError from '../utils/customError';
-import { signToken } from './../services/tokenSrv';
+import { signToken } from '../services/tokenSvc';
 
 const userRepo = dataSource.getRepository(User);
 

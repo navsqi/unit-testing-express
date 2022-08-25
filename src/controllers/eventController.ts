@@ -4,7 +4,7 @@ import { objectRemove, objectUpload } from '~/config/minio';
 import { dataSource } from '~/orm/dbCreateConnection';
 import Event from '~/orm/entities/Event';
 import Instansi from '~/orm/entities/Instansi';
-import { konsolidasiTopBottom } from '~/services/konsolidasiSrv';
+import { konsolidasiTopBottom } from '~/services/konsolidasiSvc';
 import { generateFileName } from '~/utils/common';
 import CustomError from '~/utils/customError';
 import queryHelper from '~/utils/queryHelper';

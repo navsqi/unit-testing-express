@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { ILike } from 'typeorm';
 import { dataSource } from '~/orm/dbCreateConnection';
 import Outlet from '~/orm/entities/Outlet';
-import { konsolidasiTopBottomFull } from '~/services/konsolidasiSrv';
+import { konsolidasiTopBottomFull } from '~/services/konsolidasiSvc';
 import queryHelper from '~/utils/queryHelper';
 
 const outletRepo = dataSource.getRepository(Outlet);
