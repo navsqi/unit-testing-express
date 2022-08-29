@@ -4,6 +4,7 @@ import axios, { AxiosPromise } from 'axios';
 
 const ssoEnv = {
   grantType: 'authorization_code',
+  ssoUrl: process.env.SSO_URL,
   redirectUri: process.env.SSO_REDIRECT_URI,
   state: process.env.SSO_STATE,
   clientId: process.env.SSO_CLIENT,
@@ -17,7 +18,7 @@ const ssoEnv = {
 export const exchangeTokenSso = async (code: string): Promise<AxiosPromise> => {
   try {
     const getToken = await axios.post(
-      process.env.SSO_URL + '/oauth/token',
+      ssoEnv.ssoUrl + '/oauth/token',
       new URLSearchParams({
         grant_type: ssoEnv.grantType,
         code,
