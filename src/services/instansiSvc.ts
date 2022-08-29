@@ -61,10 +61,18 @@ export const listInstansi = async (filter: any, paging: any): Promise<[Instansi[
     f['status_potensial'] = filter.status_potensial;
   }
 
+  const fWithOr = Object.keys(f).length > 0 ? [f, { created_by: filter.user_nik }] : f;
+
   const [instansi, count] = await instansiRepo.findAndCount({
     take: paging.limit,
     skip: paging.offset,
-    where: f,
+    where: fWithOr,
+    select: {
+      master_instansi: {
+        id: true,
+        nama_instansi: true,
+      },
+    },
     relations: {
       master_instansi: true,
     },

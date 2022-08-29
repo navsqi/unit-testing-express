@@ -271,6 +271,7 @@ export const getInstansi = async (req: Request, res: Response, next: NextFunctio
       kategori_instansi: req.query.kategori_instansi || '',
       jenis_instansi: req.query.jenis_instansi || '',
       status_potensial: req.query.status_potensial || '',
+      user_nik: req.user.nik,
     };
 
     const paging = queryHelper.paging(req.query);
