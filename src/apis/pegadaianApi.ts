@@ -19,18 +19,42 @@ interface IKTPDukcapil {
   ipUser?: string;
 }
 
+const API_URL_OAUTH =
+  process.env.NODE_ENV === 'production'
+    ? process.env.PEGADAIANAPI_URL
+    : process.env.PEGADAIANAPI_URL + ':' + process.env.PEGADAIANAPI_PORT_OAUTH;
+const API_URL =
+  process.env.NODE_ENV === 'production'
+    ? process.env.PEGADAIANAPI_URL
+    : process.env.PEGADAIANAPI_URL + ':' + process.env.PEGADAIANAPI_PORT;
+
 const pegadaianApiEnv = {
-  grantType: 'password',
-  oauthUsername: 'test',
-  oauthPass: 'test',
-  basic: {
-    username: 'aplikasijs',
-    password: 'aplikasi123',
+  authApi: {
+    grantType: 'password',
+    authUser: process.env.PEGADAIANAPI_AUTH_USER,
+    authPass: process.env.PEGADAIANAPI_AUTH_PASS,
+    basicUser: process.env.PEGADAIANAPI_BASIC_USER_OAUTH,
+    basicPass: process.env.PEGADAIANAPI_BASIC_PASS_OAUTH,
+    url: API_URL_OAUTH,
   },
-  url: process.env.PEGADAIANAPI_URL,
-  channelId: '6017',
-  clientId: '9997',
-  treshold: '75',
+  api: {
+    url: API_URL,
+    port: process.env.PEGADAIANAPI_PORT,
+    channelId: process.env.PEGADAIANAPI_CHANNELID,
+    clientId: process.env.PEGADAIANAPI_CLIENTID,
+    treshold: '75',
+  },
+  tscale: {
+    url: process.env.TSCALE_EXTERNAL_URL,
+    urlAuth: process.env.TSCALE_EXTERNAL_URL_AUTH,
+    channelId: process.env.TSCALE_EXTERNAL_CHANNELID,
+    clientId: process.env.TSCALE_EXTERNAL_CLIENTID,
+    authUser: process.env.TSCALE_EXTERNAL_AUTH_USER,
+    authPass: process.env.TSCALE_EXTERNAL_AUTH_PASS,
+    basicUser: process.env.TSCALE_EXTERNAL_BASIC_USER,
+    basicPass: process.env.TSCALE_EXTERNAL_BASIC_PASS,
+    grantType: 'password',
+  },
 };
 
 export const bodyEktp = {
@@ -66,36 +90,35 @@ export const bodyEktp = {
 export const getToken = async (): Promise<AxiosPromise> => {
   logger.info('GET_TOKEN_API', 'HITTING OAUTH API...');
   const getToken = await axios.post(
-    `${pegadaianApiEnv.url}:${process.env.PEGADAIANAPI_PORT_OAUTH}` + '/oauth/token',
+    pegadaianApiEnv.authApi.url + '/oauth/token',
     new URLSearchParams({
-      grant_type: pegadaianApiEnv.grantType,
-      username: pegadaianApiEnv.oauthUsername,
-      password: pegadaianApiEnv.oauthPass,
+      grant_type: pegadaianApiEnv.authApi.grantType,
+      username: pegadaianApiEnv.authApi.authUser,
+      password: pegadaianApiEnv.authApi.authPass,
     }),
     {
       auth: {
-        username: process.env.PEGADAIANAPI_BASIC_USER_OAUTH,
-        password: process.env.PEGADAIANAPI_BASIC_PASS_OAUTH,
+        username: pegadaianApiEnv.authApi.basicUser,
+        password: pegadaianApiEnv.authApi.basicPass,
       },
     },
   );
-  logger.info('GET_TOKEN_API_RESPONSE', getToken.data);
 
   return getToken;
 };
 
 export const getTokenTScale = async (): Promise<AxiosPromise> => {
   const getToken = await axios.post(
-    process.env.TSCALE_EXTERNAL_URL_AUTH,
+    pegadaianApiEnv.tscale.urlAuth,
     new URLSearchParams({
-      grant_type: 'password',
-      username: process.env.TSCALE_EXTERNAL_AUTH_USER,
-      password: process.env.TSCALE_EXTERNAL_AUTH_PASS,
+      grant_type: pegadaianApiEnv.tscale.grantType,
+      username: pegadaianApiEnv.tscale.authUser,
+      password: pegadaianApiEnv.tscale.authPass,
     }),
     {
       auth: {
-        username: process.env.TSCALE_EXTERNAL_BASIC_USER,
-        password: process.env.TSCALE_EXTERNAL_BASIC_PASS,
+        username: pegadaianApiEnv.tscale.basicUser,
+        password: pegadaianApiEnv.tscale.basicPass,
       },
     },
   );
@@ -109,7 +132,7 @@ export const checkEktpDukcapil = async (body: IKTPDukcapil): Promise<AxiosPromis
   const bearerToken = reqBearerToken.data.access_token;
 
   const getToken = await axios.post(
-    process.env.TSCALE_EXTERNAL_URL + '/switching/dukcapil/dukcapil/inquiry',
+    pegadaianApiEnv.tscale.url + '/switching/dukcapil/dukcapil/inquiry',
     {
       nik: body.nik,
       noKK: '',
@@ -135,8 +158,8 @@ export const checkEktpDukcapil = async (body: IKTPDukcapil): Promise<AxiosPromis
       statusKawin: '',
       agama: '',
       treshold: '90',
-      channelId: process.env.TSCALE_EXTERNAL_CHANNELID,
-      clientId: process.env.TSCALE_EXTERNAL_CLIENTID,
+      channelId: pegadaianApiEnv.tscale.channelId,
+      clientId: pegadaianApiEnv.tscale.clientId,
       ipUser: body.ipUser ? body.ipUser : '10.31.78.20',
     },
     {
@@ -156,10 +179,10 @@ export const getNasabahByIdKtpPassion = async (body: IKTPPassion): Promise<Axios
 
   logger.info('HIT_API_MW_IDKTP', 'HITTING....');
   const nasabah = await axios.post(
-    `${pegadaianApiEnv.url}:${process.env.PEGADAIANAPI_PORT}` + '/customer/checkktp',
+    pegadaianApiEnv.api.url + '/customer/checkktp',
     {
-      channelId: pegadaianApiEnv.channelId,
-      clientId: pegadaianApiEnv.clientId,
+      channelId: pegadaianApiEnv.api.channelId,
+      clientId: pegadaianApiEnv.api.clientId,
       flag: body.flag,
       noIdentitas: body.nik,
     },
@@ -169,8 +192,6 @@ export const getNasabahByIdKtpPassion = async (body: IKTPPassion): Promise<Axios
       },
     },
   );
-
-  logger.info('PASSION_IDKTP', nasabah.data);
 
   return nasabah;
 };
@@ -182,10 +203,10 @@ export const getNasabahByCif = async (body): Promise<AxiosPromise> => {
 
   logger.info('HIT_API_MW_CIF', 'HITTING....');
   const nasabah = await axios.post(
-    `${pegadaianApiEnv.url}:${process.env.PEGADAIANAPI_PORT}` + '/customer/inquiry',
+    pegadaianApiEnv.api.url + '/customer/inquiry',
     {
-      channelId: pegadaianApiEnv.channelId,
-      clientId: pegadaianApiEnv.clientId,
+      channelId: pegadaianApiEnv.api.channelId,
+      clientId: pegadaianApiEnv.api.clientId,
       cif: body.cif,
     },
     {
@@ -194,8 +215,6 @@ export const getNasabahByCif = async (body): Promise<AxiosPromise> => {
       },
     },
   );
-
-  logger.info('PASSION_CIF', nasabah.data);
 
   return nasabah;
 };
@@ -206,10 +225,10 @@ export const getBadanUsahaByCif = async (body: IBadanUsahaByCif): Promise<AxiosP
   const bearerToken = reqBearerToken.data.access_token;
 
   const badanUsaha = await axios.post(
-    `${pegadaianApiEnv.url}:${process.env.PEGADAIANAPI_PORT}` + '/customer/corporate/detailbadanusaha',
+    pegadaianApiEnv.api.url + '/customer/corporate/detailbadanusaha',
     {
-      channelId: pegadaianApiEnv.channelId,
-      clientId: pegadaianApiEnv.clientId,
+      channelId: pegadaianApiEnv.api.channelId,
+      clientId: pegadaianApiEnv.api.clientId,
       cif: body.cif,
       flag: body.flag,
     },

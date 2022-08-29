@@ -11,7 +11,7 @@ import NasabahPerorangan from '~/orm/entities/NasabahPerorangan';
 import { IKTPPassion } from '~/types/APIPegadaianTypes';
 import { addDays, bufferToStream, parseIp } from '~/utils/common';
 import validationCsv from '~/utils/validationCsv';
-import { konsolidasiTopBottom } from '~/services/konsolidasiSrv';
+import { konsolidasiTopBottom } from '~/services/konsolidasiSvc';
 
 const leadsRepo = dataSource.getRepository(Leads);
 const nasabahPeroranganRepo = dataSource.getRepository(NasabahPerorangan);
@@ -276,6 +276,7 @@ export const createNewLeadsBadanUsaha = async (req: Request, res: Response, next
       updated_by: req.user.nik,
       source_data: 'FORM INPUT DATA',
       expired_referral: addDays(30),
+      status: 1,
     });
 
     const dataRes = {

@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { dataSource } from '~/orm/dbCreateConnection';
 import AccessMenuRole from '~/orm/entities/AccessMenuRole';
 import MasterMenu from '~/orm/entities/MasterMenu';
-import menuRoleSrv from '~/services/menuRoleSrv';
+import menuRoleSvc from '~/services/menuRoleSvc';
 
 const masterMenuRepo = dataSource.getRepository(MasterMenu);
 
@@ -34,7 +34,7 @@ export const getMasterMenuRole = async (req: Request, res: Response, next: NextF
 
 export const updateMasterMenu = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const masterMenu = await menuRoleSrv.updateMenuRole(req.body as AccessMenuRole[]);
+    const masterMenu = await menuRoleSvc.updateMenuRole(req.body as AccessMenuRole[]);
 
     if (masterMenu.error && !masterMenu.success) {
       return next(masterMenu.error);

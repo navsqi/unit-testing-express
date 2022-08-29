@@ -40,9 +40,9 @@ const listAssignInstansi = async (userNik: string, paging: IPaging, filter?: IFi
   return res;
 };
 
-const assignmentInstansiSrv = {
+const assignmentInstansiSvc = {
   listAssignUser,
   listAssignInstansi,
 };
 
-export default assignmentInstansiSrv;
+export default assignmentInstansiSvc;

@@ -4,8 +4,8 @@ import Instansi from '~/orm/entities/Instansi';
 import MasterInstansi from '~/orm/entities/MasterInstansi';
 import OrganisasiPegawai from '~/orm/entities/OrganisasiPegawai';
 import SaranaMedia from '~/orm/entities/SaranaMedia';
-import { listInstansi, listMasterInstansi } from '~/services/instansiSrv';
-import { konsolidasiTopBottom } from '~/services/konsolidasiSrv';
+import { listInstansi, listMasterInstansi } from '~/services/instansiSvc';
+import { konsolidasiTopBottom } from '~/services/konsolidasiSvc';
 import { tanggal } from '~/utils/common';
 import CustomError from '~/utils/customError';
 import queryHelper from '~/utils/queryHelper';
@@ -271,6 +271,7 @@ export const getInstansi = async (req: Request, res: Response, next: NextFunctio
       kategori_instansi: req.query.kategori_instansi || '',
       jenis_instansi: req.query.jenis_instansi || '',
       status_potensial: req.query.status_potensial || '',
+      user_nik: req.user.nik,
     };
 
     const paging = queryHelper.paging(req.query);

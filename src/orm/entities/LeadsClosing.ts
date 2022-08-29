@@ -78,6 +78,12 @@ class LeadsClosing {
   up: number;
 
   @Column({
+    length: 10,
+    nullable: true,
+  })
+  kode_produk: string;
+
+  @Column({
     type: 'double precision',
     nullable: true,
   })

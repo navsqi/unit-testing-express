@@ -7,7 +7,7 @@ import { basicAuth } from '~/middlewares/basicAuth';
 const router = Router();
 
 router.get('/', (req, res) => {
-  res.send('Updated at 24/08/2022 15:02');
+  res.send('Updated at 25/08/2022 09:02');
 });
 
 router.put('/closing-scheduler', basicAuth, (req, res) => {

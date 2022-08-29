@@ -1,9 +1,10 @@
+import { NextFunction, Request, Response } from 'express';
 import CustomError from '~/utils/customError';
 import logger from '~/utils/logger';
 
-export const basicAuth = async (req, res, next) => {
+export const basicAuth = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const auth = { login: process.env.BASIC_USERNAME, password: process.env.BASIC_PASSWORD }; // change this
+    const auth = { login: process.env.BASIC_USERNAME, password: process.env.BASIC_PASSWORD };
 
     // parse login and password from headers
     const b64auth = (req.headers.authorization || '').split(' ')[1] || '';
@@ -16,8 +17,8 @@ export const basicAuth = async (req, res, next) => {
     }
 
     // Access denied...
-    res.set('WWW-Authenticate', 'Basic realm="401"'); // change this
-    res.status(401).json({ status: 'fail', message: 'Authentication required' }); // custom message
+    res.set('WWW-Authenticate', 'Basic realm="401"');
+    res.status(401).json({ status: 'fail', message: 'Authentication required' });
   } catch (e) {
     logger.error(e, 'BASIC_AUTH');
     return next(new CustomError('Something went wrong', 500));
