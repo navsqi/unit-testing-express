@@ -31,7 +31,7 @@ export default {
       return 'PNWA';
     }
 
-    if (kodeRole && kodeRole.includes('PNT')) {
+    if ((kodeRole && kodeRole.includes('PNT')) || (kodeRole && kodeRole.includes('STF'))) {
       return 'PNTA';
     }
 
@@ -43,7 +43,7 @@ export default {
       return 'KDIV';
     }
 
-    if (kodeRole && kodeRole.includes('PF')) {
+    if ((kodeRole && kodeRole.includes('PF')) || (kodeRole && kodeRole.includes('ADV'))) {
       return 'ADMN';
     }
 
