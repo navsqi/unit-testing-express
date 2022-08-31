@@ -483,3 +483,20 @@ export const deleteInstansi = async (req: Request, res: Response, next: NextFunc
     return next(e);
   }
 };
+
+export const approveInstansi = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const instansi = await instansiRepo.update(req.params.id, {
+      is_approved: 1,
+      updated_by: req.user.nik,
+    });
+
+    const dataRes = {
+      instansi: instansi,
+    };
+
+    return res.customSuccess(200, 'Approve instansi success', dataRes);
+  } catch (e) {
+    return next(e);
+  }
+};
