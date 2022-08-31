@@ -94,3 +94,38 @@ export const editUser = async (req: Request, res: Response, next: NextFunction) 
     return next(e);
   }
 };
+
+export const getUserById = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const params = req.params;
+
+    const user = await userRepo.findOne({
+      select: {
+        id: true,
+        nik: true,
+        email: true,
+        nama: true,
+        photo: true,
+        kode_role: true,
+        kode_unit_kerja: true,
+        is_active: true,
+        is_approved: true,
+      },
+      where: {
+        id: +params.id,
+      },
+      relations: {
+        role: true,
+        unit_kerja: true,
+      },
+    });
+
+    const dataRes = {
+      user,
+    };
+
+    return res.customSuccess(200, 'Get user success', dataRes);
+  } catch (e) {
+    return next(e);
+  }
+};
