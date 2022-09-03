@@ -30,7 +30,7 @@ export const getUser = async (req: Request, res: Response, next: NextFunction) =
     const [users, count] = await userRepo.findAndCount({
       take: paging.limit,
       skip: paging.offset,
-      select: ['nik', 'nama', 'kode_role', 'kode_unit_kerja'],
+      select: ['id', 'nik', 'nama', 'kode_role', 'kode_unit_kerja'],
       where,
     });
 
@@ -111,9 +111,14 @@ export const getUserById = async (req: Request, res: Response, next: NextFunctio
         is_active: true,
         is_approved: true,
       },
-      where: {
-        id: +params.id,
-      },
+      where: [
+        {
+          id: +params.id || undefined,
+        },
+        {
+          nik: params.id || '',
+        },
+      ],
       relations: {
         role: true,
         unit_kerja: true,

@@ -29,8 +29,8 @@ class Role {
   @UpdateDateColumn()
   updated_at: Date;
 
-  @OneToMany(() => AccessMenuRole, (amr) => amr.kode_role)
-  access_menu_role: MasterMenu[];
+  @OneToMany(() => AccessMenuRole, (amr) => amr.role)
+  access_menu_role: AccessMenuRole[];
 }
 
 export default Role;
