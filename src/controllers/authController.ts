@@ -123,6 +123,8 @@ export const exchangeTokenSso = async (req: Request, res: Response, next: NextFu
 
     const kodeOutlet = ssoHelper.setOutlet(ssoRes.kode_unit_kerja);
 
+    // Jika user sso belum ada di DB Kamila, save to DB
+    // Jika user sso ada di DB Kamila, update data DB
     if (!user) {
       user = await userRepo.save({
         nama: ssoRes.nama_lengkap,
@@ -132,6 +134,17 @@ export const exchangeTokenSso = async (req: Request, res: Response, next: NextFu
         kode_unit_kerja: kodeOutlet,
         photo: ssoRes.path_foto,
       });
+    } else {
+      await userRepo.update(user.id, {
+        nama: ssoRes.nama_lengkap,
+        nik: ssoRes.nik,
+        email: ssoRes.email,
+        // kode_role: kodeRole,
+        // kode_unit_kerja: kodeOutlet,
+        photo: ssoRes.path_foto,
+      });
+
+      user = await userRepo.findOne({ where: { nik: ssoRes.nik } });
     }
 
     const token = await signToken(user);
