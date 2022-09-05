@@ -144,6 +144,7 @@ export const checkKTPAndApprove = async (req: Request, res: Response, next: Next
 
     const leads = await leadsRepo.update(req.params.id, {
       status: 1,
+      is_ktp_valid: 1,
       updated_by: req.user.nik,
     });
 
