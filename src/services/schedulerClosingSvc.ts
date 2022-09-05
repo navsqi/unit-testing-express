@@ -15,177 +15,186 @@ export const schedulerClosing = async () => {
 
     // const data = await q.getRawMany();
 
-    // Insert leads closing non top up tabemas
+    // Insert leads closing non top up tabemas [OK]
     await manager.query(
-      `INSERT INTO leads_closing (
-        leads_id, kode_produk, nik_ktp, no_kontrak, 
-        marketing_code, tgl_fpk, tgl_cif, 
-        tgl_kredit, kode_unit_kerja, kode_unit_kerja_pencairan, 
-        up, outlet_syariah, cif
-      ) 
-      select 
-        l.id as leads_id, 
-        tk.product_code, 
-        tk.nik, 
-        tk.no_kontrak , 
-        tk.marketing_code, 
-        tk.tgl_fpk, 
-        tk.tgl_cif, 
-        tk.tgl_kredit, 
-        tk.kode_outlet, 
-        tk.kode_outlet as kode_outlet_pencairan, 
-        tk.up, 
-        tk.outlet_syariah, 
-        tk.cif 
-      FROM 
-        (
-          SELECT 
-            * 
-          FROM 
-            tmp_kredit
-        ) tk, 
+      `
+      INSERT
+        INTO
+        leads_closing (
+          leads_id,
+          kode_produk ,
+          nik_ktp,
+          no_kontrak,
+          marketing_code ,
+          tgl_fpk,
+          tgl_cif,
+          tgl_kredit,
+          kode_unit_kerja ,
+          kode_unit_kerja_pencairan ,
+          up,
+          outlet_syariah ,
+          cif,
+          channel,
+          osl,
+          saldo_tabemas
+        )
+      SELECT
+        l.id AS leads_id,
+        tmpk.product_code,
+        tmpk.nik_ktp,
+        tmpk.no_kontrak,
+        tmpk.marketing_code,
+        tmpk.tgl_fpk,
+        tmpk.tgl_cif,
+        tmpk.tgl_kredit,
+        tmpk.kode_outlet,
+        tmpk.kode_outlet AS kode_outlet_pencairan,
+        tmpk.up,
+        tmpk.outlet_syariah,
+        tmpk.cif,
+        tmpk.nama_channel,
+        tmpk.osl,
+        tmpk.saldo_tabemas
+      FROM
+        (SELECT * FROM tmp_kredit) tmpk,
         leads l
-      WHERE 
-        l.up_realisasi IS NULL 
-        AND l.tanggal_realisasi IS NULL 
-        AND l.nik_ktp = tk.nik 
-        AND l.kode_produk = tk.product_code 
-        AND CAST (l.created_at AS DATE) <= CAST (tk.tgl_fpk AS DATE) 
-        AND l.step = 'CLP' 
-      `,
-    );
-
-    // Update leads kredit non top up tabemas
-    await manager.query(
-      `UPDATE 
-        leads as l 
-      SET 
-        up_realisasi = tk.up_realisasi, 
-        tanggal_realisasi = tk.tgl_kredit, 
-        step = 'CLS' 
-      FROM 
-        (
-          SELECT 
-            SUM (up) AS up_realisasi, 
-            nik, 
-            product_code, 
-            tgl_kredit, 
-            tgl_fpk 
-          FROM 
-            tmp_kredit 
-          GROUP BY 
-            nik, 
-            product_code, 
-            tgl_kredit, 
-            tgl_fpk
-        ) tk 
-      WHERE 
-        l.up_realisasi IS NULL 
-        AND l.tanggal_realisasi IS NULL 
-        AND l.nik_ktp = tk.nik 
-        AND l.kode_produk = tk.product_code 
-        AND CAST (l.created_at  AS DATE) <= CAST (tk.tgl_fpk AS DATE) 
+      WHERE
+        l.up_realisasi IS NULL
+        AND l.tanggal_realisasi IS NULL
+        AND l.nik_ktp = tmpk.nik_ktp
+        AND CAST (l.created_at AS DATE) <= CAST ( tmpk.tgl_fpk AS DATE )
         AND l.step = 'CLP'
       `,
     );
 
-    // Insert leads closing kredit topup tabemas
+    // Update leads kredit non top up tabemas [OK]
     await manager.query(
-      `INSERT INTO leads_closing (
-        leads_id, kode_produk, nik_ktp, no_kontrak, 
-        marketing_code, tgl_fpk, tgl_cif, 
-        tgl_kredit, kode_unit_kerja, kode_unit_kerja_pencairan, 
-        up, cif
-      ) 
-      select 
-        l.id as leads_id, 
-        tk.product_code, 
-        tk.nik, 
-        tk.no_rekening as no_kontrak, 
-        tk.marketing_code, 
-        tk.tgl_trx as tgl_fpk, 
-        tk.tgl_cif, 
-        tk.tgl_trx as tgl_kredit, 
-        tk.kode_outlet, 
-        tk.kode_outlet as kode_outlet_pencairan, 
-        tk.up, 
-        tk.cif 
-      FROM 
+      `
+      UPDATE
+        leads AS l 
+            SET
+        step = 'CLS'
+      FROM
         (
-          SELECT 
-            * 
-          FROM 
-            tmp_top_up_tabemas
-        ) tk, 
-        leads l
-      WHERE 
-        l.up_realisasi IS null 
-        AND l.tanggal_realisasi IS NULL 
-        AND l.nik_ktp = tk.nik 
-        AND l.kode_produk = tk.product_code 
-        AND CAST (l.created_at AS DATE) <= CAST (tk.tgl_trx AS DATE) 
-        AND l.step = 'CLP'      
+        SELECT
+          nik_ktp,
+          tgl_fpk,
+          tgl_kredit
+        FROM
+          tmp_kredit
+        GROUP BY
+          nik_ktp,
+          tgl_kredit,
+          tgl_fpk
+              ) tmpk
+      WHERE
+        l.nik_ktp = tmpk.nik_ktp
+        AND CAST (l.created_at AS DATE) <= CAST (tmpk.tgl_fpk AS DATE)
+        AND l.step = 'CLP'
       `,
     );
 
-    // Update leads closing kredit topup tabemas
+    // Insert leads closing kredit topup tabemas [OK]
     await manager.query(
-      `UPDATE 
+      `
+      INSERT
+        INTO
+        leads_closing (
+        leads_id,
+        kode_produk,
+        nik_ktp,
+        no_kontrak,
+        marketing_code,
+        tgl_fpk,
+        tgl_cif,
+        tgl_kredit,
+        kode_unit_kerja,
+        kode_unit_kerja_pencairan,
+        up,
+        cif
+      ) 
+      SELECT
+        l.id AS leads_id,
+        tmpt.product_code,
+        tmpt.nik_ktp,
+        tmpt.no_rekening AS no_kontrak,
+        tmpt.marketing_code,
+        tmpt.tgl_trx AS tgl_fpk,
+        tmpt.tgl_cif,
+        tmpt.tgl_trx AS tgl_kredit,
+        tmpt.kode_outlet,
+        tmpt.kode_outlet AS kode_outlet_pencairan,
+        tmpt.up,
+        tmpt.cif
+      FROM
+        (SELECT * FROM tmp_top_up_tabemas) tmpt, leads l
+      WHERE
+        l.up_realisasi IS NULL
+        AND l.tanggal_realisasi IS NULL
+        AND l.nik_ktp = tmpt.nik_ktp
+        AND CAST (l.created_at AS DATE) <= CAST (tmpt.tgl_trx AS DATE)
+        AND l.step = 'CLP';
+      `,
+    );
+
+    // Update leads closing kredit topup tabemas [OK]
+    await manager.query(
+      `
+      UPDATE
         leads AS l 
-      SET 
-        up_realisasi = tk.up_realisasi, 
-        tanggal_realisasi  = tk.tgl_trx, 
-        kode_unit_kerja_realisasi = tk.kode_outlet, 
-        step = 'CLS' 
-      FROM 
+            SET
+        step = 'CLS'
+      FROM
         (
-          SELECT 
-            SUM(up) AS up_realisasi, 
-            nik, 
-            product_code, 
-            tgl_trx, 
-            kode_outlet 
-          FROM 
-            tmp_top_up_tabemas 
-          group by 
-            nik, 
-            tgl_trx, 
-            product_code, 
-            kode_outlet
-        ) tk 
-      WHERE 
-        l.up_realisasi IS null 
-        AND l.tanggal_realisasi IS NULL 
-        AND l.nik_ktp = tk.nik 
-        AND l.kode_produk = tk.product_code 
-        AND CAST (l.created_at AS DATE) <= CAST (tk.tgl_trx AS DATE) 
-        AND l.step = 'CLP'     
+        SELECT
+          nik_ktp,
+          product_code,
+          tgl_trx,
+          kode_outlet
+        FROM
+          tmp_top_up_tabemas
+        GROUP BY
+          nik_ktp,
+          tgl_trx,
+          product_code,
+          kode_outlet
+              ) tk
+      WHERE
+        l.nik_ktp = tk.nik_ktp
+        AND CAST (l.created_at AS DATE) <= CAST (tk.tgl_trx AS DATE)
+        AND l.step = 'CLP'
       `,
     );
 
     // update new cif
     await manager.query(
-      `UPDATE 
-        leads_closing lcs 
-      set 
+      `
+      UPDATE
+        leads_closing lcs
+      SET
         status_new_cif = 1
-      where 
-        status_new_cif is null 
-        and lcs.id in (
-          select 
-            lcs.id 
-          from 
-            leads l
-            join leads_closing lcs on l.id = lcs.leads_id 
-          where 
-            CAST(l.created_at AS DATE) <= CAST(lcs.tgl_cif AS DATE) 
-            and step = 'CLS' 
-            and tanggal_realisasi is not null 
-            and lcs.status_new_cif is null)     
+      WHERE
+        status_new_cif = 0
+        AND lcs.leads_id IN (
+        SELECT
+          l.id
+        FROM
+          leads l
+        JOIN leads_closing lcs ON
+          l.id = lcs.leads_id
+        WHERE
+          CAST(l.created_at AS DATE) <= CAST(lcs.tgl_cif AS DATE)
+            AND step = 'CLS'
+            AND lcs.status_new_cif = 0)   
       `,
     );
 
-    await manager.query(`TRUNCATE tmp_kredit RESTART IDENTITY`);
+    await manager.query(`INSERT INTO history_kredit SELECT * FROM tmp_kredit`);
+    // await manager.query(`INSERT INTO history_top_up_tabemas SELECT * FROM tmp_top_up_tabemas`);
+    await manager.query(
+      `DELETE FROM history_kredit WHERE current_date > CAST(CAST(tgl_kredit AS DATE) + INTERVAL '21 DAY' AS DATE)`,
+    );
+    // await manager.query(`TRUNCATE tmp_kredit RESTART IDENTITY`);
 
     await queryRunner.commitTransaction();
     await queryRunner.release();

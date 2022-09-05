@@ -17,7 +17,7 @@ export const getReportEvent = async (req: Request, res: Response, next: NextFunc
       start_date: (req.query.start_date as string) || '',
       end_date: (req.query.end_date as string) || '',
       outlet_id: outletIds,
-      user_id: req.user.kode_role == 'MKTO' ? req.user.id : null,
+      user_id: req.user.kode_role == 'MKTO' ? req.user.id : req.query.user_id,
     };
 
     if (!filter.start_date || !filter.end_date) return next(new CustomError('Pilih tanggal awal dan akhir', 400));
@@ -56,7 +56,6 @@ export const getReportInstansi = async (req: Request, res: Response, next: NextF
       start_date: (req.query.start_date as string) || '',
       end_date: (req.query.end_date as string) || '',
       outlet_id: outletIds,
-      user_id: req.user.kode_role == 'MKTO' ? req.user.id : null,
     };
 
     if (!filter.start_date || !filter.end_date) return next(new CustomError('Pilih tanggal awal dan akhir', 400));
@@ -95,7 +94,7 @@ export const getReportLeads = async (req: Request, res: Response, next: NextFunc
       start_date: (req.query.start_date as string) || '',
       end_date: (req.query.end_date as string) || '',
       outlet_id: outletIds,
-      user_id: req.user.kode_role == 'MKTO' ? req.user.id : null,
+      user_id: req.user.kode_role == 'MKTO' ? req.user.id : req.query.user_id,
     };
 
     if (!filter.start_date || !filter.end_date) return next(new CustomError('Pilih tanggal awal dan akhir', 400));
@@ -134,7 +133,7 @@ export const getReportClosing = async (req: Request, res: Response, next: NextFu
       start_date: (req.query.start_date as string) || '',
       end_date: (req.query.end_date as string) || '',
       outlet_id: outletIds,
-      user_id: req.user.kode_role == 'MKTO' ? req.user.id : null,
+      user_id: req.user.kode_role == 'MKTO' ? req.user.id : req.query.user_id,
     };
 
     if (!filter.start_date || !filter.end_date) return next(new CustomError('Pilih tanggal awal dan akhir', 400));

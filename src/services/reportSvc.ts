@@ -104,8 +104,8 @@ export const eventReport = async (filter?: IFilter) => {
       'leads.event_id = e.id',
     );
 
-    q.where('CAST(i.created_at AS date) >= :startDate', { startDate: filter.start_date });
-    q.andWhere('CAST(i.created_at AS date) <= :endDate', { endDate: filter.end_date });
+    q.where('CAST(e.tanggal_event AS date) >= :startDate', { startDate: filter.start_date });
+    q.andWhere('CAST(e.tanggal_event AS date) <= :endDate', { endDate: filter.end_date });
 
     if (filter.outlet_id && filter.outlet_id.length > 0) {
       q.andWhere('i.kode_unit_kerja IN (:...kodeUnitKerja)', { kodeUnitKerja: filter.outlet_id });
@@ -158,6 +158,7 @@ export const leadsReport = async (filter?: IFilter) => {
     q.addSelect('outlet_p2.unit_kerja', 'unit_parent_2');
     q.addSelect('COALESCE(leadsclosing.omset, 0)', 'omset');
     q.addSelect('COALESCE(leadsclosing.osl, 0)', 'osl');
+    q.addSelect('COALESCE(leadsclosing.saldo_tabemas, 0)', 'saldo_tabemas');
 
     q.leftJoin('event', 'event', 'event.id = leads.event_id');
     q.leftJoin('instansi', 'instansi', 'instansi.id = leads.instansi_id');
@@ -173,8 +174,8 @@ export const leadsReport = async (filter?: IFilter) => {
           .from('leads_closing', 'lcs')
           .addSelect('lcs.nik_ktp', 'nik_ktp')
           .addSelect('SUM(lcs.up)', 'omset')
-          .addSelect('SUM(lcs.osl)', 'osl')
-          .addSelect('SUM(lcs.saldo_tabemas)', 'saldo_tabemas')
+          .addSelect('MAX(lcs.osl)', 'osl')
+          .addSelect('MAX(lcs.saldo_tabemas)', 'saldo_tabemas')
           .groupBy('lcs.nik_ktp');
 
         return qb2;
@@ -188,6 +189,10 @@ export const leadsReport = async (filter?: IFilter) => {
 
     if (filter.outlet_id && filter.outlet_id.length > 0) {
       q.andWhere('leads.kode_unit_kerja IN (:...kodeUnitKerja)', { kodeUnitKerja: filter.outlet_id });
+    }
+
+    if (filter.user_id) {
+      q.andWhere('leads.created_by = :userId', { userId: filter.user_id });
     }
 
     const data = await q.getRawMany();
@@ -238,6 +243,7 @@ export const closingReport = async (filter?: IFilter) => {
     q.addSelect('COALESCE(leadsclosing.omset, 0)', 'omset');
     q.addSelect('COALESCE(leadsclosing.osl, 0)', 'osl');
     q.addSelect('leadsclosing.channel', 'channel');
+    q.addSelect('COALESCE(leadsclosing.saldo_tabemas, 0)', 'saldo_tabemas');
 
     q.leftJoin('event', 'event', 'event.id = leads.event_id');
     q.leftJoin('instansi', 'instansi', 'instansi.id = leads.instansi_id');
@@ -245,7 +251,7 @@ export const closingReport = async (filter?: IFilter) => {
     q.leftJoin('outlet', 'outlet_p3', 'outlet_p3.kode = outlet.parent');
     q.leftJoin('outlet', 'outlet_p2', 'outlet_p2.kode = outlet_p3.parent');
 
-    q.leftJoin(
+    q.innerJoin(
       (qb) => {
         const qb2 = qb as SelectQueryBuilder<any>;
 
@@ -253,11 +259,13 @@ export const closingReport = async (filter?: IFilter) => {
           .from('leads_closing', 'lcs')
           .addSelect('lcs.nik_ktp', 'nik_ktp')
           .addSelect('lcs.channel', 'channel')
+          .addSelect('lcs.tgl_kredit', 'tgl_kredit')
           .addSelect('SUM(lcs.up)', 'omset')
           .addSelect('SUM(lcs.osl)', 'osl')
           .addSelect('SUM(lcs.saldo_tabemas)', 'saldo_tabemas')
           .groupBy('lcs.nik_ktp')
-          .addGroupBy('lcs.channel');
+          .addGroupBy('lcs.channel')
+          .addGroupBy('lcs.tgl_kredit');
 
         return qb2;
       },
@@ -265,12 +273,15 @@ export const closingReport = async (filter?: IFilter) => {
       'leadsclosing.nik_ktp = leads.nik_ktp',
     );
 
-    q.where('CAST(leads.created_at AS date) >= :startDate', { startDate: filter.start_date });
-    q.andWhere('CAST(leads.created_at AS date) <= :endDate', { endDate: filter.end_date });
-    q.andWhere('leads.step != :step', { step: 'CLP' });
+    q.where('CAST(leadsclosing.tgl_kredit AS date) >= :startDate', { startDate: filter.start_date });
+    q.andWhere('CAST(leadsclosing.tgl_kredit AS date) <= :endDate', { endDate: filter.end_date });
 
     if (filter.outlet_id && filter.outlet_id.length > 0) {
       q.andWhere('leads.kode_unit_kerja IN (:...kodeUnitKerja)', { kodeUnitKerja: filter.outlet_id });
+    }
+
+    if (filter.user_id) {
+      q.andWhere('leads.created_by = :userId', { userId: filter.user_id });
     }
 
     const data = await q.getRawMany();
