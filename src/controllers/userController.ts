@@ -61,7 +61,8 @@ export const editUser = async (req: Request, res: Response, next: NextFunction) 
 
     const userPhoto = user.photo ? user.photo.valueOf() : null;
 
-    if (req.user.nik != user.nik) return next(new CustomError('User is not allowed to change password', 404));
+    if (req.user.nik != user.nik && req.user.kode_role != 'SADM')
+      return next(new CustomError('User is not allowed to change password', 404));
 
     if (req.files && req.files['photo']) {
       photo = req.files['photo'][0];
