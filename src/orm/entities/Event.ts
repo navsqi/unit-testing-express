@@ -7,6 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import Instansi from './Instansi';
 import Outlet from './Outlet';
 import User from './User';
 
@@ -106,6 +107,10 @@ class Event {
   @ManyToOne(() => User, { onUpdate: 'CASCADE', onDelete: 'NO ACTION' })
   @JoinColumn([{ name: 'created_by', referencedColumnName: 'nik' }])
   user_created: User;
+
+  @ManyToOne(() => Instansi)
+  @JoinColumn([{ name: 'instansi_id', referencedColumnName: 'id' }])
+  instansi: Instansi;
 }
 
 export default Event;
