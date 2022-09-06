@@ -129,6 +129,7 @@ export const getEventById = async (req: Request, res: Response, next: NextFuncti
       where: {
         id: +req.params.id,
       },
+      relations: { instansi: true },
     });
 
     const dataRes = {
