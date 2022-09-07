@@ -79,6 +79,8 @@ export const getEvent = async (req: Request, res: Response, next: NextFunction) 
       end_date: (qs.end_date as string) || '',
     };
 
+    if (req.user.kode_role == 'MKTO') filter.is_session = 1;
+
     if (filter.nama_event) {
       where['nama_event'] = ILike(`%${filter.nama_event}%`);
     }
