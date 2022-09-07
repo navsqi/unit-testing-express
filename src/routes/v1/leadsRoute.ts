@@ -24,6 +24,7 @@ router.get('/', protect(), leadsController.getLeads);
 router.post('/perorangan', protect(), inputLeadsVal, leadsController.createNewLeadsPerorangan);
 router.post('/badan-usaha', protect(), inputLeadsBadanUsahaVal, leadsController.createNewLeadsBadanUsaha);
 router.patch('/:id/approve', protect(), leadsController.checkKTPAndApprove);
+router.patch('/:id/reject', protect(), leadsController.rejectLeads);
 router.patch('/:id', protect(), leadsController.updateLeads);
 
 export default router;
