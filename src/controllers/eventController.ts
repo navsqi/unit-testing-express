@@ -8,6 +8,8 @@ import { konsolidasiTopBottom } from '~/services/konsolidasiSvc';
 import { generateFileName } from '~/utils/common';
 import CustomError from '~/utils/customError';
 import queryHelper from '~/utils/queryHelper';
+import * as common from '~/utils/common';
+import dayjs from 'dayjs';
 
 const eventRepo = dataSource.getRepository(Event);
 const instansiRepo = dataSource.getRepository(Instansi);
@@ -18,6 +20,11 @@ export const createEvent = async (req: Request, res: Response, next: NextFunctio
   try {
     let photo: Express.Multer.File = null;
     const bodies = req.body as Event;
+
+    const dateDiff = Math.abs(common.getDiffDateCount(dayjs().format('YYYY-MM-DD'), bodies.tanggal_event));
+
+    if (dateDiff > 7) return next(new CustomError('Tanggal event melebihi 7 hari per-hari ini', 400));
+
     const ev = new Event();
 
     const getKodeUnitKerjaInstansi = await instansiRepo.findOne({ where: { id: bodies.instansi_id } });
