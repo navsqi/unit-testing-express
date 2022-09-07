@@ -4,6 +4,7 @@ import APIPegadaian from '~/apis/pegadaianApi';
 import Leads from '~/orm/entities/Leads';
 import CustomError from '~/utils/customError';
 import queryHelper from '~/utils/queryHelper';
+import * as common from '~/utils/common';
 
 import { parse } from 'csv-parse';
 import { dataSource } from '~/orm/dbCreateConnection';
@@ -12,8 +13,11 @@ import { IKTPPassion } from '~/types/APIPegadaianTypes';
 import { addDays, bufferToStream, parseIp } from '~/utils/common';
 import validationCsv from '~/utils/validationCsv';
 import { konsolidasiTopBottom } from '~/services/konsolidasiSvc';
+import dayjs from 'dayjs';
+import Event from '~/orm/entities/Event';
 
 const leadsRepo = dataSource.getRepository(Leads);
+const eventRepo = dataSource.getRepository(Event);
 const nasabahPeroranganRepo = dataSource.getRepository(NasabahPerorangan);
 
 export const getLeads = async (req: Request, res: Response, next: NextFunction) => {
@@ -62,6 +66,23 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
     const paging = queryHelper.paging(req.query);
 
     const [leads, count] = await leadsRepo.findAndCount({
+      select: {
+        instansi: {
+          id: true,
+          nama_instansi: true,
+        },
+        event: {
+          id: true,
+          nama_event: true,
+          nama_pic: true,
+          tanggal_event: true,
+        },
+        outlet: {
+          kode: true,
+          unit_kerja: true,
+          nama: true,
+        },
+      },
       relations: ['instansi', 'event', 'outlet'],
       take: paging.limit,
       skip: paging.offset,
@@ -158,6 +179,26 @@ export const checkKTPAndApprove = async (req: Request, res: Response, next: Next
   }
 };
 
+export const rejectLeads = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const currentLeads = await leadsRepo.findOne({ where: { id: +req.params.id } });
+
+    if (!currentLeads) return next(new CustomError('Data tidak ditemukan', 404));
+
+    if (currentLeads.status == 1) return next(new CustomError('Leads sudah di approve', 404));
+
+    await leadsRepo.delete({ id: +req.params.id });
+
+    const dataRes = {
+      leads: null,
+    };
+
+    return res.customSuccess(200, 'Data leads di-tolak dan di-hapus', dataRes);
+  } catch (e) {
+    return next(e);
+  }
+};
+
 export const getKtpByInstansiId = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const where: FindOptionsWhere<Leads> = {};
@@ -203,6 +244,14 @@ export const createNewLeadsPerorangan = async (req: Request, res: Response, next
     }
 
     if (!bodies.is_ktp_valid) return next(new CustomError('NIK KTP harus valid', 400));
+
+    const findEvent = await eventRepo.findOne({ where: { id: bodies.event_id } });
+
+    if (!findEvent) return next(new CustomError('Event tidak ditemukan', 400));
+
+    const dateDiff = Math.abs(common.getDiffDateCount(dayjs().format('YYYY-MM-DD'), findEvent.tanggal_event));
+
+    if (dateDiff > 7) return next(new CustomError('Tanggal event telah expired', 400));
 
     const getExistingLeads = await leadsRepo.findOne({
       where: { nik_ktp: bodies.nik_ktp },
