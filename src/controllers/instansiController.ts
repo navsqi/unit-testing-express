@@ -500,3 +500,24 @@ export const approveInstansi = async (req: Request, res: Response, next: NextFun
     return next(e);
   }
 };
+
+export const rejectInstansi = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const findCurrentInstansi = await instansiRepo.findOne({ where: { id: +req.params.id } });
+
+    if (!findCurrentInstansi) return next(new CustomError(`Instansi tidak di-temukan`, 400));
+
+    if (findCurrentInstansi && findCurrentInstansi.is_approved == 1)
+      return next(new CustomError(`Instansi telah di-approve`, 400));
+
+    const instansi = await instansiRepo.delete({ id: +req.params.id });
+
+    const dataRes = {
+      instansi: instansi,
+    };
+
+    return res.customSuccess(200, 'Reject instansi success', dataRes);
+  } catch (e) {
+    return next(e);
+  }
+};
