@@ -36,6 +36,7 @@ router.get('/child/:id', protect(), instansiController.getInstansiById);
 router.post('/child/', protect(), instansiVal.instansi, instansiController.createNewInstansi);
 router.patch('/child/:id', protect(), instansiVal.instansi, instansiController.updateInstansi);
 router.patch('/child/:id/approve', protect(), instansiController.approveInstansi);
+router.patch('/child/:id/reject', protect(), instansiController.rejectInstansi);
 router.delete('/child/:id', protect(), instansiController.deleteInstansi);
 
 export default router;
