@@ -28,9 +28,26 @@ export const listMou = async (filter: any, paging: any): Promise<[Mou[], number]
   }
 
   const [mou, count] = await mouRepo.findAndCount({
+    select: {
+      instansi: {
+        nama_instansi: true,
+        jenis_instansi: true,
+        cakupan_instansi: {
+          nama: true,
+        },
+      },
+    },
     take: paging.limit,
     skip: paging.offset,
     where: f,
+    order: {
+      created_at: 'desc',
+    },
+    relations: {
+      instansi: {
+        cakupan_instansi: true,
+      },
+    },
   });
 
   return [mou, count];

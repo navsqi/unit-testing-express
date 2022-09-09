@@ -112,9 +112,24 @@ export const getEvent = async (req: Request, res: Response, next: NextFunction) 
     const paging = queryHelper.paging(req.query);
 
     const [event, count] = await eventRepo.findAndCount({
+      select: {
+        instansi: {
+          nama_instansi: true,
+        },
+        outlet: {
+          nama: true,
+        },
+      },
       take: paging.limit,
       skip: paging.offset,
       where,
+      order: {
+        created_at: 'desc',
+      },
+      relations: {
+        instansi: true,
+        outlet: true,
+      },
     });
 
     const dataRes = {
@@ -138,7 +153,7 @@ export const getEventById = async (req: Request, res: Response, next: NextFuncti
       where: {
         id: +req.params.id,
       },
-      relations: { instansi: true },
+      relations: { instansi: true, outlet: true },
     });
 
     const dataRes = {

@@ -96,3 +96,9 @@ export const generateNestedMenu = (arr: IGenerateNestedArrOfObj[]) => {
 
   console.log(result);
 };
+
+export const getCakupanUnit = (unit: number) => {
+  const listCakupan = ['KANTOR PUSAT', 'WILAYAH', 'AREA', 'CABANG'];
+
+  return listCakupan[unit - 1];
+};

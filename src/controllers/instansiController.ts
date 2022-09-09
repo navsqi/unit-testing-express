@@ -99,12 +99,13 @@ export const genExcelMasterInstansi = async (req: Request, res: Response, next: 
 
     const { workbook, worksheet, headingStyle, outlineHeadingStyle, outlineStyle } = xls();
 
+    const col = 13;
+
     worksheet.column(1).setWidth(5);
-    worksheet.column(2).setWidth(25);
-    worksheet.column(3).setWidth(25);
-    worksheet.column(4).setWidth(25);
-    worksheet.column(5).setWidth(25);
-    worksheet.column(6).setWidth(25);
+    for (let i = 2; i <= col; i++) {
+      const exclude = [];
+      worksheet.column(i).setWidth(exclude.includes(i) ? 10 : 25);
+    }
 
     worksheet.cell(1, 1, 1, 9, true).string('DAFTAR NAMA MASTER INSTANSI').style(headingStyle);
     worksheet
@@ -114,30 +115,29 @@ export const genExcelMasterInstansi = async (req: Request, res: Response, next: 
 
     const barisHeading = 5;
     let noHeading = 0;
-    worksheet
-      .cell(barisHeading, ++noHeading)
-      .string('NO')
-      .style(outlineHeadingStyle);
-    worksheet
-      .cell(barisHeading, ++noHeading)
-      .string('JENIS INSTANSI')
-      .style(outlineHeadingStyle);
-    worksheet
-      .cell(barisHeading, ++noHeading)
-      .string('NAMA INSTANSI')
-      .style(outlineHeadingStyle);
-    worksheet
-      .cell(barisHeading, ++noHeading)
-      .string('NO TELEPON')
-      .style(outlineHeadingStyle);
-    worksheet
-      .cell(barisHeading, ++noHeading)
-      .string('NAMA KARYAWAN')
-      .style(outlineHeadingStyle);
-    worksheet
-      .cell(barisHeading, ++noHeading)
-      .string('NO TELEPON KARYAWAN')
-      .style(outlineHeadingStyle);
+
+    const judulKolom = [
+      'NO',
+      'JENIS INSTANSI',
+      'NAMA INSTANSI',
+      'NO TELEPON',
+      'EMAIL KANTOR',
+      'NAMA KARYAWAN',
+      'NO TELEPON KARYAWAN',
+      'EMAIL KARYAWAN',
+      'JABATAN KARYAWAN',
+      'UNIT KERJA',
+      'TANGGAL DIBUAT',
+      'TANGGAL UPDATE',
+      'NIK PEMBUAT',
+    ];
+
+    for (const header of judulKolom) {
+      worksheet
+        .cell(barisHeading, ++noHeading)
+        .string(header)
+        .style(outlineHeadingStyle);
+    }
 
     let rows = 6;
 
@@ -161,11 +161,39 @@ export const genExcelMasterInstansi = async (req: Request, res: Response, next: 
         .style(outlineStyle);
       worksheet
         .cell(rows, ++bodyLineNum)
+        .string(val.email)
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
         .string(val.nama_karyawan)
         .style(outlineStyle);
       worksheet
         .cell(rows, ++bodyLineNum)
         .string(val.no_telepon_karyawan)
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(val.email_karyawan)
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(val.jabatan_karyawan)
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(val.cakupan_instansi.nama)
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(common.tanggal(val.created_at))
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(common.tanggal(val.updated_at))
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(val.created_by)
         .style(outlineStyle);
 
       rows++;
@@ -187,7 +215,9 @@ export const getMasterInstansiById = async (req: Request, res: Response, next: N
   try {
     const masterInstansiById = await masterInsRepo.findOne({
       where: { id: +req.params.id },
-      relations: ['cakupan_instansi'],
+      relations: {
+        cakupan_instansi: true,
+      },
     });
 
     const dataRes = {
@@ -313,12 +343,13 @@ export const genExcelInstansi = async (req: Request, res: Response, next: NextFu
 
     const { workbook, worksheet, headingStyle, outlineHeadingStyle, outlineStyle } = xls();
 
+    const col = 20;
+
     worksheet.column(1).setWidth(5);
-    worksheet.column(2).setWidth(25);
-    worksheet.column(3).setWidth(25);
-    worksheet.column(4).setWidth(25);
-    worksheet.column(5).setWidth(25);
-    worksheet.column(6).setWidth(25);
+    for (let i = 2; i <= col; i++) {
+      const exclude = [13, 14, 15, 16];
+      worksheet.column(i).setWidth(exclude.includes(i) ? 10 : 25);
+    }
 
     worksheet.cell(1, 1, 1, 9, true).string('DAFTAR NAMA INSTANSI').style(headingStyle);
     worksheet
@@ -326,40 +357,39 @@ export const genExcelInstansi = async (req: Request, res: Response, next: NextFu
       .string(`TANGGAL ${tanggal(req.query.start_date as string)} S.D. ${tanggal(req.query.end_date as string)}`)
       .style(headingStyle);
 
+    const judulKolom = [
+      'NO',
+      'JENIS INSTANSI',
+      'NAMA INSTANSI',
+      'KATEGORI INSTANSI',
+      'STATUS POTENSIAL',
+      'NO TELEPON',
+      'EMAIL KANTOR',
+      'NAMA KARYAWAN',
+      'NO TELEPON KARYAWAN',
+      'EMAIL KARYAWAN',
+      'JABATAN KARYAWAN',
+      'UNIT KERJA',
+      'JUMLAH PEGAWAI',
+      'JUMLAH PELANGGAN',
+      'JUMLAH KANTOR CABANG',
+      'JUMLAH KERJASAMA',
+      'SARANA MEDIA',
+      'KOPERASI/ORGANISASI',
+      'TANGGAL DIBUAT',
+      'TANGGAL UPDATE',
+      'NIK PEMBUAT',
+    ];
+
     const barisHeading = 5;
     let noHeading = 0;
-    worksheet
-      .cell(barisHeading, ++noHeading)
-      .string('NO')
-      .style(outlineHeadingStyle);
-    worksheet
-      .cell(barisHeading, ++noHeading)
-      .string('JENIS INSTANSI')
-      .style(outlineHeadingStyle);
-    worksheet
-      .cell(barisHeading, ++noHeading)
-      .string('NAMA PARENT INSTANSI')
-      .style(outlineHeadingStyle);
-    worksheet
-      .cell(barisHeading, ++noHeading)
-      .string('NAMA INSTANSI')
-      .style(outlineHeadingStyle);
-    worksheet
-      .cell(barisHeading, ++noHeading)
-      .string('ALAMAT')
-      .style(outlineHeadingStyle);
-    worksheet
-      .cell(barisHeading, ++noHeading)
-      .string('NO TELEPON')
-      .style(outlineHeadingStyle);
-    worksheet
-      .cell(barisHeading, ++noHeading)
-      .string('NAMA KARYAWAN')
-      .style(outlineHeadingStyle);
-    worksheet
-      .cell(barisHeading, ++noHeading)
-      .string('NO TELEPON KARYAWAN')
-      .style(outlineHeadingStyle);
+
+    for (const header of judulKolom) {
+      worksheet
+        .cell(barisHeading, ++noHeading)
+        .string(header)
+        .style(outlineHeadingStyle);
+    }
 
     let rows = 6;
 
@@ -375,19 +405,23 @@ export const genExcelInstansi = async (req: Request, res: Response, next: NextFu
         .style(outlineStyle);
       worksheet
         .cell(rows, ++bodyLineNum)
-        .string(val.master_instansi.nama_instansi)
-        .style(outlineStyle);
-      worksheet
-        .cell(rows, ++bodyLineNum)
         .string(val.nama_instansi)
         .style(outlineStyle);
       worksheet
         .cell(rows, ++bodyLineNum)
-        .string(val.alamat)
+        .string(val.kategori_instansi)
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(val.status_potensial)
         .style(outlineStyle);
       worksheet
         .cell(rows, ++bodyLineNum)
         .string(val.no_telepon_instansi)
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(val.email)
         .style(outlineStyle);
       worksheet
         .cell(rows, ++bodyLineNum)
@@ -396,6 +430,54 @@ export const genExcelInstansi = async (req: Request, res: Response, next: NextFu
       worksheet
         .cell(rows, ++bodyLineNum)
         .string(val.no_telepon_karyawan)
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(val.email_karyawan)
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(val.jabatan_karyawan)
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(val.cakupan_instansi.nama)
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(String(val.jumlah_pegawai))
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(String(val.jumlah_pelanggan))
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(String(val.jumlah_kantor_cabang))
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(String(val.jumlah_kerjasama))
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(val.sarana_media.deskripsi)
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(val.organisasi_pegawai.deskripsi)
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(common.tanggal(val.created_at))
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(common.tanggal(val.updated_at))
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(val.created_by)
         .style(outlineStyle);
 
       rows++;
@@ -416,8 +498,14 @@ export const genExcelInstansi = async (req: Request, res: Response, next: NextFu
 export const getInstansiById = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const instansiById = await instansiRepo.findOne({
+      select: {
+        user_created: {
+          nama: true,
+          kode_role: true,
+        },
+      },
       where: { id: +req.params.id },
-      relations: ['master_instansi', 'cakupan_instansi', 'sarana_media', 'organisasi_pegawai'],
+      relations: ['master_instansi', 'user_created', 'cakupan_instansi', 'sarana_media', 'organisasi_pegawai'],
     });
 
     const dataRes = {

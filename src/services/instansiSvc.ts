@@ -22,9 +22,21 @@ export const listMasterInstansi = async (filter: any, paging: any): Promise<[Mas
   }
 
   const [masterInstansi, count] = await masterInsRepo.findAndCount({
+    select: {
+      cakupan_instansi: {
+        nama: true,
+        unit_kerja: true,
+      },
+    },
     take: paging.limit,
     skip: paging.offset,
     where: f,
+    order: {
+      created_at: 'desc',
+    },
+    relations: {
+      cakupan_instansi: true,
+    },
   });
 
   return [masterInstansi, count];
@@ -72,9 +84,25 @@ export const listInstansi = async (filter: any, paging: any): Promise<[Instansi[
         id: true,
         nama_instansi: true,
       },
+      cakupan_instansi: {
+        nama: true,
+        unit_kerja: true,
+      },
+      sarana_media: {
+        deskripsi: true,
+      },
+      organisasi_pegawai: {
+        deskripsi: true,
+      },
+    },
+    order: {
+      created_at: 'desc',
     },
     relations: {
       master_instansi: true,
+      cakupan_instansi: true,
+      sarana_media: true,
+      organisasi_pegawai: true,
     },
   });
 

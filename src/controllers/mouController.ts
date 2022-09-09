@@ -9,6 +9,7 @@ import { generateFileName, tanggal } from '~/utils/common';
 import CustomError from '~/utils/customError';
 import queryHelper from '~/utils/queryHelper';
 import xls from '~/utils/xls';
+import * as common from '~/utils/common';
 
 const mouRepo = dataSource.getRepository(Mou);
 const instansiRepo = dataSource.getRepository(Instansi);
@@ -109,12 +110,13 @@ export const genExcelMou = async (req: Request, res: Response, next: NextFunctio
 
     const { workbook, worksheet, headingStyle, outlineHeadingStyle, outlineStyle } = xls();
 
+    const col = 15;
+
     worksheet.column(1).setWidth(5);
-    worksheet.column(2).setWidth(25);
-    worksheet.column(3).setWidth(25);
-    worksheet.column(4).setWidth(25);
-    worksheet.column(5).setWidth(25);
-    worksheet.column(6).setWidth(25);
+    for (let i = 2; i <= col; i++) {
+      const exclude = [];
+      worksheet.column(i).setWidth(exclude.includes(i) ? 10 : 25);
+    }
 
     worksheet.cell(1, 1, 1, 9, true).string('DAFTAR MOU').style(headingStyle);
     worksheet
@@ -124,14 +126,30 @@ export const genExcelMou = async (req: Request, res: Response, next: NextFunctio
 
     const barisHeading = 5;
     let noHeading = 0;
-    worksheet
-      .cell(barisHeading, ++noHeading)
-      .string('NO')
-      .style(outlineHeadingStyle);
-    worksheet
-      .cell(barisHeading, ++noHeading)
-      .string('NAMA MOU')
-      .style(outlineHeadingStyle);
+
+    const judulKolom = [
+      'NO',
+      'NAMA PIC',
+      'JENIS KERJASAMA',
+      'NOMOR KERJASAMA',
+      'NAMA KERJASAMA',
+      'INSTANSI',
+      'STATUS',
+      'DESKRIPSI',
+      'TANGGAL DIMULAI',
+      'TANGGAL BERAKHIR',
+      'FILE KERJASAMA',
+      'UNIT KERJA',
+      'TANGGAL DIBUAT',
+      'TANGGAL UPDATE',
+    ];
+
+    for (const header of judulKolom) {
+      worksheet
+        .cell(barisHeading, ++noHeading)
+        .string(header)
+        .style(outlineHeadingStyle);
+    }
 
     let rows = 6;
 
@@ -143,7 +161,55 @@ export const genExcelMou = async (req: Request, res: Response, next: NextFunctio
         .style(outlineStyle);
       worksheet
         .cell(rows, ++bodyLineNum)
+        .string(val.nama_pic)
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(val.jenis_kerjasama)
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(val.nomor_kerjasama)
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
         .string(val.nama_kerjasama)
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(val.instansi.nama_instansi)
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(val.status)
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(val.deskripsi)
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(common.tanggal(val.start_date))
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(common.tanggal(val.end_date))
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(`${process.env.MINIO_LINK_PREFIX}/${val.file}`)
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(val.instansi.cakupan_instansi.nama)
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(common.tanggal(val.created_at))
+        .style(outlineStyle);
+      worksheet
+        .cell(rows, ++bodyLineNum)
+        .string(common.tanggal(val.updated_at))
         .style(outlineStyle);
 
       rows++;

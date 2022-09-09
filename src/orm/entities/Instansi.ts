@@ -13,6 +13,7 @@ import MasterInstansi, { JenisInstansi } from './MasterInstansi';
 import OrganisasiPegawai from './OrganisasiPegawai';
 import Outlet from './Outlet';
 import SaranaMedia from './SaranaMedia';
+import User from './User';
 
 @Entity('instansi')
 class Instansi {
@@ -168,6 +169,10 @@ class Instansi {
 
   @OneToMany(() => AssignmentInstansi, (assignmentInstansi) => assignmentInstansi.instansi)
   assignment_instansi: Outlet;
+
+  @ManyToOne(() => User, { onUpdate: 'CASCADE', onDelete: 'NO ACTION' })
+  @JoinColumn([{ name: 'created_by', referencedColumnName: 'nik' }])
+  user_created: User;
 }
 
 export default Instansi;

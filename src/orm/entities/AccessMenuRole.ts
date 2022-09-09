@@ -29,7 +29,7 @@ class AccessMenuRole {
   @UpdateDateColumn()
   updated_at: Date;
 
-  @ManyToOne(() => MasterMenu)
+  @ManyToOne(() => MasterMenu, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
   @JoinColumn([{ name: 'master_menu_id', referencedColumnName: 'id' }])
   master_menu?: MasterMenu;
 
