@@ -28,3 +28,35 @@ export interface QueryResultLeadsReport {
   osl: number;
   saldo_tabemas: number;
 }
+
+export interface QueryResultClosingReport {
+  event_id?: number;
+  instansi_id?: number;
+  nama_nasabah?: string;
+  nik_ktp_nasabah?: string;
+  no_hp_nasabah?: string;
+  kode_produk?: string;
+  kode_unit_kerja?: string;
+  is_ktp_valid?: number;
+  step?: string;
+  flag_app?: string;
+  is_karyawan?: number;
+  created_at?: Date;
+  created_by?: string;
+  jenis_event?: string;
+  nama_event?: string;
+  nama_instansi?: string;
+  jenis_instansi?: string;
+  nama_master_instansi?: string;
+  unit_kerja_instansi?: string;
+  nama_unit_kerja?: string;
+  unit?: number;
+  nama_unit_kerja_parent_3?: string;
+  unit_parent_3?: number;
+  nama_unit_kerja_parent_2?: string;
+  unit_parent_2?: number;
+  cif?: string;
+  channel?: any;
+  tgl_kredit?: Date;
+  produk_nama_produk?: string;
+}

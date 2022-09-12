@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity('leads_closing')
 class LeadsClosing {
@@ -42,20 +42,20 @@ class LeadsClosing {
   marketing_code: string;
 
   @Column({
-    length: 20,
     nullable: true,
+    type: 'date',
   })
   tgl_fpk: string;
 
   @Column({
-    length: 20,
     nullable: true,
+    type: 'date',
   })
   tgl_cif: string;
 
   @Column({
-    length: 20,
     nullable: true,
+    type: 'date',
   })
   tgl_kredit: string;
 
@@ -111,6 +111,10 @@ class LeadsClosing {
   @Column()
   @CreateDateColumn()
   created_at: Date;
+
+  @Column()
+  @UpdateDateColumn()
+  updated_at: Date;
 }
 
 export default LeadsClosing;

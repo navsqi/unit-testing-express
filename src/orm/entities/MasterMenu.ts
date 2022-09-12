@@ -40,7 +40,11 @@ class MasterMenu {
   @UpdateDateColumn()
   updated_at: Date;
 
-  @OneToMany(() => AccessMenuRole, (amr) => amr.master_menu)
+  @OneToMany(() => AccessMenuRole, (amr) => amr.master_menu, {
+    cascade: true,
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   access_menu_role: AccessMenuRole[];
 }
 

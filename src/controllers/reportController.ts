@@ -17,7 +17,7 @@ export const getReportEvent = async (req: Request, res: Response, next: NextFunc
       start_date: (req.query.start_date as string) || '',
       end_date: (req.query.end_date as string) || '',
       outlet_id: outletIds,
-      user_id: req.user.kode_role == 'MKTO' ? req.user.id : req.query.user_id,
+      created_by: req.user.kode_role == 'MKTO' ? req.user.nik : req.query.created_by,
     };
 
     if (!filter.start_date || !filter.end_date) return next(new CustomError('Pilih tanggal awal dan akhir', 400));
@@ -56,6 +56,7 @@ export const getReportInstansi = async (req: Request, res: Response, next: NextF
       start_date: (req.query.start_date as string) || '',
       end_date: (req.query.end_date as string) || '',
       outlet_id: outletIds,
+      created_by: req.user.kode_role == 'MKTO' ? req.user.nik : req.query.created_by,
     };
 
     if (!filter.start_date || !filter.end_date) return next(new CustomError('Pilih tanggal awal dan akhir', 400));
@@ -75,7 +76,7 @@ export const getReportInstansi = async (req: Request, res: Response, next: NextF
       report: report.data,
     };
 
-    return res.customSuccess(200, 'Get report leads', dataRes);
+    return res.customSuccess(200, 'Get report instansi', dataRes);
   } catch (e) {
     return next(e);
   }
@@ -94,7 +95,7 @@ export const getReportLeads = async (req: Request, res: Response, next: NextFunc
       start_date: (req.query.start_date as string) || '',
       end_date: (req.query.end_date as string) || '',
       outlet_id: outletIds,
-      user_id: req.user.kode_role == 'MKTO' ? req.user.id : req.query.user_id,
+      created_by: req.user.kode_role == 'MKTO' ? req.user.nik : req.query.created_by,
     };
 
     if (!filter.start_date || !filter.end_date) return next(new CustomError('Pilih tanggal awal dan akhir', 400));
@@ -133,7 +134,7 @@ export const getReportClosing = async (req: Request, res: Response, next: NextFu
       start_date: (req.query.start_date as string) || '',
       end_date: (req.query.end_date as string) || '',
       outlet_id: outletIds,
-      user_id: req.user.kode_role == 'MKTO' ? req.user.id : req.query.user_id,
+      created_by: req.user.kode_role == 'MKTO' ? req.user.nik : req.query.created_by,
     };
 
     if (!filter.start_date || !filter.end_date) return next(new CustomError('Pilih tanggal awal dan akhir', 400));

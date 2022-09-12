@@ -87,6 +87,9 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
       take: paging.limit,
       skip: paging.offset,
       where,
+      order: {
+        created_at: 'desc',
+      },
     });
 
     const dataRes = {

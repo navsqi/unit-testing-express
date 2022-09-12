@@ -7,7 +7,7 @@ import protect from './../../middlewares/protect';
 
 const router = Router();
 
-router.get('/', protect(['ADMN', 'SADM']), userController.getUser);
+router.get('/', protect(), userController.getUser);
 router.get('/:id', protect(), userController.getUserById);
 
 router.put(
