@@ -15,6 +15,7 @@ export const getUser = async (req: Request, res: Response, next: NextFunction) =
     const filter = {
       kode_role: (req.query.kode_role as string) ?? null,
       kode_unit_kerja: (req.query.kode_unit_kerja as string) ?? null,
+      nik_user: req.user.kode_role == 'MKTO' ? req.user.nik : undefined,
     };
 
     if (filter.kode_role) {
@@ -23,6 +24,10 @@ export const getUser = async (req: Request, res: Response, next: NextFunction) =
 
     if (filter.kode_unit_kerja) {
       where.kode_unit_kerja = In(filter.kode_unit_kerja.split(','));
+    }
+
+    if (filter.nik_user) {
+      where.nik = filter.nik_user;
     }
 
     const paging = queryHelper.paging(req.query);

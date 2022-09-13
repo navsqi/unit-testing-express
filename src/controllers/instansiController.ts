@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { dataSource } from '~/orm/dbCreateConnection';
-import Instansi from '~/orm/entities/Instansi';
+import Instansi, { JENIS_INSTANSI } from '~/orm/entities/Instansi';
 import MasterInstansi from '~/orm/entities/MasterInstansi';
 import OrganisasiPegawai from '~/orm/entities/OrganisasiPegawai';
 import SaranaMedia from '~/orm/entities/SaranaMedia';
@@ -11,6 +11,7 @@ import CustomError from '~/utils/customError';
 import queryHelper from '~/utils/queryHelper';
 import xls from '~/utils/xls';
 import * as common from '~/utils/common';
+import dayjs from 'dayjs';
 
 const organisasiPegawaiRepo = dataSource.getRepository(OrganisasiPegawai);
 const masterInsRepo = dataSource.getRepository(MasterInstansi);
@@ -523,8 +524,15 @@ export const createNewInstansi = async (req: Request, res: Response, next: NextF
     req.body.nama_instansi = req.body.nama_instansi.toUpperCase();
     const kodeUnitKerja = req.body.kode_unit_kerja || req.user.kode_unit_kerja;
 
+    const yearKode = dayjs().format('YY');
+    const masterInstansiKode = req.body.master_instansi_id.toString().padStart(5, '0');
+    const jenisInstansiKode = JENIS_INSTANSI[req.body.jenis_instansi];
+    const instansiPrefix = common.getKodePrefix();
+    const kodeInstansi = `${yearKode}${jenisInstansiKode}${masterInstansiKode}${instansiPrefix}`;
+
     const instansi = await instansiRepo.save({
       ...req.body,
+      kode_instansi: kodeInstansi,
       kategori_instansi: req.body.status_potensial === 'C' ? 'NON BINAAN' : 'BINAAN',
       kode_unit_kerja: kodeUnitKerja,
       created_by: req.user.nik,

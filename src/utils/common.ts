@@ -102,3 +102,22 @@ export const getCakupanUnit = (unit: number) => {
 
   return listCakupan[unit - 1];
 };
+
+export const getRandomInt = (min = 100000000, max = 99999999) => {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+
+export const getKodePrefix = () => {
+  const time = dayjs().format('HHmmss');
+  const digitAkhir = getRandomInt(1, 9).toString().padStart(2, '0');
+
+  return `${time}${digitAkhir}`;
+};
+
+export const isSalesRole = (kodeRole: string) => {
+  if (kodeRole == 'MKTO' || kodeRole == 'BPOM') return true;
+
+  return false;
+};
