@@ -22,7 +22,7 @@ export const getOutlet = async (req: Request, res: Response, next: NextFunction)
     }
 
     if (filter.parent) {
-      where['parent'] = +filter.parent;
+      where['parent'] = filter.parent;
     }
 
     if (filter.kode) {
@@ -67,6 +67,70 @@ export const getOutletSessionWithChild = async (req: Request, res: Response, nex
     };
 
     return res.customSuccess(200, 'Get outlet', dataRes);
+  } catch (e) {
+    return next(e);
+  }
+};
+
+export const getOutletById = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const outletById = await outletRepo.findOne({
+      where: { id: +req.params.id },
+    });
+
+    const dataRes = {
+      outlet: outletById,
+    };
+
+    return res.customSuccess(200, 'Get outlet', dataRes);
+  } catch (e) {
+    return next(e);
+  }
+};
+
+export const createNewOutlet = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const outlet = await outletRepo.save({
+      ...req.body,
+      created_by: req.user.nik,
+      updated_by: req.user.nik,
+    });
+
+    const dataRes = {
+      outlet: outlet,
+    };
+
+    return res.customSuccess(200, 'Create outlet success', dataRes);
+  } catch (e) {
+    return next(e);
+  }
+};
+
+export const updateOutlet = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const outlet = await outletRepo.update(req.params.id, {
+      ...req.body,
+    });
+
+    const dataRes = {
+      outlet: outlet,
+    };
+
+    return res.customSuccess(200, 'Update outlet success', dataRes);
+  } catch (e) {
+    return next(e);
+  }
+};
+
+export const deleteOutlet = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const outlet = await outletRepo.delete({ id: +req.params.id });
+
+    const dataRes = {
+      outlet: outlet,
+    };
+
+    return res.customSuccess(200, 'Delete outlet success', dataRes);
   } catch (e) {
     return next(e);
   }

@@ -27,6 +27,12 @@ class LeadsClosing {
     length: 16,
     nullable: true,
   })
+  channel_id: string;
+
+  @Column({
+    length: 16,
+    nullable: true,
+  })
   channel: string;
 
   @Column({
