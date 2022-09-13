@@ -25,6 +25,14 @@ export const instansiReport = async (filter?: IFilter) => {
     q.addSelect('i.id', 'id_instansi');
     q.addSelect('mi.nama_instansi', 'nama_master_instansi');
     q.addSelect('i.nama_instansi', 'nama_instansi');
+    q.addSelect('i.alamat', 'alamat');
+    q.addSelect('i.email', 'email');
+    q.addSelect('i.no_telepon_instansi', 'no_telepon_instansi');
+    q.addSelect('i.nama_karyawan', 'nama_karyawan');
+    q.addSelect('i.no_telepon_karyawan', 'no_telepon_karyawan');
+    q.addSelect('i.email_karyawan', 'email_karyawan');
+    q.addSelect('i.jabatan_karyawan', 'jabatan_karyawan');
+    q.addSelect('i.alamat', 'alamat');
     q.addSelect('i.master_instansi_id', 'master_instansi_id');
     q.addSelect('i.jenis_instansi', 'jenis_instansi');
     q.addSelect('i.kategori_instansi', 'kategori_instansi');
@@ -134,8 +142,8 @@ export const eventReport = async (filter?: IFilter) => {
     const q = manager.createQueryBuilder();
     q.from('event', 'e');
     q.select('e.created_at', 'created_at');
-    q.select('e.created_by', 'created_by_kode');
-    q.select('u.nama', 'created_by');
+    q.addSelect('e.created_by', 'created_by_kode');
+    q.addSelect('u.nama', 'created_by');
     q.addSelect('e.id', 'id_event');
     q.addSelect('e.instansi_id', 'instansi_id');
     q.addSelect('e.jenis_event', 'jenis_event');
@@ -217,6 +225,7 @@ export const leadsReport = async (filter?: IFilter) => {
     q.addSelect('instansi.jenis_instansi', 'jenis_instansi');
     q.addSelect('master_instansi.nama_instansi', 'nama_master_instansi');
     q.addSelect('instansi.nama_instansi', 'nama_instansi');
+    q.addSelect('instansi.kategori_instansi', 'kategori_instansi');
     q.addSelect('leads.event_id', 'event_id');
     q.addSelect('event.jenis_event', 'jenis_event');
     q.addSelect('event.nama_event', 'nama_event');
@@ -304,6 +313,7 @@ export const closingReport = async (filter?: IFilter) => {
     q.from('leads', 'leads');
     q.select('leads.nik_ktp', 'nik_ktp_nasabah');
     q.addSelect('lcs.tgl_kredit', 'tgl_kredit');
+    q.addSelect('lcs.tgl_fpk', 'tgl_fpk');
     q.addSelect('leads.nama', 'nama_nasabah');
     q.addSelect('lcs.cif', 'cif');
     q.addSelect('leads.no_hp', 'no_hp_nasabah');
@@ -333,6 +343,7 @@ export const closingReport = async (filter?: IFilter) => {
     q.addSelect('lcs.no_kontrak', 'no_kontrak');
     q.addSelect('lcs.channel', 'channel');
     q.addSelect('lcs.up', 'omset');
+    q.addSelect('lcs.osl', 'osl');
     q.addSelect('lcs.saldo_tabemas', 'saldo_tabemas');
 
     q.leftJoin('event', 'event', 'event.id = leads.event_id');

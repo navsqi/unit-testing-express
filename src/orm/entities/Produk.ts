@@ -64,7 +64,7 @@ class Produk {
   ro: boolean;
 
   @Column({
-    default: false,
+    default: true,
   })
   cst: boolean;
 

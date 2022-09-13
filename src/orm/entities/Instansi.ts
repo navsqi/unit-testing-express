@@ -15,10 +15,23 @@ import Outlet from './Outlet';
 import SaranaMedia from './SaranaMedia';
 import User from './User';
 
+export const JENIS_INSTANSI = {
+  PEMERINTAH: '01',
+  BUMN: '02',
+  SWASTA: '03',
+  KOMUNITAS: '04',
+};
+
 @Entity('instansi')
 class Instansi {
   @PrimaryGeneratedColumn()
   id: number;
+
+  @Column({
+    length: 50,
+    nullable: true,
+  })
+  kode_instansi: string;
 
   @Column({
     type: 'int8',
