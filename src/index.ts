@@ -14,15 +14,15 @@ import CustomError from './utils/customError';
 import './utils/customErrorValidation';
 import './utils/customSuccess';
 import logger from './utils/logger';
-// import cronJob from './config/cron';
+import cronJob from './config/cron';
 
 (async () => {
   await dbCreateConnection();
 
-  // if (!cronJob.running) {
-  //   cronJob.start();
-  //   logger.info('CRON', 'CRON is running...');
-  // }
+  if (!cronJob.running) {
+    cronJob.start();
+    logger.info('CRON', 'CRON is running...');
+  }
 })();
 
 export const app = express();

@@ -373,6 +373,7 @@ export const createNewLeadsByCsv = async (req: Request, res: Response, next: Nex
         leads.up = +row[3];
         leads.kode_produk = row[4];
         leads.nik_ktp_karyawan = row[5] ? row[5] : null;
+        leads.is_karyawan = row[5] ? 0 : 1;
         leads.created_by = req.user.nik;
         leads.kode_unit_kerja = req.user.kode_unit_kerja;
         leads.source_data = 'BULK CSV';

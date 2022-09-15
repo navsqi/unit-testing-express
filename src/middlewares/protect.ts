@@ -32,7 +32,19 @@ export const protect = (roles?: string[], isExclude = false) => {
 
       req.user = await userRepo.findOne({
         where: { id: jwtPayload.id },
-        select: ['id', 'nik', 'email', 'nama', 'kode_role', 'kode_unit_kerja'],
+        select: {
+          id: true,
+          nik: true,
+          email: true,
+          nama: true,
+          kode_role: true,
+          kode_unit_kerja: true,
+          unit_kerja: {
+            unit_kerja: true,
+            nama: true,
+          },
+        },
+        relations: { unit_kerja: true },
       });
 
       if (isExclude && roles && roles.includes(req.user.kode_role))
@@ -46,6 +58,18 @@ export const protect = (roles?: string[], isExclude = false) => {
       return next(e);
     }
   };
+};
+
+export const cabangOnly = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    console.log(req.user);
+    if (Number(req.user.unit_kerja.unit_kerja) !== 4)
+      return next(new CustomError(`Hanya user cabang yang dapat melakukan aksi`, 403));
+
+    return next();
+  } catch (e) {
+    return next(e);
+  }
 };
 
 export default protect;

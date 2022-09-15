@@ -255,7 +255,7 @@ export const leadsReport = async (filter?: IFilter) => {
     q.leftJoin('outlet', 'outlet_p3', 'outlet_p3.kode = outlet.parent');
     q.leftJoin('outlet', 'outlet_p2', 'outlet_p2.kode = outlet_p3.parent');
 
-    q.innerJoin(
+    q.leftJoin(
       (qb) => {
         const qb2 = qb as SelectQueryBuilder<any>;
 
@@ -343,7 +343,13 @@ export const closingReport = async (filter?: IFilter) => {
     q.addSelect('lcs.no_kontrak', 'no_kontrak');
     q.addSelect('lcs.channel', 'channel');
     q.addSelect('lcs.up', 'omset');
-    q.addSelect('lcs.osl', 'osl');
+    q.addSelect((subQuery) => {
+      return subQuery
+        .select('osl')
+        .from('leads_closing', 'lc2')
+        .where('lc2.no_kontrak = lcs.no_kontrak AND osl IS NOT NULL');
+    }, 'osl');
+    q.addSelect('lcs.osl', 'osl_original');
     q.addSelect('lcs.saldo_tabemas', 'saldo_tabemas');
 
     q.leftJoin('event', 'event', 'event.id = leads.event_id');
