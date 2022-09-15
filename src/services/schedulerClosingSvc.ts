@@ -159,7 +159,6 @@ export const schedulerClosingTabemas = async () => {
 
     // memproses semua baris yang ada pada table tmp_kredit
     for (const tmpKredit of tmpKredits) {
-      console.log(tmpKredit.jenis_transaksi);
       const up = tmpKredit.jenis_transaksi === 'OPEN' ? tmpKredit.amount : tmpKredit.up;
 
       // Check no kredit duplikat
