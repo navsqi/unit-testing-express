@@ -1,8 +1,11 @@
 import dayjs from 'dayjs';
 import { EntityManager, SelectQueryBuilder } from 'typeorm';
 import { dataSource } from '~/orm/dbCreateConnection';
+import { ITmpKreditQuery, ITmpKreditTabemasQuery } from '~/types/queryClosingTypes';
 import logger from '~/utils/logger';
+import queryClosing from '~/utils/queryClosing';
 
+// ==== CLOSING NON TABEMAS
 export const schedulerClosing = async () => {
   const queryRunner = dataSource.createQueryRunner();
   await queryRunner.connect();
@@ -15,186 +18,119 @@ export const schedulerClosing = async () => {
 
     // const data = await q.getRawMany();
 
-    // Insert leads closing non top up tabemas [OK]
+    // Select tmp_kredit
+    const tmpKredits: ITmpKreditQuery[] = await manager.query(queryClosing.selectTmpKredit);
+
+    // memproses semua baris yang ada pada table tmp_kredit
+    for (const tmpKredit of tmpKredits) {
+      // Check no kredit duplikat
+      const checkNoKredit = await manager.query(
+        `SELECT * FROM leads_closing lc WHERE lc.no_kontrak = '${tmpKredit.no_kontrak}'`,
+      );
+
+      if (checkNoKredit && checkNoKredit.length > 0) {
+        // jika duplikat
+        // produk update saldo te & osl ke 0
+        await manager.query(
+          `UPDATE leads_closing SET saldo_tabemas = NULL, osl = NULL WHERE no_kontrak = '${tmpKredit.no_kontrak}' AND created_at < now()`,
+        );
+
+        // insert ke leads closing
+        await manager.query(
+          `INSERT INTO leads_closing 
+        (leads_id, nik_ktp, cif, no_kontrak, marketing_code, tgl_fpk, tgl_cif, tgl_kredit, kode_unit_kerja, kode_unit_kerja_pencairan, up, outlet_syariah, status_new_cif, osl, saldo_tabemas, channel_id,channel, kode_produk) VALUES 
+        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18);
+        `,
+          [
+            tmpKredit.leads_id,
+            tmpKredit.nik_ktp,
+            tmpKredit.cif,
+            tmpKredit.no_kontrak,
+            tmpKredit.marketing_code,
+            tmpKredit.tgl_fpk,
+            null, //tgl cif null
+            tmpKredit.tgl_kredit,
+            tmpKredit.kode_outlet,
+            tmpKredit.kode_outlet_pencairan,
+            tmpKredit.up,
+            tmpKredit.outlet_syariah,
+            0,
+            tmpKredit.osl,
+            tmpKredit.saldo_tabemas,
+            tmpKredit.channel_id,
+            tmpKredit.nama_channel,
+            tmpKredit.product_code,
+          ],
+        );
+      } else {
+        // jika tidak duplikat
+        // insert ke tb leads_closing
+        await manager.query(
+          `INSERT INTO leads_closing 
+        (leads_id, nik_ktp, cif, no_kontrak, marketing_code, tgl_fpk, tgl_cif, tgl_kredit, kode_unit_kerja, kode_unit_kerja_pencairan, up, outlet_syariah, status_new_cif, osl, saldo_tabemas, channel_id,channel, kode_produk) VALUES 
+        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18);
+        `,
+          [
+            tmpKredit.leads_id,
+            tmpKredit.nik_ktp,
+            tmpKredit.cif,
+            tmpKredit.no_kontrak,
+            tmpKredit.marketing_code,
+            tmpKredit.tgl_fpk,
+            null, // tgl cif
+            tmpKredit.tgl_kredit,
+            tmpKredit.kode_outlet,
+            tmpKredit.kode_outlet_pencairan,
+            tmpKredit.up,
+            tmpKredit.outlet_syariah,
+            0,
+            tmpKredit.osl,
+            tmpKredit.saldo_tabemas,
+            tmpKredit.channel_id,
+            tmpKredit.nama_channel,
+            tmpKredit.product_code,
+          ],
+        );
+      }
+
+      // insert semua closingan ke log (untuk log osl)
+      // await manager.query(
+      //   `INSERT INTO log_leads_closing
+      //   (leads_id, nik_ktp, cif, no_kontrak, marketing_code, tgl_fpk, tgl_cif, tgl_kredit, kode_unit_kerja, kode_unit_kerja_pencairan, up, outlet_syariah, status_new_cif, osl, saldo_tabemas, channel_id,channel, kode_produk) VALUES
+      //   ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
+      //   `,
+      //   [
+      //     tmpKredit.leads_id,
+      //     tmpKredit.nik_ktp,
+      //     tmpKredit.cif,
+      //     tmpKredit.no_kontrak,
+      //     tmpKredit.marketing_code,
+      //     tmpKredit.tgl_fpk,
+      //     null, //tgl cif
+      //     tmpKredit.tgl_kredit,
+      //     tmpKredit.kode_outlet,
+      //     tmpKredit.kode_outlet_pencairan,
+      //     tmpKredit.up,
+      //     tmpKredit.outlet_syariah,
+      //     0,
+      //     tmpKredit.osl,
+      //     tmpKredit.saldo_tabemas,
+      //     tmpKredit.channel_id,
+      //     tmpKredit.nama_channel,
+      //     tmpKredit.product_code,
+      //   ],
+      // );
+    }
+
+    // menghapus data history bigdata
     await manager.query(
-      `
-      INSERT
-        INTO
-        leads_closing (
-          leads_id,
-          kode_produk ,
-          nik_ktp,
-          no_kontrak,
-          marketing_code ,
-          tgl_fpk,
-          tgl_cif,
-          tgl_kredit,
-          kode_unit_kerja ,
-          kode_unit_kerja_pencairan ,
-          up,
-          outlet_syariah ,
-          cif,
-          channel,
-          osl,
-          saldo_tabemas
-        )
-      SELECT
-        l.id AS leads_id,
-        tmpk.product_code,
-        tmpk.nik_ktp,
-        tmpk.no_kontrak,
-        tmpk.marketing_code,
-        tmpk.tgl_fpk,
-        tmpk.tgl_cif,
-        tmpk.tgl_kredit,
-        tmpk.kode_outlet,
-        tmpk.kode_outlet AS kode_outlet_pencairan,
-        tmpk.up,
-        tmpk.outlet_syariah,
-        tmpk.cif,
-        tmpk.nama_channel,
-        tmpk.osl,
-        tmpk.saldo_tabemas
-      FROM
-        (SELECT * FROM tmp_kredit) tmpk,
-        leads l
-      WHERE
-        l.up_realisasi IS NULL
-        AND l.tanggal_realisasi IS NULL
-        AND l.nik_ktp = tmpk.nik_ktp
-        AND CAST (l.created_at AS DATE) <= CAST ( tmpk.tgl_fpk AS DATE )
-        AND l.step = 'CLP'
-      `,
+      `DELETE FROM history_tmp_kredit WHERE current_date > CAST(CAST(created_at_kamila AS DATE) + INTERVAL '30 DAY' AS DATE)`,
     );
 
-    // Update leads kredit non top up tabemas [OK]
-    await manager.query(
-      `
-      UPDATE
-        leads AS l 
-            SET
-        step = 'CLS'
-      FROM
-        (
-        SELECT
-          nik_ktp,
-          tgl_fpk,
-          tgl_kredit
-        FROM
-          tmp_kredit
-        GROUP BY
-          nik_ktp,
-          tgl_kredit,
-          tgl_fpk
-              ) tmpk
-      WHERE
-        l.nik_ktp = tmpk.nik_ktp
-        AND CAST (l.created_at AS DATE) <= CAST (tmpk.tgl_fpk AS DATE)
-        AND l.step = 'CLP'
-      `,
-    );
+    // insert data yang dikirim bigdata ke table history
+    await manager.query(`INSERT INTO history_tmp_kredit SELECT * FROM tmp_kredit`);
 
-    // Insert leads closing kredit topup tabemas [OK]
-    await manager.query(
-      `
-      INSERT
-        INTO
-        leads_closing (
-        leads_id,
-        kode_produk,
-        nik_ktp,
-        no_kontrak,
-        marketing_code,
-        tgl_fpk,
-        tgl_cif,
-        tgl_kredit,
-        kode_unit_kerja,
-        kode_unit_kerja_pencairan,
-        up,
-        cif
-      ) 
-      SELECT
-        l.id AS leads_id,
-        tmpt.product_code,
-        tmpt.nik_ktp,
-        tmpt.no_rekening AS no_kontrak,
-        tmpt.marketing_code,
-        tmpt.tgl_trx AS tgl_fpk,
-        tmpt.tgl_cif,
-        tmpt.tgl_trx AS tgl_kredit,
-        tmpt.kode_outlet,
-        tmpt.kode_outlet AS kode_outlet_pencairan,
-        tmpt.up,
-        tmpt.cif
-      FROM
-        (SELECT * FROM tmp_top_up_tabemas) tmpt, leads l
-      WHERE
-        l.up_realisasi IS NULL
-        AND l.tanggal_realisasi IS NULL
-        AND l.nik_ktp = tmpt.nik_ktp
-        AND CAST (l.created_at AS DATE) <= CAST (tmpt.tgl_trx AS DATE)
-        AND l.step = 'CLP';
-      `,
-    );
-
-    // Update leads closing kredit topup tabemas [OK]
-    await manager.query(
-      `
-      UPDATE
-        leads AS l 
-            SET
-        step = 'CLS'
-      FROM
-        (
-        SELECT
-          nik_ktp,
-          product_code,
-          tgl_trx,
-          kode_outlet
-        FROM
-          tmp_top_up_tabemas
-        GROUP BY
-          nik_ktp,
-          tgl_trx,
-          product_code,
-          kode_outlet
-              ) tk
-      WHERE
-        l.nik_ktp = tk.nik_ktp
-        AND CAST (l.created_at AS DATE) <= CAST (tk.tgl_trx AS DATE)
-        AND l.step = 'CLP'
-      `,
-    );
-
-    // update new cif
-    await manager.query(
-      `
-      UPDATE
-        leads_closing lcs
-      SET
-        status_new_cif = 1
-      WHERE
-        status_new_cif = 0
-        AND lcs.leads_id IN (
-        SELECT
-          l.id
-        FROM
-          leads l
-        JOIN leads_closing lcs ON
-          l.id = lcs.leads_id
-        WHERE
-          CAST(l.created_at AS DATE) <= CAST(lcs.tgl_cif AS DATE)
-            AND step = 'CLS'
-            AND lcs.status_new_cif = 0)   
-      `,
-    );
-
-    await manager.query(`INSERT INTO history_kredit SELECT * FROM tmp_kredit`);
-    // await manager.query(`INSERT INTO history_top_up_tabemas SELECT * FROM tmp_top_up_tabemas`);
-    await manager.query(
-      `DELETE FROM history_kredit WHERE current_date > CAST(CAST(tgl_kredit AS DATE) + INTERVAL '21 DAY' AS DATE)`,
-    );
-    // await manager.query(`TRUNCATE tmp_kredit RESTART IDENTITY`);
+    await manager.query(`TRUNCATE tmp_kredit RESTART IDENTITY`);
 
     await queryRunner.commitTransaction();
     await queryRunner.release();
@@ -208,8 +144,146 @@ export const schedulerClosing = async () => {
   }
 };
 
-const queryA = async (manager: EntityManager) => {
-  return true;
+// ==== CLOSING TABEMAS ====
+export const schedulerClosingTabemas = async () => {
+  const queryRunner = dataSource.createQueryRunner();
+  await queryRunner.connect();
+  await queryRunner.startTransaction();
+  const manager = queryRunner.manager;
+
+  try {
+    logger.info('QUERY_CLOSING', `STARTING AT ${dayjs().format('DD/MM/YYYY HH:mm:ss')}`);
+
+    // Select tmp_kredit
+    const tmpKredits: ITmpKreditTabemasQuery[] = await manager.query(queryClosing.selectTmpKreditTabemas);
+
+    // memproses semua baris yang ada pada table tmp_kredit
+    for (const tmpKredit of tmpKredits) {
+      console.log(tmpKredit.jenis_transaksi);
+      const up = tmpKredit.jenis_transaksi === 'OPEN' ? tmpKredit.amount : tmpKredit.up;
+
+      // Check no kredit duplikat
+      const checkNoKredit = await manager.query(
+        `SELECT * FROM leads_closing lc WHERE lc.no_kontrak = '${tmpKredit.no_kontrak}'`,
+      );
+
+      if (checkNoKredit && checkNoKredit.length > 0) {
+        // jika duplikat
+        // produk update saldo te & osl ke 0
+        await manager.query(
+          `UPDATE leads_closing SET saldo_tabemas = NULL, osl = NULL WHERE no_kontrak = '${tmpKredit.no_kontrak}' AND created_at < now()`,
+        );
+
+        // insert ke leads closing
+        await manager.query(
+          `INSERT INTO leads_closing 
+        (leads_id, nik_ktp, cif, no_kontrak, marketing_code, tgl_fpk, tgl_kredit, kode_unit_kerja, kode_unit_kerja_pencairan, up, status_new_cif, osl, saldo_tabemas, channel_id,channel, kode_produk) VALUES 
+        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16);
+        `,
+          [
+            tmpKredit.leads_id,
+            tmpKredit.nik_ktp,
+            tmpKredit.cif,
+            tmpKredit.no_kontrak,
+            tmpKredit.marketing_code,
+            tmpKredit.tgl_fpk,
+            tmpKredit.tgl_kredit,
+            tmpKredit.kode_outlet,
+            tmpKredit.kode_outlet_pencairan,
+            up,
+            0,
+            tmpKredit.osl,
+            tmpKredit.saldo,
+            tmpKredit.channel_id,
+            tmpKredit.nama_channel,
+            tmpKredit.product_code,
+          ],
+        );
+
+        // update status leads ke CLS
+        await manager.query(`UPDATE leads SET step = 'CLS' WHERE id = '${tmpKredit.leads_id}' AND step = 'CLP'`);
+      } else {
+        // jika tidak duplikat
+        // insert ke tb leads_closing
+        await manager.query(
+          `INSERT INTO leads_closing 
+        (leads_id, nik_ktp, cif, no_kontrak, marketing_code, tgl_fpk, tgl_kredit, kode_unit_kerja, kode_unit_kerja_pencairan, up, status_new_cif, osl, saldo_tabemas, channel_id,channel, kode_produk) VALUES 
+        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16);
+        `,
+          [
+            tmpKredit.leads_id,
+            tmpKredit.nik_ktp,
+            tmpKredit.cif,
+            tmpKredit.no_kontrak,
+            tmpKredit.marketing_code,
+            tmpKredit.tgl_fpk,
+            tmpKredit.tgl_kredit,
+            tmpKredit.kode_outlet,
+            tmpKredit.kode_outlet_pencairan,
+            up,
+            0,
+            tmpKredit.osl,
+            tmpKredit.saldo,
+            tmpKredit.channel_id,
+            tmpKredit.nama_channel,
+            tmpKredit.product_code,
+          ],
+        );
+
+        // update status leads ke CLS
+        await manager.query(`UPDATE leads SET step = 'CLS' WHERE id = '${tmpKredit.leads_id}' AND step = 'CLP'`);
+      }
+
+      // insert semua closingan ke log (untuk log osl)
+      // await manager.query(
+      //   `INSERT INTO log_leads_closing
+      //   (leads_id, nik_ktp, cif, no_kontrak, marketing_code, tgl_fpk, tgl_kredit, kode_unit_kerja, kode_unit_kerja_pencairan, up, status_new_cif, osl, saldo_tabemas, channel_id,channel, kode_produk) VALUES
+      //   ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+      //   `,
+      //   [
+      //     tmpKredit.leads_id,
+      //     tmpKredit.nik_ktp,
+      //     tmpKredit.cif,
+      //     tmpKredit.no_kontrak,
+      //     tmpKredit.marketing_code,
+      //     tmpKredit.tgl_fpk,
+      //     tmpKredit.tgl_kredit,
+      //     tmpKredit.kode_outlet,
+      //     tmpKredit.kode_outlet_pencairan,
+      //     up,
+      //     0,
+      //     tmpKredit.osl,
+      //     tmpKredit.saldo,
+      //     tmpKredit.channel_id,
+      //     tmpKredit.nama_channel,
+      //     tmpKredit.product_code,
+      //   ],
+      // );
+    }
+
+    // menghapus data history bigdata
+    await manager.query(
+      `DELETE FROM history_tmp_kredit_tabemas WHERE current_date > CAST(CAST(created_at_kamila AS DATE) + INTERVAL '30 DAY' AS DATE)`,
+    );
+
+    // insert data yang dikirim bigdata ke table history
+    await manager.query(`INSERT INTO history_tmp_kredit_tabemas SELECT * FROM tmp_kredit_tabemas`);
+
+    await manager.query(`TRUNCATE tmp_kredit_tabemas RESTART IDENTITY`);
+
+    await queryRunner.commitTransaction();
+    await queryRunner.release();
+
+    logger.info('QUERY_CLOSING', `ENDED AT ${dayjs().format('DD/MM/YYYY HH:mm:ss')}`);
+  } catch (error) {
+    logger.info('QUERY_CLOSING', `ERROR ENDED AT ${dayjs().format('DD/MM/YYYY HH:mm:ss')}`);
+    logger.error(error, 'QUERY_CLOSING_ERROR');
+    await queryRunner.rollbackTransaction();
+    await queryRunner.release();
+  }
 };
 
-export default schedulerClosing;
+export default {
+  schedulerClosing,
+  schedulerClosingTabemas,
+};

@@ -255,7 +255,7 @@ export const leadsReport = async (filter?: IFilter) => {
     q.leftJoin('outlet', 'outlet_p3', 'outlet_p3.kode = outlet.parent');
     q.leftJoin('outlet', 'outlet_p2', 'outlet_p2.kode = outlet_p3.parent');
 
-    q.innerJoin(
+    q.leftJoin(
       (qb) => {
         const qb2 = qb as SelectQueryBuilder<any>;
 
