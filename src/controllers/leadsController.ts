@@ -32,7 +32,7 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
       is_badan_usaha: req.query.is_badan_usaha ? +req.query.is_badan_usaha : null,
     };
 
-    if (req.user.kode_role == 'MKTO') {
+    if (common.isSalesRole(req.user.kode_role)) {
       filter.is_session = 1;
     }
 
@@ -52,7 +52,7 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
         outletIds = await konsolidasiTopBottom(outletId as string);
       }
 
-      where['kode_unit_kerja'] = In(outletIds);
+      where['kode_unit_kerja'] = outletIds.length > 0 ? In(outletIds) : undefined;
     }
 
     if (filter.is_session == 1) {

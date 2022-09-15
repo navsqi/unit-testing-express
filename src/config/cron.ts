@@ -1,6 +1,5 @@
 import { CronJob } from 'cron';
 import schedulerClosingSvc from '~/services/schedulerClosingSvc';
-import schedulerClosing from '~/services/schedulerClosingSvc';
 import * as common from '~/utils/common';
 import logger from '~/utils/logger';
 

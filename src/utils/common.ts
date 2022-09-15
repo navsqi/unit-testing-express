@@ -117,7 +117,7 @@ export const getKodePrefix = () => {
 };
 
 export const isSalesRole = (kodeRole: string) => {
-  if (kodeRole == 'MKTO' || kodeRole == 'BPOM') return true;
+  if (kodeRole == 'MKTO' || kodeRole.includes('BPO')) return true;
 
   return false;
 };
