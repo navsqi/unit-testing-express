@@ -20,8 +20,15 @@ export const getReportInstansi = async (req: Request, res: Response, next: NextF
       start_date: (req.query.start_date as string) || '',
       end_date: (req.query.end_date as string) || '',
       outlet_id: outletIds,
-      created_by: req.user.kode_role == 'MKTO' ? req.user.nik : req.query.created_by,
+      created_by: common.isSalesRole(req.user.kode_role) ? req.user.nik : req.query.created_by,
+      page: Number(req.query.page) || 1,
+      limit: Number(req.query.limit) || 250,
+      offset: null,
     };
+
+    const paging = queryHelper.paging({ ...filter });
+    filter.offset = paging.offset;
+    filter.limit = paging.limit;
 
     if (!filter.start_date || !filter.end_date) return next(new CustomError('Pilih tanggal awal dan akhir', 400));
 
@@ -61,7 +68,7 @@ export const genExcelReportInstansi = async (req: Request, res: Response, next: 
       start_date: (req.query.start_date as string) || '',
       end_date: (req.query.end_date as string) || '',
       outlet_id: outletIds,
-      created_by: req.user.kode_role == 'MKTO' ? req.user.nik : req.query.created_by,
+      created_by: common.isSalesRole(req.user.kode_role) ? req.user.nik : req.query.created_by,
     };
 
     if (!filter.start_date || !filter.end_date) return next(new CustomError('Pilih tanggal awal dan akhir', 400));
@@ -201,8 +208,15 @@ export const getReportEvent = async (req: Request, res: Response, next: NextFunc
       start_date: (req.query.start_date as string) || '',
       end_date: (req.query.end_date as string) || '',
       outlet_id: outletIds,
-      created_by: req.user.kode_role == 'MKTO' ? req.user.nik : req.query.created_by,
+      created_by: common.isSalesRole(req.user.kode_role) ? req.user.nik : req.query.created_by,
+      page: Number(req.query.page) || 1,
+      limit: Number(req.query.limit) || 250,
+      offset: null,
     };
+
+    const paging = queryHelper.paging({ ...filter });
+    filter.offset = paging.offset;
+    filter.limit = paging.limit;
 
     if (!filter.start_date || !filter.end_date) return next(new CustomError('Pilih tanggal awal dan akhir', 400));
 
@@ -242,7 +256,7 @@ export const genExcelReportEvent = async (req: Request, res: Response, next: Nex
       start_date: (req.query.start_date as string) || '',
       end_date: (req.query.end_date as string) || '',
       outlet_id: outletIds,
-      created_by: req.user.kode_role == 'MKTO' ? req.user.nik : req.query.created_by,
+      created_by: common.isSalesRole(req.user.kode_role) ? req.user.nik : req.query.created_by,
     };
 
     if (!filter.start_date || !filter.end_date) return next(new CustomError('Pilih tanggal awal dan akhir', 400));
@@ -376,8 +390,15 @@ export const getReportLeads = async (req: Request, res: Response, next: NextFunc
       start_date: (req.query.start_date as string) || '',
       end_date: (req.query.end_date as string) || '',
       outlet_id: outletIds,
-      created_by: req.user.kode_role == 'MKTO' ? req.user.nik : req.query.created_by,
+      created_by: common.isSalesRole(req.user.kode_role) ? req.user.nik : req.query.created_by,
+      page: Number(req.query.page) || 1,
+      limit: Number(req.query.limit) || 250,
+      offset: null,
     };
+
+    const paging = queryHelper.paging({ ...filter });
+    filter.offset = paging.offset;
+    filter.limit = paging.limit;
 
     if (!filter.start_date || !filter.end_date) return next(new CustomError('Pilih tanggal awal dan akhir', 400));
 
@@ -417,7 +438,9 @@ export const genExcelReportLeads = async (req: Request, res: Response, next: Nex
       start_date: (req.query.start_date as string) || '',
       end_date: (req.query.end_date as string) || '',
       outlet_id: outletIds,
-      created_by: req.user.kode_role == 'MKTO' ? req.user.nik : req.query.created_by,
+      created_by: common.isSalesRole(req.user.kode_role) ? req.user.nik : req.query.created_by,
+      page: Number(req.query.page) || 1,
+      limit: Number(req.query.limit) || 250,
     };
 
     if (!filter.start_date || !filter.end_date) return next(new CustomError('Pilih tanggal awal dan akhir', 400));
@@ -563,8 +586,15 @@ export const getReportClosing = async (req: Request, res: Response, next: NextFu
       start_date: (req.query.start_date as string) || '',
       end_date: (req.query.end_date as string) || '',
       outlet_id: outletIds,
-      created_by: req.user.kode_role == 'MKTO' ? req.user.nik : req.query.created_by,
+      created_by: common.isSalesRole(req.user.kode_role) ? req.user.nik : req.query.created_by,
+      page: Number(req.query.page) || 1,
+      limit: Number(req.query.limit) || 250,
+      offset: null,
     };
+
+    const paging = queryHelper.paging({ ...filter });
+    filter.offset = paging.offset;
+    filter.limit = paging.limit;
 
     if (!filter.start_date || !filter.end_date) return next(new CustomError('Pilih tanggal awal dan akhir', 400));
 
@@ -604,7 +634,9 @@ export const genExcelReportClosing = async (req: Request, res: Response, next: N
       start_date: (req.query.start_date as string) || '',
       end_date: (req.query.end_date as string) || '',
       outlet_id: outletIds,
-      created_by: req.user.kode_role == 'MKTO' ? req.user.nik : req.query.created_by,
+      created_by: common.isSalesRole(req.user.kode_role) ? req.user.nik : req.query.created_by,
+      page: Number(req.query.page) || 1,
+      limit: Number(req.query.limit) || 250,
     };
 
     if (!filter.start_date || !filter.end_date) return next(new CustomError('Pilih tanggal awal dan akhir', 400));

@@ -1,11 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
-import { FindOptionsWhere, In } from 'typeorm';
+import { FindOptionsWhere, ILike, In } from 'typeorm';
 import { objectRemove, objectUpload } from '~/config/minio';
 import { dataSource } from '~/orm/dbCreateConnection';
 import { generateFileName } from '~/utils/common';
 import CustomError from '~/utils/customError';
 import queryHelper from '~/utils/queryHelper';
 import User from '../orm/entities/User';
+import * as common from '~/utils/common';
 
 const userRepo = dataSource.getRepository(User);
 
@@ -15,7 +16,8 @@ export const getUser = async (req: Request, res: Response, next: NextFunction) =
     const filter = {
       kode_role: (req.query.kode_role as string) ?? null,
       kode_unit_kerja: (req.query.kode_unit_kerja as string) ?? null,
-      nik_user: req.user.kode_role == 'MKTO' ? req.user.nik : undefined,
+      nik_user: common.isSalesRole(req.user.kode_role) ? req.user.nik : undefined,
+      nama: (req.query.nama as string) ?? null,
     };
 
     if (filter.kode_role) {
@@ -28,6 +30,10 @@ export const getUser = async (req: Request, res: Response, next: NextFunction) =
 
     if (filter.nik_user) {
       where.nik = filter.nik_user;
+    }
+
+    if (filter.nama) {
+      where.nama = ILike(`%${filter.nama}%`);
     }
 
     const paging = queryHelper.paging(req.query);

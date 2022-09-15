@@ -8,6 +8,9 @@ interface IFilter {
   outlet_id?: string[];
   user_id?: any;
   created_by?: any;
+  page?: number;
+  limit?: number;
+  offset?: any;
 }
 
 export const instansiReport = async (filter?: IFilter) => {
@@ -120,12 +123,20 @@ export const instansiReport = async (filter?: IFilter) => {
       q.andWhere('i.kode_unit_kerja IN (:...kodeUnitKerja)', { kodeUnitKerja: filter.outlet_id });
     }
 
+    const count = await q.getCount();
+
+    if (filter.page && filter.offset) {
+      q.limit(filter.limit);
+      q.offset(filter.offset);
+    }
+
     const data = await q.getRawMany();
     await queryRunner.release();
 
     return {
       err: false,
       data,
+      count,
     };
   } catch (error) {
     await queryRunner.release();
