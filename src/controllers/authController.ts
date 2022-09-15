@@ -73,6 +73,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
         unit_kerja: {
           nama: true,
           kode: true,
+          unit_kerja: true,
         },
       },
       where: [{ email: bodies.email }, { nik: bodies.username }],
@@ -157,6 +158,7 @@ export const exchangeTokenSso = async (req: Request, res: Response, next: NextFu
         unit_kerja: {
           nama: true,
           kode: true,
+          unit_kerja: true,
         },
       },
       relations: { role: true, unit_kerja: true },

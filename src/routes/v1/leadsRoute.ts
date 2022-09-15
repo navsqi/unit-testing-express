@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import protect from '~/middlewares/protect';
+import protect, { cabangOnly } from '~/middlewares/protect';
 import { uploadBuffer } from '~/utils/uploadFile';
 
 import * as leadsController from '../../controllers/leadsController';
@@ -15,14 +15,15 @@ router.post('/check/badan-usaha', protect(), leadsController.checkBadanUsahaByCi
 router.post(
   '/csv',
   protect(),
+  cabangOnly,
   uploadBuffer([{ name: 'csv', maxCount: 1 }], false),
   leadsController.createNewLeadsByCsv,
 );
 router.get('/nik-karyawan', protect(), leadsController.getNIKKaryawan);
 router.get('/:leadsId', leadsController.getLeadsById);
 router.get('/', protect(), leadsController.getLeads);
-router.post('/perorangan', protect(), inputLeadsVal, leadsController.createNewLeadsPerorangan);
-router.post('/badan-usaha', protect(), inputLeadsBadanUsahaVal, leadsController.createNewLeadsBadanUsaha);
+router.post('/perorangan', protect(), cabangOnly, inputLeadsVal, leadsController.createNewLeadsPerorangan);
+router.post('/badan-usaha', protect(), cabangOnly, inputLeadsBadanUsahaVal, leadsController.createNewLeadsBadanUsaha);
 router.patch('/:id/approve', protect(), leadsController.checkKTPAndApprove);
 router.patch('/:id/reject', protect(), leadsController.rejectLeads);
 router.patch('/:id', protect(), leadsController.updateLeads);

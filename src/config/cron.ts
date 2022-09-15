@@ -6,10 +6,10 @@ import logger from '~/utils/logger';
 
 const CRON_PATTERN = {
   every10s: '*/10 * * * * *',
-  every5am: '15 7 * * *',
+  every7am: '15 7 * * *',
 };
 
-const cronJob: CronJob = new CronJob(CRON_PATTERN.every5am, async () => {
+const cronJob: CronJob = new CronJob(CRON_PATTERN.every7am, async () => {
   try {
     logger.info('CRON', common.tanggal(new Date(), true));
     await schedulerClosingSvc.schedulerClosing();
