@@ -44,7 +44,11 @@ export const getReportInstansi = async (req: Request, res: Response, next: NextF
 
     const dataRes = {
       meta: {
-        count: report.data.length,
+        count: report.count,
+        rowCount: report.data.length,
+        page: filter.page,
+        limit: filter.limit,
+        offset: filter.offset,
       },
       report: data,
     };
@@ -232,7 +236,11 @@ export const getReportEvent = async (req: Request, res: Response, next: NextFunc
 
     const dataRes = {
       meta: {
-        count: report.data.length,
+        count: report.count,
+        rowCount: report.data.length,
+        page: filter.page,
+        limit: filter.limit,
+        offset: filter.offset,
       },
       report: data,
     };
@@ -414,7 +422,11 @@ export const getReportLeads = async (req: Request, res: Response, next: NextFunc
 
     const dataRes = {
       meta: {
-        count: report.data.length,
+        count: report.count,
+        rowCount: report.data.length,
+        page: filter.page,
+        limit: filter.limit,
+        offset: filter.offset,
       },
       report: data,
     };
@@ -439,8 +451,6 @@ export const genExcelReportLeads = async (req: Request, res: Response, next: Nex
       end_date: (req.query.end_date as string) || '',
       outlet_id: outletIds,
       created_by: common.isSalesRole(req.user.kode_role) ? req.user.nik : req.query.created_by,
-      page: Number(req.query.page) || 1,
-      limit: Number(req.query.limit) || 250,
     };
 
     if (!filter.start_date || !filter.end_date) return next(new CustomError('Pilih tanggal awal dan akhir', 400));
@@ -610,7 +620,11 @@ export const getReportClosing = async (req: Request, res: Response, next: NextFu
 
     const dataRes = {
       meta: {
-        count: report.data.length,
+        count: report.count,
+        rowCount: report.data.length,
+        page: filter.page,
+        limit: filter.limit,
+        offset: filter.offset,
       },
       report: data,
     };
@@ -635,8 +649,6 @@ export const genExcelReportClosing = async (req: Request, res: Response, next: N
       end_date: (req.query.end_date as string) || '',
       outlet_id: outletIds,
       created_by: common.isSalesRole(req.user.kode_role) ? req.user.nik : req.query.created_by,
-      page: Number(req.query.page) || 1,
-      limit: Number(req.query.limit) || 250,
     };
 
     if (!filter.start_date || !filter.end_date) return next(new CustomError('Pilih tanggal awal dan akhir', 400));
