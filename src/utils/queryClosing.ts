@@ -27,7 +27,7 @@ FROM
 WHERE
 	l.up_realisasi IS NULL
 	AND l.tanggal_realisasi IS NULL
-	AND l.nik_ktp = tmpk.nik_ktp
+	AND (l.nik_ktp = tmpk.nik_ktp OR l.cif = tmpk.cif)
    AND l.status = 1 
 	AND CAST (l.created_at AS DATE) <= CAST ( tmpk.tgl_fpk AS DATE )
 	AND tmpk.tgl_kredit IS NOT NULL
@@ -65,7 +65,7 @@ FROM
 WHERE
 	l.up_realisasi IS NULL
 	AND l.tanggal_realisasi IS NULL
-	AND l.nik_ktp = tmpk.nik_ktp
+	AND (l.nik_ktp = tmpk.nik_ktp OR l.cif = tmpk.cif)
 	AND l.status = 1
 	AND tmpk.tgl_transaksi IS NOT NULL
 	AND CAST (l.created_at AS DATE) <= CAST ( tmpk.tgl_transaksi AS DATE )

@@ -123,9 +123,11 @@ export const instansiReport = async (filter?: IFilter) => {
       q.andWhere('i.kode_unit_kerja IN (:...kodeUnitKerja)', { kodeUnitKerja: filter.outlet_id });
     }
 
-    const count = await q.getCount();
+    let count = null;
 
-    if (filter.page && filter.offset) {
+    if (filter.page && filter.limit && filter.offset !== null) {
+      count = await q.getCount();
+
       q.limit(filter.limit);
       q.offset(filter.offset);
     }
@@ -136,7 +138,7 @@ export const instansiReport = async (filter?: IFilter) => {
     return {
       err: false,
       data,
-      count,
+      count: count ?? data.length,
     };
   } catch (error) {
     await queryRunner.release();
@@ -205,12 +207,22 @@ export const eventReport = async (filter?: IFilter) => {
       q.andWhere('e.kode_unit_kerja IN (:...kodeUnitKerja)', { kodeUnitKerja: filter.outlet_id });
     }
 
+    let count = null;
+
+    if (filter.page && filter.limit && filter.offset !== null) {
+      count = await q.getCount();
+
+      q.limit(filter.limit);
+      q.offset(filter.offset);
+    }
+
     const data = await q.getRawMany();
     await queryRunner.release();
 
     return {
       err: false,
       data,
+      count: count ?? data.length,
     };
   } catch (error) {
     await queryRunner.release();
@@ -285,7 +297,7 @@ export const leadsReport = async (filter?: IFilter) => {
         return qb2;
       },
       'leadsclosing',
-      'leadsclosing.nik_ktp = leads.nik_ktp',
+      'leadsclosing.nik_ktp = leads.nik_ktp OR leadsclosing.cif = leads.cif',
     );
 
     q.leftJoin('produk', 'produk', 'produk.kode_produk = leadsclosing.kode_produk');
@@ -301,12 +313,22 @@ export const leadsReport = async (filter?: IFilter) => {
       q.andWhere('leads.created_by = :userId', { userId: filter.user_id });
     }
 
+    let count = null;
+
+    if (filter.page && filter.limit && filter.offset !== null) {
+      count = await q.getCount();
+
+      q.limit(filter.limit);
+      q.offset(filter.offset);
+    }
+
     const data = await q.getRawMany();
     await queryRunner.release();
 
     return {
       err: false,
       data,
+      count: count ?? data.length,
     };
   } catch (error) {
     await queryRunner.release();
@@ -370,7 +392,7 @@ export const closingReport = async (filter?: IFilter) => {
     q.leftJoin('outlet', 'outlet', 'outlet.kode = leads.kode_unit_kerja');
     q.leftJoin('outlet', 'outlet_p3', 'outlet_p3.kode = outlet.parent');
     q.leftJoin('outlet', 'outlet_p2', 'outlet_p2.kode = outlet_p3.parent');
-    q.innerJoin('leads_closing', 'lcs', 'lcs.nik_ktp = leads.nik_ktp');
+    q.innerJoin('leads_closing', 'lcs', 'lcs.leads_id = leads.id');
     q.leftJoin('produk', 'produk', 'produk.kode_produk = lcs.kode_produk');
 
     q.where('CAST(lcs.tgl_kredit AS date) >= :startDate', { startDate: filter.start_date });
@@ -384,12 +406,22 @@ export const closingReport = async (filter?: IFilter) => {
       q.andWhere('leads.created_by = :userId', { userId: filter.created_by });
     }
 
+    let count = null;
+
+    if (filter.page && filter.limit && filter.offset !== null) {
+      count = await q.getCount();
+
+      q.limit(filter.limit);
+      q.offset(filter.offset);
+    }
+
     const data: QueryResultClosingReport[] = await q.getRawMany();
     await queryRunner.release();
 
     return {
       err: false,
       data,
+      count: count ?? data.length,
     };
   } catch (error) {
     await queryRunner.release();
