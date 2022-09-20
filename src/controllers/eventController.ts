@@ -150,10 +150,26 @@ export const getEvent = async (req: Request, res: Response, next: NextFunction) 
 export const getEventById = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const event = await eventRepo.findOne({
+      select: {
+        user_created: {
+          nama: true,
+          nik: true,
+        },
+        outlet: {
+          nama: true,
+          kode: true,
+          unit_kerja: true,
+          parent: true,
+        },
+        instansi: {
+          nama_instansi: true,
+          jenis_instansi: true,
+        },
+      },
       where: {
         id: +req.params.id,
       },
-      relations: { instansi: true, outlet: true },
+      relations: { instansi: true, outlet: true, user_created: true },
     });
 
     const dataRes = {

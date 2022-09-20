@@ -1,12 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import { approvedInstansi, approvedLeads, approvedMou } from '~/services/dashboardSvc';
 import { konsolidasiTopBottom } from '~/services/konsolidasiSvc';
-import { closingReport, eventReport, instansiReport, leadsReport } from '~/services/reportSvc';
 import * as common from '~/utils/common';
 import CustomError from '~/utils/customError';
-import { mapClosingReport, mapInstansiReport, mapLeadsReport } from '~/utils/mappingReport';
-import queryHelper from '~/utils/queryHelper';
-import xls from '~/utils/xls';
 
 export const getApprovedInstansi = async (req: Request, res: Response, next: NextFunction) => {
   try {

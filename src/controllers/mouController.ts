@@ -230,7 +230,27 @@ export const genExcelMou = async (req: Request, res: Response, next: NextFunctio
 export const getMouById = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const mou = await mouRepo.findOne({
-      relations: ['outlet'],
+      select: {
+        user_created: {
+          nama: true,
+          nik: true,
+        },
+        outlet: {
+          nama: true,
+          kode: true,
+          unit_kerja: true,
+          parent: true,
+        },
+        instansi: {
+          nama_instansi: true,
+          jenis_instansi: true,
+        },
+      },
+      relations: {
+        outlet: true,
+        instansi: true,
+        user_created: true,
+      },
       where: {
         id: +req.params.id,
       },

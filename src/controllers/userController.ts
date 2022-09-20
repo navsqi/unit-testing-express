@@ -146,3 +146,17 @@ export const getUserById = async (req: Request, res: Response, next: NextFunctio
     return next(e);
   }
 };
+
+export const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const user = await userRepo.delete({ id: +req.params.id });
+
+    const dataRes = {
+      user: user,
+    };
+
+    return res.customSuccess(200, 'Delete user success', dataRes);
+  } catch (e) {
+    return next(e);
+  }
+};

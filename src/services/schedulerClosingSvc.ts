@@ -1,5 +1,4 @@
 import dayjs from 'dayjs';
-import { EntityManager, SelectQueryBuilder } from 'typeorm';
 import { dataSource } from '~/orm/dbCreateConnection';
 import { ITmpKreditQuery, ITmpKreditTabemasQuery } from '~/types/queryClosingTypes';
 import logger from '~/utils/logger';
@@ -13,10 +12,7 @@ export const schedulerClosing = async () => {
   const manager = queryRunner.manager;
 
   try {
-    logger.info('QUERY_CLOSING', `STARTING AT ${dayjs().format('DD/MM/YYYY HH:mm:ss')}`);
-    // const q = manager.createQueryBuilder();
-
-    // const data = await q.getRawMany();
+    logger.info('QUERY_CLOSING', `TMP_KREDIT STARTING AT ${dayjs().format('DD/MM/YYYY HH:mm:ss')}`);
 
     // Select tmp_kredit
     const tmpKredits: ITmpKreditQuery[] = await manager.query(queryClosing.selectTmpKredit);
@@ -29,10 +25,9 @@ export const schedulerClosing = async () => {
       );
 
       if (checkNoKredit && checkNoKredit.length > 0) {
-        // jika duplikat
-        // produk update saldo te & osl ke 0
+        // jika duplikat no kredit/kontrak update saldo te & osl ke 0
         await manager.query(
-          `UPDATE leads_closing SET saldo_tabemas = NULL, osl = NULL WHERE no_kontrak = '${tmpKredit.no_kontrak}' AND created_at < now()`,
+          `UPDATE leads_closing SET saldo_tabemas = NULL, osl = NULL WHERE no_kontrak = '${tmpKredit.no_kontrak}' AND CAST(created_at AS DATE) < CAST(now() AS date)`,
         );
 
         // insert ke leads closing
@@ -63,8 +58,7 @@ export const schedulerClosing = async () => {
           ],
         );
       } else {
-        // jika tidak duplikat
-        // insert ke tb leads_closing
+        // jika tidak duplikat no kredit/kontrak insert ke tb leads_closing
         await manager.query(
           `INSERT INTO leads_closing 
         (leads_id, nik_ktp, cif, no_kontrak, marketing_code, tgl_fpk, tgl_cif, tgl_kredit, kode_unit_kerja, kode_unit_kerja_pencairan, up, outlet_syariah, status_new_cif, osl, saldo_tabemas, channel_id,channel, kode_produk) VALUES 
@@ -92,34 +86,6 @@ export const schedulerClosing = async () => {
           ],
         );
       }
-
-      // insert semua closingan ke log (untuk log osl)
-      // await manager.query(
-      //   `INSERT INTO log_leads_closing
-      //   (leads_id, nik_ktp, cif, no_kontrak, marketing_code, tgl_fpk, tgl_cif, tgl_kredit, kode_unit_kerja, kode_unit_kerja_pencairan, up, outlet_syariah, status_new_cif, osl, saldo_tabemas, channel_id,channel, kode_produk) VALUES
-      //   ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
-      //   `,
-      //   [
-      //     tmpKredit.leads_id,
-      //     tmpKredit.nik_ktp,
-      //     tmpKredit.cif,
-      //     tmpKredit.no_kontrak,
-      //     tmpKredit.marketing_code,
-      //     tmpKredit.tgl_fpk,
-      //     null, //tgl cif
-      //     tmpKredit.tgl_kredit,
-      //     tmpKredit.kode_outlet,
-      //     tmpKredit.kode_outlet_pencairan,
-      //     tmpKredit.up,
-      //     tmpKredit.outlet_syariah,
-      //     0,
-      //     tmpKredit.osl,
-      //     tmpKredit.saldo_tabemas,
-      //     tmpKredit.channel_id,
-      //     tmpKredit.nama_channel,
-      //     tmpKredit.product_code,
-      //   ],
-      // );
     }
 
     // menghapus data history bigdata
@@ -143,8 +109,9 @@ export const schedulerClosing = async () => {
     await queryRunner.release();
   }
 };
+// ==== END OF CLOSING NON TABEMAS
 
-// ==== CLOSING TABEMAS ====
+// ==== CLOSING TABEMAS
 export const schedulerClosingTabemas = async () => {
   const queryRunner = dataSource.createQueryRunner();
   await queryRunner.connect();
@@ -152,7 +119,7 @@ export const schedulerClosingTabemas = async () => {
   const manager = queryRunner.manager;
 
   try {
-    logger.info('QUERY_CLOSING', `STARTING AT ${dayjs().format('DD/MM/YYYY HH:mm:ss')}`);
+    logger.info('QUERY_CLOSING', `TMP_KREDIT_TABEMAS STARTING AT ${dayjs().format('DD/MM/YYYY HH:mm:ss')}`);
 
     // Select tmp_kredit
     const tmpKredits: ITmpKreditTabemasQuery[] = await manager.query(queryClosing.selectTmpKreditTabemas);
@@ -167,10 +134,9 @@ export const schedulerClosingTabemas = async () => {
       );
 
       if (checkNoKredit && checkNoKredit.length > 0) {
-        // jika duplikat
-        // produk update saldo te & osl ke 0
+        // jika duplikat no_rekening update saldo te & osl ke 0
         await manager.query(
-          `UPDATE leads_closing SET saldo_tabemas = NULL, osl = NULL WHERE no_kontrak = '${tmpKredit.no_kontrak}' AND created_at < now()`,
+          `UPDATE leads_closing SET saldo_tabemas = NULL, osl = NULL WHERE no_kontrak = '${tmpKredit.no_kontrak}' AND CAST(created_at AS DATE) < CAST(now() AS date)`,
         );
 
         // insert ke leads closing
@@ -202,8 +168,7 @@ export const schedulerClosingTabemas = async () => {
         // update status leads ke CLS
         await manager.query(`UPDATE leads SET step = 'CLS' WHERE id = '${tmpKredit.leads_id}' AND step = 'CLP'`);
       } else {
-        // jika tidak duplikat
-        // insert ke tb leads_closing
+        // jika tidak duplikat insert ke tb leads_closing
         await manager.query(
           `INSERT INTO leads_closing 
         (leads_id, nik_ktp, cif, no_kontrak, marketing_code, tgl_fpk, tgl_kredit, kode_unit_kerja, kode_unit_kerja_pencairan, up, status_new_cif, osl, saldo_tabemas, channel_id,channel, kode_produk) VALUES 
@@ -232,32 +197,6 @@ export const schedulerClosingTabemas = async () => {
         // update status leads ke CLS
         await manager.query(`UPDATE leads SET step = 'CLS' WHERE id = '${tmpKredit.leads_id}' AND step = 'CLP'`);
       }
-
-      // insert semua closingan ke log (untuk log osl)
-      // await manager.query(
-      //   `INSERT INTO log_leads_closing
-      //   (leads_id, nik_ktp, cif, no_kontrak, marketing_code, tgl_fpk, tgl_kredit, kode_unit_kerja, kode_unit_kerja_pencairan, up, status_new_cif, osl, saldo_tabemas, channel_id,channel, kode_produk) VALUES
-      //   ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
-      //   `,
-      //   [
-      //     tmpKredit.leads_id,
-      //     tmpKredit.nik_ktp,
-      //     tmpKredit.cif,
-      //     tmpKredit.no_kontrak,
-      //     tmpKredit.marketing_code,
-      //     tmpKredit.tgl_fpk,
-      //     tmpKredit.tgl_kredit,
-      //     tmpKredit.kode_outlet,
-      //     tmpKredit.kode_outlet_pencairan,
-      //     up,
-      //     0,
-      //     tmpKredit.osl,
-      //     tmpKredit.saldo,
-      //     tmpKredit.channel_id,
-      //     tmpKredit.nama_channel,
-      //     tmpKredit.product_code,
-      //   ],
-      // );
     }
 
     // menghapus data history bigdata
@@ -281,6 +220,7 @@ export const schedulerClosingTabemas = async () => {
     await queryRunner.release();
   }
 };
+// ==== END OF CLOSING TABEMAS
 
 export default {
   schedulerClosing,
