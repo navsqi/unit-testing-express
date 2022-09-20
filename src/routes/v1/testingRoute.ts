@@ -1,10 +1,6 @@
 import { Router } from 'express';
 import { basicAuth } from '~/middlewares/basicAuth';
 import schedulerClosingSvc from '~/services/schedulerClosingSvc';
-import schedulerClosing from '~/services/schedulerClosingSvc';
-
-// import * as eventController from '../../controllers/eventController';
-// import protect from '../../middlewares/protect';
 
 const router = Router();
 

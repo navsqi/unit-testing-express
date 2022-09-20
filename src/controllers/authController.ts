@@ -1,13 +1,13 @@
 import { NextFunction, Request, Response } from 'express';
 import APISSO from '~/apis/sso';
-import { objectUpload, objectRemove } from '~/config/minio';
+import { objectUpload } from '~/config/minio';
 import { ISSOExchangeTokenResponse } from '~/interfaces/ISso';
 import { dataSource } from '~/orm/dbCreateConnection';
 import { generateFileName } from '~/utils/common';
 import ssoHelper from '~/utils/ssoHelper';
 import User from '../orm/entities/User';
-import CustomError from '../utils/customError';
 import { signToken } from '../services/tokenSvc';
+import CustomError from '../utils/customError';
 
 const userRepo = dataSource.getRepository(User);
 

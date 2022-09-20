@@ -1,6 +1,4 @@
-import { SelectQueryBuilder } from 'typeorm';
 import { dataSource } from '~/orm/dbCreateConnection';
-import { QueryResultClosingReport } from '~/types/reportTypes';
 
 interface IFilter {
   start_date: string;
