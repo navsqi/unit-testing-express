@@ -222,38 +222,3 @@ export const omsetPerKategoriProduk = async (filter?: IFilter) => {
     return { err: error.message, data: null };
   }
 };
-
-// Omset Pembiayaan
-
-// Omset Tabemas
-// SELECT
-// 	COALESCE (SUM(lc.osl), 0)
-// FROM
-// 	leads_closing lc
-// INNER JOIN leads l ON
-// 	l.id = lc.leads_id
-// WHERE
-// 	lc.kode_unit_kerja IN (
-
-// WITH RECURSIVE cte AS (
-// 	SELECT
-// 		kode,
-// 		parent
-// 	FROM
-// 		outlet
-// 	WHERE
-// 		kode = '00108'
-// UNION
-// 	SELECT
-// 		o2.kode,
-// 		o2.parent
-// 	FROM
-// 		outlet o2
-// 	INNER JOIN cte s ON
-// 		o2.parent = s.kode
-//          )
-// 	SELECT
-// 		kode
-// 	FROM
-// 		cte
-// ) AND l.kode_produk = '62';
