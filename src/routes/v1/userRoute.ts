@@ -18,4 +18,6 @@ router.put(
   userController.editUser,
 );
 
+router.delete('/:id', protect(['ADMN', 'SADM']), userController.deleteUser);
+
 export default router;
