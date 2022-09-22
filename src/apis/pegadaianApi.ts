@@ -1,7 +1,6 @@
 import 'dotenv/config';
 
 import axios, { AxiosPromise } from 'axios';
-import logger from '~/utils/logger';
 
 interface IBadanUsahaByCif {
   cif: string;
@@ -88,7 +87,6 @@ export const bodyEktp = {
 };
 
 export const getToken = async (): Promise<AxiosPromise> => {
-  logger.info('GET_TOKEN_API', 'HITTING OAUTH API...');
   const getToken = await axios.post(
     pegadaianApiEnv.authApi.url + '/oauth/token',
     new URLSearchParams({
@@ -177,7 +175,6 @@ export const getNasabahByIdKtpPassion = async (body: IKTPPassion): Promise<Axios
 
   const bearerToken = reqBearerToken.data.access_token;
 
-  logger.info('HIT_API_MW_IDKTP', 'HITTING....');
   const nasabah = await axios.post(
     pegadaianApiEnv.api.url + '/customer/checkktp',
     {
@@ -201,7 +198,6 @@ export const getNasabahByCif = async (body): Promise<AxiosPromise> => {
 
   const bearerToken = reqBearerToken.data.access_token;
 
-  logger.info('HIT_API_MW_CIF', 'HITTING....');
   const nasabah = await axios.post(
     pegadaianApiEnv.api.url + '/customer/inquiry',
     {
