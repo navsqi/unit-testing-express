@@ -166,7 +166,9 @@ export const schedulerClosingTabemas = async () => {
         );
 
         // update status leads ke CLS
-        await manager.query(`UPDATE leads SET step = 'CLS' WHERE id = '${tmpKredit.leads_id}' AND step = 'CLP'`);
+        await manager.query(
+          `UPDATE leads SET step = 'CLS', cif = '${tmpKredit.cif}', updated_at = now() WHERE id = '${tmpKredit.leads_id}' AND step = 'CLP'`,
+        );
       } else {
         // jika tidak duplikat insert ke tb leads_closing
         await manager.query(
@@ -195,7 +197,9 @@ export const schedulerClosingTabemas = async () => {
         );
 
         // update status leads ke CLS
-        await manager.query(`UPDATE leads SET step = 'CLS' WHERE id = '${tmpKredit.leads_id}' AND step = 'CLP'`);
+        await manager.query(
+          `UPDATE leads SET step = 'CLP', cif = '${tmpKredit.cif}', updated_at = now() WHERE id = '${tmpKredit.leads_id}' AND step = 'CLP'`,
+        );
       }
     }
 
