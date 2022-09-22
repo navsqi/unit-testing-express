@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import '~/config/check-env';
 import express from 'express';
 import actuator from 'express-actuator';
 import morgan from 'morgan';
