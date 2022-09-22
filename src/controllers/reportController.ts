@@ -34,7 +34,8 @@ export const getReportInstansi = async (req: Request, res: Response, next: NextF
 
     const dateDiff = common.getDiffDateCount(filter.start_date, filter.end_date);
 
-    if (dateDiff > 31) return next(new CustomError('Maksimal 31 hari', 400));
+    if (dateDiff > +process.env.DATERANGE_REPORT)
+      return next(new CustomError(`Maksimal ${process.env.DATERANGE_REPORT} hari`, 400));
 
     const report = await instansiReport(filter);
 
@@ -79,7 +80,8 @@ export const genExcelReportInstansi = async (req: Request, res: Response, next: 
 
     const dateDiff = common.getDiffDateCount(filter.start_date, filter.end_date);
 
-    if (dateDiff > 31) return next(new CustomError('Maksimal 31 hari', 400));
+    if (dateDiff > +process.env.DATERANGE_REPORT)
+      return next(new CustomError(`Maksimal ${process.env.DATERANGE_REPORT} hari`, 400));
 
     const report = await instansiReport(filter);
 
@@ -226,7 +228,8 @@ export const getReportEvent = async (req: Request, res: Response, next: NextFunc
 
     const dateDiff = common.getDiffDateCount(filter.start_date, filter.end_date);
 
-    if (dateDiff > 31) return next(new CustomError('Maksimal 31 hari', 400));
+    if (dateDiff > +process.env.DATERANGE_REPORT)
+      return next(new CustomError(`Maksimal ${process.env.DATERANGE_REPORT} hari`, 400));
 
     const report = await eventReport(filter);
 
@@ -271,7 +274,8 @@ export const genExcelReportEvent = async (req: Request, res: Response, next: Nex
 
     const dateDiff = common.getDiffDateCount(filter.start_date, filter.end_date);
 
-    if (dateDiff > 31) return next(new CustomError('Maksimal 31 hari', 400));
+    if (dateDiff > +process.env.DATERANGE_REPORT)
+      return next(new CustomError(`Maksimal ${process.env.DATERANGE_REPORT} hari`, 400));
 
     const report = await eventReport(filter);
 
@@ -412,7 +416,8 @@ export const getReportLeads = async (req: Request, res: Response, next: NextFunc
 
     const dateDiff = common.getDiffDateCount(filter.start_date, filter.end_date);
 
-    if (dateDiff > 31) return next(new CustomError('Maksimal 31 hari', 400));
+    if (dateDiff > +process.env.DATERANGE_REPORT)
+      return next(new CustomError(`Maksimal ${process.env.DATERANGE_REPORT} hari`, 400));
 
     const report = await leadsReport(filter);
 
@@ -457,7 +462,8 @@ export const genExcelReportLeads = async (req: Request, res: Response, next: Nex
 
     const dateDiff = common.getDiffDateCount(filter.start_date, filter.end_date);
 
-    if (dateDiff > 31) return next(new CustomError('Maksimal 31 hari', 400));
+    if (dateDiff > +process.env.DATERANGE_REPORT)
+      return next(new CustomError(`Maksimal ${process.env.DATERANGE_REPORT} hari`, 400));
 
     const report = await leadsReport(filter);
 
@@ -610,7 +616,8 @@ export const getReportClosing = async (req: Request, res: Response, next: NextFu
 
     const dateDiff = common.getDiffDateCount(filter.start_date, filter.end_date);
 
-    if (dateDiff > 31) return next(new CustomError('Maksimal 31 hari', 400));
+    if (dateDiff > +process.env.DATERANGE_REPORT)
+      return next(new CustomError(`Maksimal ${process.env.DATERANGE_REPORT} hari`, 400));
 
     const report = await closingReport(filter);
 
@@ -655,7 +662,8 @@ export const genExcelReportClosing = async (req: Request, res: Response, next: N
 
     const dateDiff = common.getDiffDateCount(filter.start_date, filter.end_date);
 
-    if (dateDiff > 31) return next(new CustomError('Maksimal 31 hari', 400));
+    if (dateDiff > +process.env.DATERANGE_REPORT)
+      return next(new CustomError(`Maksimal ${process.env.DATERANGE_REPORT} hari`, 400));
 
     const report = await closingReport(filter);
 

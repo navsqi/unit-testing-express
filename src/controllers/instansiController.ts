@@ -92,7 +92,8 @@ export const genExcelMasterInstansi = async (req: Request, res: Response, next: 
 
     const dateDiff = common.getDiffDateCount(filter.start_date, filter.end_date);
 
-    if (dateDiff > 90) return next(new CustomError('Maksimal 90 hari', 400));
+    if (dateDiff > +process.env.DATERANGE_INSTANSI_EXCEL)
+      return next(new CustomError(`Maksimal ${process.env.DATERANGE_INSTANSI_EXCEL} hari`, 400));
 
     const paging = common.pagingExcel();
 
@@ -108,7 +109,7 @@ export const genExcelMasterInstansi = async (req: Request, res: Response, next: 
       worksheet.column(i).setWidth(exclude.includes(i) ? 10 : 25);
     }
 
-    worksheet.cell(1, 1, 1, 9, true).string('DAFTAR NAMA MASTER INSTANSI').style(headingStyle);
+    worksheet.cell(1, 1, 1, 9, true).string('LIST MASTER INSTANSI').style(headingStyle);
     worksheet
       .cell(2, 1, 2, 9, true)
       .string(`TANGGAL ${tanggal(req.query.start_date as string)} S.D. ${tanggal(req.query.end_date as string)}`)
@@ -310,7 +311,16 @@ export const getInstansi = async (req: Request, res: Response, next: NextFunctio
 
 export const genExcelInstansi = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    let outletIds = [];
+    const outletId = (req.query.kode_unit_kerja || req.user.kode_unit_kerja) as string;
+
+    if (!outletId.startsWith('000')) {
+      outletIds = await konsolidasiTopBottom(outletId as string);
+    }
+
     const filter = {
+      is_approved: 1,
+      outlet_id: outletIds,
       nama_instansi: req.query.nama_instansi || '',
       start_date: (req.query.start_date as string) || '',
       end_date: (req.query.end_date as string) || '',
@@ -320,7 +330,8 @@ export const genExcelInstansi = async (req: Request, res: Response, next: NextFu
 
     const dateDiff = common.getDiffDateCount(filter.start_date, filter.end_date);
 
-    if (dateDiff > 90) return next(new CustomError('Maksimal 90 hari', 400));
+    if (dateDiff > +process.env.DATERANGE_INSTANSI_EXCEL)
+      return next(new CustomError(`Maksimal ${process.env.DATERANGE_INSTANSI_EXCEL} hari`, 400));
 
     const paging = common.pagingExcel();
 
@@ -336,7 +347,7 @@ export const genExcelInstansi = async (req: Request, res: Response, next: NextFu
       worksheet.column(i).setWidth(exclude.includes(i) ? 10 : 25);
     }
 
-    worksheet.cell(1, 1, 1, 9, true).string('DAFTAR NAMA INSTANSI').style(headingStyle);
+    worksheet.cell(1, 1, 1, 9, true).string('LIST INSTANSI').style(headingStyle);
     worksheet
       .cell(2, 1, 2, 9, true)
       .string(`TANGGAL ${tanggal(req.query.start_date as string)} S.D. ${tanggal(req.query.end_date as string)}`)

@@ -50,6 +50,10 @@ declare global {
       PEGADAIANAPI_CHANNELID: string;
       PEGADAIANAPI_CLIENTID: string;
       SENTRY_DSN: string;
+      DATERANGE_EVENT_CREATE: string;
+      DATERANGE_MOU: string;
+      DATERANGE_INSTANSI_EXCEL: string;
+      DATERANGE_REPORT: string;
     }
   }
 }
