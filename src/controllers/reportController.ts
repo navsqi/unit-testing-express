@@ -3,7 +3,7 @@ import { konsolidasiTopBottom } from '~/services/konsolidasiSvc';
 import { closingReport, eventReport, instansiReport, leadsReport } from '~/services/reportSvc';
 import * as common from '~/utils/common';
 import CustomError from '~/utils/customError';
-import { mapClosingReport, mapInstansiReport, mapLeadsReport } from '~/utils/mappingReport';
+import { mapClosingReport, mapEventReport, mapInstansiReport, mapLeadsReport } from '~/utils/mappingReport';
 import queryHelper from '~/utils/queryHelper';
 import xls from '~/utils/xls';
 
@@ -180,7 +180,7 @@ export const genExcelReportInstansi = async (req: Request, res: Response, next: 
 
         worksheet
           .cell(rows, ++bodyLineNum)
-          .string(data)
+          .string(data && data != 'null' ? data : '-')
           .style(outlineStyle);
       }
 
@@ -232,7 +232,7 @@ export const getReportEvent = async (req: Request, res: Response, next: NextFunc
 
     if (report.err) return next(new CustomError(report.err, 400));
 
-    const data = mapInstansiReport(report.data);
+    const data = mapEventReport(report.data);
 
     const dataRes = {
       meta: {
@@ -277,7 +277,7 @@ export const genExcelReportEvent = async (req: Request, res: Response, next: Nex
 
     if (report.err) return next(new CustomError(report.err, 400));
 
-    const data = mapInstansiReport(report.data);
+    const data = mapEventReport(report.data);
 
     const { workbook, worksheet, headingStyle, outlineHeadingStyle, outlineStyle } = xls();
 
@@ -343,7 +343,7 @@ export const genExcelReportEvent = async (req: Request, res: Response, next: Nex
       { property: 'outlet_4', isMoney: false, isDate: false },
       { property: 'outlet_3', isMoney: false, isDate: false },
       { property: 'outlet_2', isMoney: false, isDate: false },
-      { property: 'created_at', isMoney: false, isDate: false },
+      { property: 'created_at', isMoney: false, isDate: true },
     ];
 
     for (const [index, val] of data.entries()) {
@@ -366,7 +366,7 @@ export const genExcelReportEvent = async (req: Request, res: Response, next: Nex
 
         worksheet
           .cell(rows, ++bodyLineNum)
-          .string(data)
+          .string(data && data != 'null' ? data : '-')
           .style(outlineStyle);
       }
 
@@ -539,7 +539,7 @@ export const genExcelReportLeads = async (req: Request, res: Response, next: Nex
       { property: 'outlet_4', isMoney: false, isDate: false },
       { property: 'outlet_3', isMoney: false, isDate: false },
       { property: 'outlet_2', isMoney: false, isDate: false },
-      { property: 'created_at', isMoney: false },
+      { property: 'created_at', isMoney: false, isDate: true },
       { property: 'step', isMoney: false, isDate: false },
       { property: 'is_ktp_valid', isMoney: false, isDate: false },
     ];
@@ -564,7 +564,7 @@ export const genExcelReportLeads = async (req: Request, res: Response, next: Nex
 
         worksheet
           .cell(rows, ++bodyLineNum)
-          .string(data)
+          .string(data && data != 'null' ? data : '-')
           .style(outlineStyle);
       }
 
@@ -752,7 +752,7 @@ export const genExcelReportClosing = async (req: Request, res: Response, next: N
 
         worksheet
           .cell(rows, ++bodyLineNum)
-          .string(data)
+          .string(data && data != 'null' ? data : '-')
           .style(outlineStyle);
       }
 
