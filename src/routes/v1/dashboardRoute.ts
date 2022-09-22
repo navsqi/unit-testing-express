@@ -5,6 +5,6 @@ import protect from '../../middlewares/protect';
 
 const router = Router();
 
-router.get('/approved', protect(), reportController.getApprovedInstansi);
+router.get('/', protect(), reportController.dashboard);
 
 export default router;

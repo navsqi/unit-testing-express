@@ -1,10 +1,7 @@
 import { dataSource } from '~/orm/dbCreateConnection';
 
 interface IFilter {
-  start_date: string;
-  end_date: string;
-  outlet_id?: string[];
-  user_id?: any;
+  outlet_id?: string[] | string;
   created_by?: any;
 }
 
@@ -128,6 +125,97 @@ export const approvedMou = async (filter?: IFilter) => {
     return {
       err: false,
       data: res,
+    };
+  } catch (error) {
+    await queryRunner.release();
+    return { err: error.message, data: null };
+  }
+};
+
+export const omsetPerKategoriProduk = async (filter?: IFilter) => {
+  const queryRunner = dataSource.createQueryRunner();
+  await queryRunner.connect();
+  const manager = queryRunner.manager;
+
+  try {
+    const omset_pembiayaan = await manager.query(
+      `
+      SELECT
+        COALESCE (SUM(lc.osl), 0) as total
+      FROM
+        leads_closing lc
+      INNER JOIN leads l ON
+        l.id = lc.leads_id
+      WHERE
+        lc.kode_unit_kerja IN (
+      
+      WITH RECURSIVE cte AS (
+        SELECT
+          kode,
+          parent
+        FROM
+          outlet
+        WHERE
+          kode = '${filter.outlet_id}'
+      UNION
+        SELECT
+          o2.kode,
+          o2.parent
+        FROM
+          outlet o2
+        INNER JOIN cte s ON
+          o2.parent = s.kode
+              )
+        SELECT
+          kode
+        FROM
+          cte
+      ) AND l.kode_produk <> '62'
+      `,
+    );
+
+    const omset_tabemas = await manager.query(
+      `
+      SELECT
+        COALESCE (SUM(lc.osl), 0) as total
+      FROM
+        leads_closing lc
+      INNER JOIN leads l ON
+        l.id = lc.leads_id
+      WHERE
+        lc.kode_unit_kerja IN (
+      
+      WITH RECURSIVE cte AS (
+        SELECT
+          kode,
+          parent
+        FROM
+          outlet
+        WHERE
+          kode = '${filter.outlet_id}'
+      UNION
+        SELECT
+          o2.kode,
+          o2.parent
+        FROM
+          outlet o2
+        INNER JOIN cte s ON
+          o2.parent = s.kode
+              )
+        SELECT
+          kode
+        FROM
+          cte
+      ) AND l.kode_produk = '62'
+      `,
+    );
+
+    return {
+      err: false,
+      data: {
+        omset_pembiayaan: omset_pembiayaan[0].total,
+        omset_tabemas: omset_tabemas[0].total,
+      },
     };
   } catch (error) {
     await queryRunner.release();

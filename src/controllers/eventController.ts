@@ -23,7 +23,10 @@ export const createEvent = async (req: Request, res: Response, next: NextFunctio
 
     const dateDiff = Math.abs(common.getDiffDateCount(dayjs().format('YYYY-MM-DD'), bodies.tanggal_event));
 
-    if (dateDiff > 7) return next(new CustomError('Tanggal event melebihi 7 hari per-hari ini', 400));
+    if (dateDiff > +process.env.DATERANGE_EVENT_CREATE)
+      return next(
+        new CustomError(`Tanggal event melebihi ${process.env.DATERANGE_EVENT_CREATE} hari per-hari ini`, 400),
+      );
 
     const ev = new Event();
 

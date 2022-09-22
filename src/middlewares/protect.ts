@@ -62,7 +62,6 @@ export const protect = (roles?: string[], isExclude = false) => {
 
 export const cabangOnly = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    console.log(req.user);
     if (Number(req.user.unit_kerja.unit_kerja) !== 4)
       return next(new CustomError(`Hanya user cabang yang dapat melakukan aksi`, 403));
 

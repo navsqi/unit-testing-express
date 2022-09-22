@@ -3,6 +3,7 @@ import { Readable } from 'stream';
 import crypto from 'crypto';
 import dayjs from 'dayjs';
 import { IGenerateNestedArrOfObj } from '~/types/commonTypes';
+import { IPaging } from './queryHelper';
 
 export const generateRandomStr = (length: number) => {
   const id = crypto.randomBytes(length).toString('hex').toUpperCase();
@@ -94,7 +95,7 @@ export const generateNestedMenu = (arr: IGenerateNestedArrOfObj[]) => {
     }, new Map([['root', []]]))
     .get('root');
 
-  console.log(result);
+  return result;
 };
 
 export const getCakupanUnit = (unit: number) => {
@@ -120,4 +121,17 @@ export const isSalesRole = (kodeRole: string) => {
   if (kodeRole == 'MKTO' || kodeRole.includes('BPO')) return true;
 
   return false;
+};
+
+export const getDescendantProp = (obj, desc) => {
+  const arr = desc.split('.');
+  while (arr.length && (obj = obj[arr.shift()]));
+  return obj;
+};
+
+export const pagingExcel = (): IPaging => {
+  return {
+    limit: undefined,
+    offset: undefined,
+  };
 };

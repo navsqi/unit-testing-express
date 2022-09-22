@@ -3,7 +3,7 @@ import { konsolidasiTopBottom } from '~/services/konsolidasiSvc';
 import { closingReport, eventReport, instansiReport, leadsReport } from '~/services/reportSvc';
 import * as common from '~/utils/common';
 import CustomError from '~/utils/customError';
-import { mapClosingReport, mapInstansiReport, mapLeadsReport } from '~/utils/mappingReport';
+import { mapClosingReport, mapEventReport, mapInstansiReport, mapLeadsReport } from '~/utils/mappingReport';
 import queryHelper from '~/utils/queryHelper';
 import xls from '~/utils/xls';
 
@@ -34,7 +34,8 @@ export const getReportInstansi = async (req: Request, res: Response, next: NextF
 
     const dateDiff = common.getDiffDateCount(filter.start_date, filter.end_date);
 
-    if (dateDiff > 31) return next(new CustomError('Maksimal 31 hari', 400));
+    if (dateDiff > +process.env.DATERANGE_REPORT)
+      return next(new CustomError(`Maksimal ${process.env.DATERANGE_REPORT} hari`, 400));
 
     const report = await instansiReport(filter);
 
@@ -79,7 +80,8 @@ export const genExcelReportInstansi = async (req: Request, res: Response, next: 
 
     const dateDiff = common.getDiffDateCount(filter.start_date, filter.end_date);
 
-    if (dateDiff > 31) return next(new CustomError('Maksimal 31 hari', 400));
+    if (dateDiff > +process.env.DATERANGE_REPORT)
+      return next(new CustomError(`Maksimal ${process.env.DATERANGE_REPORT} hari`, 400));
 
     const report = await instansiReport(filter);
 
@@ -180,7 +182,7 @@ export const genExcelReportInstansi = async (req: Request, res: Response, next: 
 
         worksheet
           .cell(rows, ++bodyLineNum)
-          .string(data)
+          .string(data && data != 'null' ? data : '-')
           .style(outlineStyle);
       }
 
@@ -226,13 +228,14 @@ export const getReportEvent = async (req: Request, res: Response, next: NextFunc
 
     const dateDiff = common.getDiffDateCount(filter.start_date, filter.end_date);
 
-    if (dateDiff > 31) return next(new CustomError('Maksimal 31 hari', 400));
+    if (dateDiff > +process.env.DATERANGE_REPORT)
+      return next(new CustomError(`Maksimal ${process.env.DATERANGE_REPORT} hari`, 400));
 
     const report = await eventReport(filter);
 
     if (report.err) return next(new CustomError(report.err, 400));
 
-    const data = mapInstansiReport(report.data);
+    const data = mapEventReport(report.data);
 
     const dataRes = {
       meta: {
@@ -271,13 +274,14 @@ export const genExcelReportEvent = async (req: Request, res: Response, next: Nex
 
     const dateDiff = common.getDiffDateCount(filter.start_date, filter.end_date);
 
-    if (dateDiff > 31) return next(new CustomError('Maksimal 31 hari', 400));
+    if (dateDiff > +process.env.DATERANGE_REPORT)
+      return next(new CustomError(`Maksimal ${process.env.DATERANGE_REPORT} hari`, 400));
 
     const report = await eventReport(filter);
 
     if (report.err) return next(new CustomError(report.err, 400));
 
-    const data = mapInstansiReport(report.data);
+    const data = mapEventReport(report.data);
 
     const { workbook, worksheet, headingStyle, outlineHeadingStyle, outlineStyle } = xls();
 
@@ -343,7 +347,7 @@ export const genExcelReportEvent = async (req: Request, res: Response, next: Nex
       { property: 'outlet_4', isMoney: false, isDate: false },
       { property: 'outlet_3', isMoney: false, isDate: false },
       { property: 'outlet_2', isMoney: false, isDate: false },
-      { property: 'created_at', isMoney: false, isDate: false },
+      { property: 'created_at', isMoney: false, isDate: true },
     ];
 
     for (const [index, val] of data.entries()) {
@@ -366,7 +370,7 @@ export const genExcelReportEvent = async (req: Request, res: Response, next: Nex
 
         worksheet
           .cell(rows, ++bodyLineNum)
-          .string(data)
+          .string(data && data != 'null' ? data : '-')
           .style(outlineStyle);
       }
 
@@ -412,7 +416,8 @@ export const getReportLeads = async (req: Request, res: Response, next: NextFunc
 
     const dateDiff = common.getDiffDateCount(filter.start_date, filter.end_date);
 
-    if (dateDiff > 31) return next(new CustomError('Maksimal 31 hari', 400));
+    if (dateDiff > +process.env.DATERANGE_REPORT)
+      return next(new CustomError(`Maksimal ${process.env.DATERANGE_REPORT} hari`, 400));
 
     const report = await leadsReport(filter);
 
@@ -457,7 +462,8 @@ export const genExcelReportLeads = async (req: Request, res: Response, next: Nex
 
     const dateDiff = common.getDiffDateCount(filter.start_date, filter.end_date);
 
-    if (dateDiff > 31) return next(new CustomError('Maksimal 31 hari', 400));
+    if (dateDiff > +process.env.DATERANGE_REPORT)
+      return next(new CustomError(`Maksimal ${process.env.DATERANGE_REPORT} hari`, 400));
 
     const report = await leadsReport(filter);
 
@@ -539,7 +545,7 @@ export const genExcelReportLeads = async (req: Request, res: Response, next: Nex
       { property: 'outlet_4', isMoney: false, isDate: false },
       { property: 'outlet_3', isMoney: false, isDate: false },
       { property: 'outlet_2', isMoney: false, isDate: false },
-      { property: 'created_at', isMoney: false },
+      { property: 'created_at', isMoney: false, isDate: true },
       { property: 'step', isMoney: false, isDate: false },
       { property: 'is_ktp_valid', isMoney: false, isDate: false },
     ];
@@ -564,7 +570,7 @@ export const genExcelReportLeads = async (req: Request, res: Response, next: Nex
 
         worksheet
           .cell(rows, ++bodyLineNum)
-          .string(data)
+          .string(data && data != 'null' ? data : '-')
           .style(outlineStyle);
       }
 
@@ -610,7 +616,8 @@ export const getReportClosing = async (req: Request, res: Response, next: NextFu
 
     const dateDiff = common.getDiffDateCount(filter.start_date, filter.end_date);
 
-    if (dateDiff > 31) return next(new CustomError('Maksimal 31 hari', 400));
+    if (dateDiff > +process.env.DATERANGE_REPORT)
+      return next(new CustomError(`Maksimal ${process.env.DATERANGE_REPORT} hari`, 400));
 
     const report = await closingReport(filter);
 
@@ -655,7 +662,8 @@ export const genExcelReportClosing = async (req: Request, res: Response, next: N
 
     const dateDiff = common.getDiffDateCount(filter.start_date, filter.end_date);
 
-    if (dateDiff > 31) return next(new CustomError('Maksimal 31 hari', 400));
+    if (dateDiff > +process.env.DATERANGE_REPORT)
+      return next(new CustomError(`Maksimal ${process.env.DATERANGE_REPORT} hari`, 400));
 
     const report = await closingReport(filter);
 
@@ -752,7 +760,7 @@ export const genExcelReportClosing = async (req: Request, res: Response, next: N
 
         worksheet
           .cell(rows, ++bodyLineNum)
-          .string(data)
+          .string(data && data != 'null' ? data : '-')
           .style(outlineStyle);
       }
 

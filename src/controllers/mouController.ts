@@ -100,13 +100,20 @@ export const genExcelMou = async (req: Request, res: Response, next: NextFunctio
   try {
     const filter = {
       status: req.query.status || '',
-      start_date: req.query.start_date || '',
-      end_date: req.query.end_date || '',
+      start_date: (req.query.start_date as string) || '',
+      end_date: (req.query.end_date as string) || '',
     };
 
-    const paging = queryHelper.paging(req.query);
+    if (!filter.start_date || !filter.end_date) return next(new CustomError('Pilih tanggal awal dan akhir', 400));
 
-    const [mou, count] = await listMou(filter, paging);
+    const dateDiff = common.getDiffDateCount(filter.start_date, filter.end_date);
+
+    if (dateDiff > +process.env.DATERANGE_MOU)
+      return next(new CustomError(`Maksimal ${process.env.DATERANGE_MOU} hari`, 400));
+
+    const paging = common.pagingExcel();
+
+    const [mou] = await listMou(filter, paging);
 
     const { workbook, worksheet, headingStyle, outlineHeadingStyle, outlineStyle } = xls();
 
@@ -118,7 +125,7 @@ export const genExcelMou = async (req: Request, res: Response, next: NextFunctio
       worksheet.column(i).setWidth(exclude.includes(i) ? 10 : 25);
     }
 
-    worksheet.cell(1, 1, 1, 9, true).string('DAFTAR MOU').style(headingStyle);
+    worksheet.cell(1, 1, 1, 9, true).string('LIST MOU').style(headingStyle);
     worksheet
       .cell(2, 1, 2, 9, true)
       .string(`TANGGAL ${tanggal(req.query.start_date as string)} S.D. ${tanggal(req.query.end_date as string)}`)
@@ -153,64 +160,49 @@ export const genExcelMou = async (req: Request, res: Response, next: NextFunctio
 
     let rows = 6;
 
+    const valueKolom = [
+      { property: 'nama_pic', isMoney: false, isDate: false },
+      { property: 'jenis_kerjasama', isMoney: false, isDate: false },
+      { property: 'nomor_kerjasama', isMoney: false, isDate: false },
+      { property: 'nama_kerjasama', isMoney: false, isDate: false },
+      { property: 'instansi.nama_instansi', isMoney: false, isDate: false },
+      { property: 'status', isMoney: false, isDate: false },
+      { property: 'deskripsi', isMoney: false, isDate: false },
+      { property: 'start_date', isMoney: false, isDate: true },
+      { property: 'end_date', isMoney: false, isDate: true },
+      { property: 'file', isMoney: false, isDate: false, prefix: process.env.MINIO_LINK_PREFIX },
+      { property: 'instansi.cakupan_instansi.nama', isMoney: false, isDate: false },
+      { property: 'created_at', isMoney: false, isDate: true },
+      { property: 'updated_at', isMoney: false, isDate: true },
+    ];
+
     for (const [index, val] of mou.entries()) {
       let bodyLineNum = 1;
       worksheet
         .cell(rows, 1)
         .string(`${index + 1}`)
         .style(outlineStyle);
-      worksheet
-        .cell(rows, ++bodyLineNum)
-        .string(val.nama_pic)
-        .style(outlineStyle);
-      worksheet
-        .cell(rows, ++bodyLineNum)
-        .string(val.jenis_kerjasama)
-        .style(outlineStyle);
-      worksheet
-        .cell(rows, ++bodyLineNum)
-        .string(val.nomor_kerjasama)
-        .style(outlineStyle);
-      worksheet
-        .cell(rows, ++bodyLineNum)
-        .string(val.nama_kerjasama)
-        .style(outlineStyle);
-      worksheet
-        .cell(rows, ++bodyLineNum)
-        .string(val.instansi.nama_instansi)
-        .style(outlineStyle);
-      worksheet
-        .cell(rows, ++bodyLineNum)
-        .string(val.status)
-        .style(outlineStyle);
-      worksheet
-        .cell(rows, ++bodyLineNum)
-        .string(val.deskripsi)
-        .style(outlineStyle);
-      worksheet
-        .cell(rows, ++bodyLineNum)
-        .string(common.tanggal(val.start_date))
-        .style(outlineStyle);
-      worksheet
-        .cell(rows, ++bodyLineNum)
-        .string(common.tanggal(val.end_date))
-        .style(outlineStyle);
-      worksheet
-        .cell(rows, ++bodyLineNum)
-        .string(`${process.env.MINIO_LINK_PREFIX}/${val.file}`)
-        .style(outlineStyle);
-      worksheet
-        .cell(rows, ++bodyLineNum)
-        .string(val.instansi.cakupan_instansi.nama)
-        .style(outlineStyle);
-      worksheet
-        .cell(rows, ++bodyLineNum)
-        .string(common.tanggal(val.created_at))
-        .style(outlineStyle);
-      worksheet
-        .cell(rows, ++bodyLineNum)
-        .string(common.tanggal(val.updated_at))
-        .style(outlineStyle);
+
+      for (const col of valueKolom) {
+        let data = String(common.getDescendantProp(val, col.property));
+
+        if (col.isDate) {
+          data = common.tanggal(val[col.property]);
+        }
+
+        if (col.isMoney) {
+          data = common.rupiah(+val[col.property], false);
+        }
+
+        if (data && data != 'null' && col?.prefix) {
+          data = col.prefix + '/' + data;
+        }
+
+        worksheet
+          .cell(rows, ++bodyLineNum)
+          .string(data && data != 'null' ? data : '-')
+          .style(outlineStyle);
+      }
 
       rows++;
     }
