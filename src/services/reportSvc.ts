@@ -384,7 +384,8 @@ export const closingReport = async (filter?: IFilter) => {
       return subQuery
         .select('osl')
         .from('leads_closing', 'lc2')
-        .where('lc2.no_kontrak = lcs.no_kontrak AND osl IS NOT NULL');
+        .where('lc2.no_kontrak = lcs.no_kontrak AND osl IS NOT NULL')
+        .limit(1);
     }, 'osl');
     q.addSelect('coalesce(lcs.osl, 0)', 'osl_original');
     q.addSelect('coalesce(lcs.saldo_tabemas, 0)', 'saldo_tabemas');
