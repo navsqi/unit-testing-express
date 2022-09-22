@@ -40,8 +40,8 @@ export const instansiReport = async (filter?: IFilter) => {
     q.addSelect('i.jenis_instansi', 'jenis_instansi');
     q.addSelect('i.kategori_instansi', 'kategori_instansi');
     q.addSelect('i.status_potensial', 'status_potensial');
-    q.addSelect('mou.jumlah_mou', 'jumlah_mou');
-    q.addSelect('pks.jumlah_pks', 'jumlah_pks');
+    q.addSelect('coalesce(mou.jumlah_mou, 0)', 'jumlah_mou');
+    q.addSelect('coalesce(pks.jumlah_pks, 0)', 'jumlah_pks');
     q.addSelect('i.kode_unit_kerja', 'kode_unit_kerja');
     q.addSelect('outlet.nama', 'nama_unit_kerja');
     q.addSelect('outlet.unit_kerja', 'unit');
@@ -132,6 +132,7 @@ export const instansiReport = async (filter?: IFilter) => {
       q.offset(filter.offset);
     }
 
+    q.orderBy('i.created_at');
     const data = await q.getRawMany();
     await queryRunner.release();
 
@@ -215,6 +216,8 @@ export const eventReport = async (filter?: IFilter) => {
       q.limit(filter.limit);
       q.offset(filter.offset);
     }
+
+    q.orderBy('e.created_at');
 
     const data = await q.getRawMany();
     await queryRunner.release();
@@ -322,6 +325,7 @@ export const leadsReport = async (filter?: IFilter) => {
       q.offset(filter.offset);
     }
 
+    q.orderBy('leads.created_at');
     const data = await q.getRawMany();
     await queryRunner.release();
 
@@ -382,8 +386,8 @@ export const closingReport = async (filter?: IFilter) => {
         .from('leads_closing', 'lc2')
         .where('lc2.no_kontrak = lcs.no_kontrak AND osl IS NOT NULL');
     }, 'osl');
-    q.addSelect('lcs.osl', 'osl_original');
-    q.addSelect('lcs.saldo_tabemas', 'saldo_tabemas');
+    q.addSelect('coalesce(lcs.osl, 0)', 'osl_original');
+    q.addSelect('coalesce(lcs.saldo_tabemas, 0)', 'saldo_tabemas');
 
     q.leftJoin('event', 'event', 'event.id = leads.event_id');
     q.leftJoin('instansi', 'instansi', 'instansi.id = leads.instansi_id');
@@ -415,6 +419,7 @@ export const closingReport = async (filter?: IFilter) => {
       q.offset(filter.offset);
     }
 
+    q.orderBy('lcs.tgl_kredit');
     const data: QueryResultClosingReport[] = await q.getRawMany();
     await queryRunner.release();
 
