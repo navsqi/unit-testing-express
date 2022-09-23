@@ -1,54 +1,21 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import roleSvc from '~/services/roleSvc';
+
 export default {
-  setRole: (kode_role?: string, nama_role?: string) => {
+  setRole: async (kode_role?: string): Promise<string | null> => {
     // const namaRole = nama_role ? nama_role.toUpperCase() : null;
     const kodeRole = kode_role ? kode_role.toUpperCase() : null;
+    const params = await roleSvc.listParamRoleSSO();
+    let result = null;
 
-    if (kodeRole && kodeRole.includes('PNC')) {
-      return 'PNCA';
+    for (const param of params) {
+      if (kodeRole && kodeRole.includes(param.prefix)) {
+        result = param.mapping;
+        break;
+      }
     }
 
-    if (kodeRole && kodeRole.includes('MAX')) {
-      return 'MKTO';
-    }
-
-    if (kodeRole && kodeRole.includes('ADM')) {
-      return 'ADMN';
-    }
-
-    if (kodeRole && kodeRole.includes('MSP')) {
-      return 'MSPG';
-    }
-
-    if (kodeRole && kodeRole.includes('DPT')) {
-      return 'DPTA';
-    }
-
-    if (kodeRole && kodeRole.includes('KAB')) {
-      return 'KABG';
-    }
-
-    if (kodeRole && kodeRole.includes('PNW')) {
-      return 'PNWA';
-    }
-
-    if ((kodeRole && kodeRole.includes('PNT')) || (kodeRole && kodeRole.includes('STF'))) {
-      return 'PNTA';
-    }
-
-    if (kodeRole && kodeRole.includes('KAD')) {
-      return 'KADP';
-    }
-
-    if (kodeRole && kodeRole.includes('KDI')) {
-      return 'KDIV';
-    }
-
-    if ((kodeRole && kodeRole.includes('PF')) || (kodeRole && kodeRole.includes('ADV'))) {
-      return 'ADMN';
-    }
-
-    return null;
+    return result;
   },
   setOutlet: (kode_outlet: string) => {
     const kodeOutlet = kode_outlet;

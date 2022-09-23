@@ -16,6 +16,7 @@ import NasabahPerorangan from './NasabahPerorangan';
 import Role from './Role';
 import MasterMenu from './MasterMenu';
 import AccessMenuRole from './AccessMenuRole';
+import ParamsSsoRole from './ParamsSsoRole';
 
 export default {
   User,
@@ -36,4 +37,5 @@ export default {
   MasterMenu,
   AccessMenuRole,
   LeadsClosing,
+  ParamsSsoRole,
 };
