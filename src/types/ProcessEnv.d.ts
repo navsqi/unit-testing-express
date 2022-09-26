@@ -54,6 +54,7 @@ declare global {
       DATERANGE_MOU: string;
       DATERANGE_INSTANSI_EXCEL: string;
       DATERANGE_REPORT: string;
+      DATERANGE_LEADS_CREATE_EVENT: string;
     }
   }
 }

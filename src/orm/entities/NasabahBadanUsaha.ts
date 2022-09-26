@@ -27,6 +27,12 @@ class NasabahBadanUsaha {
   })
   nama_pic: string;
 
+  @Column({
+    length: 16,
+    nullable: true,
+  })
+  no_telp: string;
+
   @Column()
   @CreateDateColumn()
   created_at: Date;

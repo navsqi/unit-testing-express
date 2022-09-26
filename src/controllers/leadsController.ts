@@ -15,10 +15,13 @@ import validationCsv from '~/utils/validationCsv';
 import { konsolidasiTopBottom } from '~/services/konsolidasiSvc';
 import dayjs from 'dayjs';
 import Event from '~/orm/entities/Event';
+import NasabahBadanUsaha from '~/orm/entities/NasabahBadanUsaha';
+import { IResponseBadanUsaha } from '~/interfaces/IApiPegadaian';
 
 const leadsRepo = dataSource.getRepository(Leads);
 const eventRepo = dataSource.getRepository(Event);
 const nasabahPeroranganRepo = dataSource.getRepository(NasabahPerorangan);
+const nasabahBadanUsahaRepo = dataSource.getRepository(NasabahBadanUsaha);
 
 export const getLeads = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -254,7 +257,8 @@ export const createNewLeadsPerorangan = async (req: Request, res: Response, next
 
     const dateDiff = Math.abs(common.getDiffDateCount(dayjs().format('YYYY-MM-DD'), findEvent.tanggal_event));
 
-    if (dateDiff > 7) return next(new CustomError('Tanggal event telah expired', 400));
+    if (dateDiff > +process.env.DATERANGE_LEADS_CREATE_EVENT)
+      return next(new CustomError('Tanggal event telah expired', 400));
 
     const getExistingLeads = await leadsRepo.findOne({
       where: { nik_ktp: bodies.nik_ktp },
@@ -316,6 +320,15 @@ export const createNewLeadsBadanUsaha = async (req: Request, res: Response, next
       );
     }
 
+    const findEvent = await eventRepo.findOne({ where: { id: bodies.event_id } });
+
+    if (!findEvent) return next(new CustomError('Event tidak ditemukan', 400));
+
+    const dateDiff = Math.abs(common.getDiffDateCount(dayjs().format('YYYY-MM-DD'), findEvent.tanggal_event));
+
+    if (dateDiff > +process.env.DATERANGE_LEADS_CREATE_EVENT)
+      return next(new CustomError('Tanggal event telah expired', 400));
+
     if (!bodies.nik_ktp_karyawan) {
       bodies.is_karyawan = 1;
     }
@@ -350,6 +363,15 @@ export const createNewLeadsByCsv = async (req: Request, res: Response, next: Nex
 
   try {
     const bodies = req.body as Leads;
+
+    const findEvent = await eventRepo.findOne({ where: { id: bodies.event_id } });
+
+    if (!findEvent) return next(new CustomError('Event tidak ditemukan', 400));
+
+    const dateDiff = Math.abs(common.getDiffDateCount(dayjs().format('YYYY-MM-DD'), findEvent.tanggal_event));
+
+    if (dateDiff > +process.env.DATERANGE_LEADS_CREATE_EVENT)
+      return next(new CustomError('Tanggal event telah expired', 400));
 
     let csv: Express.Multer.File = null;
 
@@ -633,6 +655,24 @@ export const checkBadanUsahaByCif = async (req: Request, res: Response, next: Ne
   try {
     const bodies = req.body;
 
+    const checkToNasabahBadanUsaha = await nasabahBadanUsahaRepo.findOne({ where: { cif: bodies.cif } });
+
+    if (checkToNasabahBadanUsaha) {
+      const dataRes = {
+        badanUsaha: {
+          cifBadanUsaha: checkToNasabahBadanUsaha.cif,
+          namaBadanUsaha: checkToNasabahBadanUsaha.nama,
+          namaPengurusKorp: checkToNasabahBadanUsaha.nama_pic,
+          noIdPengurus: checkToNasabahBadanUsaha.nik_pic,
+          noTelpBadanUsaha: checkToNasabahBadanUsaha.no_telp,
+        } as IResponseBadanUsaha,
+        originalReponse: 'Approved',
+        source_data: 'KAMILA',
+      };
+
+      return res.customSuccess(200, 'Get badan usaha', dataRes);
+    }
+
     let badanUsahaReq = await APIPegadaian.getBadanUsahaByCif({
       cif: bodies.cif,
       flag: 'K',
@@ -647,11 +687,31 @@ export const checkBadanUsahaByCif = async (req: Request, res: Response, next: Ne
       });
     }
 
-    const badanUsaha = JSON.parse(badanUsahaReq.data.data);
+    const badanUsaha = JSON.parse(badanUsahaReq.data.data) as IResponseBadanUsaha;
+
+    if (badanUsaha) {
+      await nasabahBadanUsahaRepo.save({
+        cif: badanUsaha.cifBadanUsaha,
+        nama: badanUsaha.namaBadanUsaha,
+        nama_pic: badanUsaha.namaPengurusKorp,
+        nik_pic: badanUsaha.noIdPengurus,
+        no_telp: badanUsaha.noTelpBadanUsaha,
+        created_by: req.user.nik,
+      });
+    }
 
     const dataRes = {
-      badanUsaha,
+      badanUsaha: badanUsaha
+        ? {
+            cifBadanUsaha: badanUsaha.cifBadanUsaha,
+            namaBadanUsaha: badanUsaha.namaBadanUsaha,
+            namaPengurusKorp: badanUsaha.namaPengurusKorp,
+            noIdPengurus: badanUsaha.noIdPengurus,
+            noTelpBadanUsaha: badanUsaha.noTelpBadanUsaha,
+          }
+        : null,
       originalReponse: badanUsahaReq?.data?.responseDesc,
+      source_data: 'PASSION',
     };
 
     return res.customSuccess(200, 'Get badan usaha', dataRes);

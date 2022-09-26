@@ -51,6 +51,7 @@ const envs = [
   'DATERANGE_EVENT_CREATE',
   'DATERANGE_INSTANSI_EXCEL',
   'DATERANGE_REPORT',
+  'DATERANGE_LEADS_CREATE_EVENT',
 ];
 
 for (const val of envs) {
