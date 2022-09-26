@@ -35,6 +35,10 @@ export const getOutlet = async (req: Request, res: Response, next: NextFunction)
       take: paging.limit,
       skip: paging.offset,
       where,
+      order: {
+        kode: 'asc',
+        unit_kerja: 'asc',
+      },
     });
 
     const dataRes = {

@@ -50,7 +50,7 @@ export const konsolidasiTopBottomFull = async (outletId: string, filter: IFilter
              select o2.kode, o2.nama, o2.parent from outlet o2
              inner join cte s on o2.parent = s.kode
          )
-         select * from cte where nama ~* $2 and kode ~* $3
+         select * from cte where nama ~* $2 and kode ~* $3 order by kode asc
            `,
       [outletId, filter.nama, filter.kode],
     );
