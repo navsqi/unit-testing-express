@@ -118,6 +118,7 @@ export const mapClosingReport = (data: QueryResultClosingReport[]) => {
       outlet_3: '',
       outlet_2: '',
       osl: el.osl || 0,
+      saldo_tabemas: el.saldo_tabemas || 0,
     };
 
     if (el.nama_unit_kerja && el.unit) {

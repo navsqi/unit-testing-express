@@ -26,8 +26,9 @@ export const schedulerClosing = async () => {
 
       if (checkNoKredit && checkNoKredit.length > 0) {
         // jika duplikat no kredit/kontrak update saldo te & osl ke 0
+        //  AND CAST(created_at AS DATE) < CAST(now() AS date)
         await manager.query(
-          `UPDATE leads_closing SET saldo_tabemas = NULL, osl = NULL WHERE no_kontrak = '${tmpKredit.no_kontrak}' AND CAST(created_at AS DATE) < CAST(now() AS date)`,
+          `UPDATE leads_closing SET saldo_tabemas = NULL, osl = NULL WHERE no_kontrak = '${tmpKredit.no_kontrak}'`,
         );
 
         // insert ke leads closing
@@ -51,7 +52,7 @@ export const schedulerClosing = async () => {
             tmpKredit.outlet_syariah,
             0,
             tmpKredit.osl,
-            tmpKredit.saldo_tabemas,
+            null,
             tmpKredit.channel_id,
             tmpKredit.nama_channel,
             tmpKredit.product_code,
@@ -79,7 +80,7 @@ export const schedulerClosing = async () => {
             tmpKredit.outlet_syariah,
             0,
             tmpKredit.osl,
-            tmpKredit.saldo_tabemas,
+            null,
             tmpKredit.channel_id,
             tmpKredit.nama_channel,
             tmpKredit.product_code,
@@ -126,7 +127,7 @@ export const schedulerClosingTabemas = async () => {
 
     // memproses semua baris yang ada pada table tmp_kredit
     for (const tmpKredit of tmpKredits) {
-      const up = tmpKredit.jenis_transaksi === 'OPEN' ? tmpKredit.amount : tmpKredit.up;
+      const up = tmpKredit.jenis_transaksi === 'OPEN' ? tmpKredit.amount : tmpKredit.omset_te;
 
       // Check no kredit duplikat
       const checkNoKredit = await manager.query(
@@ -135,8 +136,9 @@ export const schedulerClosingTabemas = async () => {
 
       if (checkNoKredit && checkNoKredit.length > 0) {
         // jika duplikat no_rekening update saldo te & osl ke 0
+        // AND CAST(created_at AS DATE) < CAST(now() AS date)
         await manager.query(
-          `UPDATE leads_closing SET saldo_tabemas = NULL, osl = NULL WHERE no_kontrak = '${tmpKredit.no_kontrak}' AND CAST(created_at AS DATE) < CAST(now() AS date)`,
+          `UPDATE leads_closing SET saldo_tabemas = NULL, osl = NULL WHERE no_kontrak = '${tmpKredit.no_kontrak}'`,
         );
 
         // insert ke leads closing
@@ -157,7 +159,7 @@ export const schedulerClosingTabemas = async () => {
             tmpKredit.kode_outlet_pencairan,
             up,
             0,
-            tmpKredit.osl,
+            null,
             tmpKredit.saldo,
             tmpKredit.channel_id,
             tmpKredit.nama_channel,
@@ -188,7 +190,7 @@ export const schedulerClosingTabemas = async () => {
             tmpKredit.kode_outlet_pencairan,
             up,
             0,
-            tmpKredit.osl,
+            null,
             tmpKredit.saldo,
             tmpKredit.channel_id,
             tmpKredit.nama_channel,

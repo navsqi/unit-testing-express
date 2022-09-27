@@ -5,14 +5,14 @@ import schedulerClosingSvc from '~/services/schedulerClosingSvc';
 const router = Router();
 
 router.get('/', (req, res) => {
-  res.send('Updated at 15/09/2022 09:02');
+  res.send('Updated at 27/09/2022 10:38');
 });
 
 router.put('/closing-scheduler', basicAuth, async (req, res) => {
   await schedulerClosingSvc.schedulerClosing();
   await schedulerClosingSvc.schedulerClosingTabemas();
 
-  res.send('Updated at 15/09/2022 11:35');
+  res.send('Updated at 27/09/2022 10:38');
 });
 
 export default router;

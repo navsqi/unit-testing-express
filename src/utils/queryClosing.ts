@@ -15,8 +15,7 @@ SELECT
 	tmpk.cif,
 	tmpk.channel_id,
 	tmpk.nama_channel,
-	tmpk.osl,
-	tmpk.saldo_tabemas
+	tmpk.osl
 FROM
 	(
 	SELECT
@@ -46,12 +45,11 @@ SELECT
 	tmpk.tgl_transaksi AS tgl_kredit,
 	tmpk.kode_outlet,
 	tmpk.kode_outlet AS kode_outlet_pencairan,
-	tmpk.up,
+	tmpk.omset_te,
 	tmpk.amount,
 	tmpk.cif,
 	tmpk.channel_id,
 	tmpk.nama_channel,
-	tmpk.osl,
 	tmpk.saldo,
 	tmpk.jenis_transaksi
 FROM
@@ -68,8 +66,8 @@ WHERE
 	AND tmpk.no_rek IS NOT NULL
 	AND CAST (l.created_at AS DATE) <= CAST ( tmpk.tgl_transaksi AS DATE )
 	AND (tmpk.kode_outlet = l.kode_unit_kerja OR tmpk.kode_cabang = l.kode_unit_kerja)
-	AND tmpk.up IS NOT NULL
-	AND CAST(tmpk.up AS float8) <> 0
+	AND tmpk.omset_te IS NOT NULL
+	AND CAST(tmpk.omset_te AS float8) <> 0
 	AND tmpk.jenis_transaksi IN ('SALE', 'OPEN')
 `;
 
