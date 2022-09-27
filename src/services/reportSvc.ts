@@ -177,7 +177,7 @@ export const eventReport = async (filter?: IFilter) => {
     q.addSelect('outlet_p3.unit_kerja', 'unit_parent_3');
     q.addSelect('outlet_p2.nama', 'nama_unit_kerja_parent_2');
     q.addSelect('outlet_p2.unit_kerja', 'unit_parent_2');
-    q.addSelect('leads.countall', 'jumlah_prospek');
+    q.addSelect('coalesce(leads.countall, 0)', 'jumlah_prospek');
     q.leftJoin('instansi', 'i', 'i.id = e.instansi_id');
     q.leftJoin('outlet', 'outlet', 'outlet.kode = e.kode_unit_kerja');
     q.leftJoin('outlet', 'outlet_p3', 'outlet_p3.kode = outlet.parent');
@@ -387,8 +387,15 @@ export const closingReport = async (filter?: IFilter) => {
         .where('lc2.no_kontrak = lcs.no_kontrak AND osl IS NOT NULL')
         .limit(1);
     }, 'osl');
+    q.addSelect((subQuery) => {
+      return subQuery
+        .select('saldo_tabemas')
+        .from('leads_closing', 'lc2')
+        .where('lc2.no_kontrak = lcs.no_kontrak AND saldo_tabemas IS NOT NULL')
+        .limit(1);
+    }, 'saldo_tabemas');
     q.addSelect('coalesce(lcs.osl, 0)', 'osl_original');
-    q.addSelect('coalesce(lcs.saldo_tabemas, 0)', 'saldo_tabemas');
+    // q.addSelect('coalesce(lcs.saldo_tabemas, 0)', 'saldo_tabemas');
 
     q.leftJoin('event', 'event', 'event.id = leads.event_id');
     q.leftJoin('instansi', 'instansi', 'instansi.id = leads.instansi_id');
