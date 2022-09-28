@@ -11,6 +11,14 @@ import Instansi from './Instansi';
 import Outlet from './Outlet';
 import User from './User';
 
+export enum JenisAktivitas {
+  KUNJUNGAN = 'KUNJUNGAN',
+  LITERASI = 'LITERASI',
+  CANVASING = 'CANVASING',
+  'OPEN BOOTH' = 'OPEN BOOTH',
+  LAINNYA = 'LAINNYA',
+}
+
 @Entity('event')
 class Event {
   @PrimaryGeneratedColumn()
@@ -28,7 +36,9 @@ class Event {
   kode_unit_kerja: string;
 
   @Column({
-    length: 100,
+    enum: JenisAktivitas,
+    type: 'enum',
+    nullable: true,
   })
   jenis_event: string;
 
