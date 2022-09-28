@@ -87,11 +87,15 @@ export const schedulerClosing = async () => {
           ],
         );
       }
+
+      await manager.query(
+        `UPDATE leads SET cif = '${tmpKredit.cif}', cif_created_at = '${tmpKredit.tgl_cif}' WHERE nik_ktp = '${tmpKredit.nik_ktp}' AND id = '${tmpKredit.leads_id}' AND cif IS NULL`,
+      );
     }
 
     // menghapus data history bigdata
     await manager.query(
-      `DELETE FROM history_tmp_kredit WHERE current_date > CAST(CAST(created_at_kamila AS DATE) + INTERVAL '30 DAY' AS DATE)`,
+      `DELETE FROM history_tmp_kredit WHERE current_date > CAST(CAST(created_at_kamila AS DATE) + INTERVAL '31 DAY' AS DATE)`,
     );
 
     // insert data yang dikirim bigdata ke table history
@@ -203,11 +207,15 @@ export const schedulerClosingTabemas = async () => {
           `UPDATE leads SET step = 'CLP', cif = '${tmpKredit.cif}', updated_at = now() WHERE id = '${tmpKredit.leads_id}' AND step = 'CLP'`,
         );
       }
+
+      await manager.query(
+        `UPDATE leads SET cif = '${tmpKredit.cif}', cif_created_at = '${tmpKredit.tgl_cif}' WHERE nik_ktp = '${tmpKredit.nik_ktp}' AND id = '${tmpKredit.leads_id}' AND cif IS NULL`,
+      );
     }
 
     // menghapus data history bigdata
     await manager.query(
-      `DELETE FROM history_tmp_kredit_tabemas WHERE current_date > CAST(CAST(created_at_kamila AS DATE) + INTERVAL '30 DAY' AS DATE)`,
+      `DELETE FROM history_tmp_kredit_tabemas WHERE current_date > CAST(CAST(created_at_kamila AS DATE) + INTERVAL '31 DAY' AS DATE)`,
     );
 
     // insert data yang dikirim bigdata ke table history
