@@ -89,7 +89,8 @@ export const schedulerClosing = async () => {
       }
 
       await manager.query(
-        `UPDATE leads SET cif = '${tmpKredit.cif}', cif_created_at = '${tmpKredit.tgl_cif}' WHERE nik_ktp = '${tmpKredit.nik_ktp}' AND id = '${tmpKredit.leads_id}' AND cif IS NULL`,
+        `UPDATE leads SET cif = $1, cif_created_at = $2 WHERE nik_ktp = $3 AND id = '${tmpKredit.leads_id}' AND cif IS NULL`,
+        [tmpKredit.cif, tmpKredit.tgl_cif, tmpKredit.nik_ktp],
       );
     }
 
@@ -173,7 +174,8 @@ export const schedulerClosingTabemas = async () => {
 
         // update status leads ke CLS
         await manager.query(
-          `UPDATE leads SET step = 'CLS', cif = '${tmpKredit.cif}', updated_at = now() WHERE id = '${tmpKredit.leads_id}' AND step = 'CLP'`,
+          `UPDATE leads SET step = $1, cif = $2, updated_at = now() WHERE id = '${tmpKredit.leads_id}' AND step = 'CLP'`,
+          ['CLS', tmpKredit.cif],
         );
       } else {
         // jika tidak duplikat insert ke tb leads_closing
@@ -204,12 +206,14 @@ export const schedulerClosingTabemas = async () => {
 
         // update status leads ke CLS
         await manager.query(
-          `UPDATE leads SET step = 'CLP', cif = '${tmpKredit.cif}', updated_at = now() WHERE id = '${tmpKredit.leads_id}' AND step = 'CLP'`,
+          `UPDATE leads SET step = $1, cif = $2, updated_at = now() WHERE id = '${tmpKredit.leads_id}' AND step = 'CLP'`,
+          ['CLS', tmpKredit.cif],
         );
       }
 
       await manager.query(
-        `UPDATE leads SET cif = '${tmpKredit.cif}', cif_created_at = '${tmpKredit.tgl_cif}' WHERE nik_ktp = '${tmpKredit.nik_ktp}' AND id = '${tmpKredit.leads_id}' AND cif IS NULL`,
+        `UPDATE leads SET cif = $1, cif_created_at = $2 WHERE nik_ktp = $3 AND id = '${tmpKredit.leads_id}' AND cif IS NULL`,
+        [tmpKredit.cif, tmpKredit.tgl_cif, tmpKredit.nik_ktp],
       );
     }
 
