@@ -25,6 +25,7 @@ export interface ITmpKreditTabemasQuery {
   marketing_code?: any;
   tgl_fpk?: string;
   tgl_kredit?: string;
+  tgl_cif?: any;
   kode_outlet?: string;
   kode_outlet_pencairan?: string;
   omset_te?: number;
