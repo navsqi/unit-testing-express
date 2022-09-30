@@ -11,9 +11,9 @@
   "ocpConfigFile":"", 
   "ocpCredential":"",
   "chatNotifWebHookURL": "https://chat.googleapis.com/v1/spaces/AAAA-5Bl1gU/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=RxRBJ2oSOuuZtjyr6zASl2n7JeuQdMNN7XyPpY283LE%3D",
-  "nameSpaceProd":"support-ileads",
-  "nameSpaceDev":"support-ileads-dev",
-  "nameSpaceStg":"support-ileads-staging",
+  "nameSpaceProd":"support-kamila",
+  "nameSpaceDev":"support-kamila-dev",
+  "nameSpaceStg":"support-kamila-staging",
   "appArtifact": 
   {
 		"groupId": "kamila-backend"
