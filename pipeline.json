@@ -1,0 +1,30 @@
+{
+  "name": "kamila-backend",
+  "description": "kamila Project",
+  "author": "RM",
+  "private": true,
+  "type": "module",
+  "appName": "kamila-backend",
+  "productName": "kamila",
+  "enableLogstash": "0",
+  "fortifyExcludePath":"", 
+  "ocpConfigFile":"", 
+  "ocpCredential":"",
+  "chatNotifWebHookURL": "https://chat.googleapis.com/v1/spaces/AAAA-5Bl1gU/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=RxRBJ2oSOuuZtjyr6zASl2n7JeuQdMNN7XyPpY283LE%3D",
+  "nameSpaceProd":"support-ileads",
+  "nameSpaceDev":"support-ileads-dev",
+  "nameSpaceStg":"support-ileads-staging",
+  "appArtifact": 
+  {
+		"groupId": "kamila-backend"
+		, "id": "kamila-backend"
+	}
+  ,"urlIqServer" : "http://10.253.238.4:8070"
+  ,"maxcritical" : "100"
+  ,"maxsevere" : "100"
+  ,"maxmoderate" : "100" 
+  ,"publicId" : "kamila-backend"
+  ,"iqScanPatterns":[
+    {"scanPattern": "package.json"}
+  ]
+}
