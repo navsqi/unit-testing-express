@@ -1,0 +1,122 @@
+export interface QueryResultInstansiReports {
+  id_instansi: number;
+  master_instansi_id: number;
+  nama_instansi: string;
+  jenis_instansi: string;
+  alamat: string;
+  email: string;
+  no_telepon_instansi: string;
+  nama_karyawan: string;
+  no_telepon_karyawan: string;
+  email_karyawan: string;
+  jabatan_karyawan: string;
+  kode_unit_kerja: string;
+  status_potensial: string;
+  kategori_instansi: string;
+  created_at: Date;
+  updated_at: Date;
+  created_by: string;
+  updated_by: string;
+  nama_master_instansi: string;
+  nama_unit_kerja: string;
+  unit: number;
+  nama_unit_kerja_parent_3: string;
+  unit_parent_3: number;
+  nama_unit_kerja_parent_2: string;
+  unit_parent_2: number;
+  jumlah_mou: string;
+  jumlah_pks: string;
+  omset: number;
+  osl: number;
+  saldo_tabemas: number;
+}
+
+export interface QueryResultEventReport {
+  id_event: number;
+  instansi_id: number;
+  jenis_event: string;
+  nama_event: string;
+  keterangan?: any;
+  tanggal_event: Date;
+  nama_pic: string;
+  nomor_hp_pic: string;
+  foto_dokumentasi?: any;
+  nama_instansi: string;
+  nama_karyawan: string;
+  no_telepon_karyawan: string;
+  nama_unit_kerja: string;
+  unit: number;
+  nama_unit_kerja_parent_3: string;
+  unit_parent_3: number;
+  nama_unit_kerja_parent_2?: any;
+  unit_parent_2?: any;
+  created_by: string;
+  jumlah_prospek?: any;
+}
+
+export interface QueryResultLeadsReport {
+  event_id: number;
+  instansi_id: number;
+  nama_nasabah: string;
+  nik_ktp_nasabah: string;
+  no_hp_nasabah: string;
+  kode_produk: string;
+  kode_unit_kerja: string;
+  is_ktp_valid: number;
+  is_badan_usaha: number;
+  step: string;
+  cif: string;
+  flag_app: string;
+  is_karyawan: number;
+  created_at: Date;
+  created_by: string;
+  jenis_event: string;
+  nama_event: string;
+  nama_instansi: string;
+  jenis_instansi: string;
+  nama_unit_kerja: string;
+  unit: number;
+  nama_unit_kerja_parent_3: string;
+  unit_parent_3: number;
+  nama_unit_kerja_parent_2: string;
+  unit_parent_2: number;
+  omset: number;
+  osl: number;
+  saldo_tabemas: number;
+}
+
+export interface QueryResultClosingReport {
+  event_id: number;
+  instansi_id: number;
+  nama_nasabah: string;
+  nik_ktp_nasabah: string;
+  no_hp_nasabah: string;
+  kode_produk: string;
+  kode_unit_kerja: string;
+  is_ktp_valid: number;
+  step: string;
+  flag_app: string;
+  is_karyawan: number;
+  created_at: Date;
+  created_by: string;
+  jenis_event: string;
+  nama_event: string;
+  nama_instansi: string;
+  jenis_instansi: string;
+  nama_master_instansi: string;
+  unit_kerja_instansi: string;
+  nama_unit_kerja: string;
+  unit: number;
+  nama_unit_kerja_parent_3: string;
+  unit_parent_3: number;
+  nama_unit_kerja_parent_2: string;
+  unit_parent_2: number;
+  cif: string;
+  channel: string;
+  no_kontrak: string;
+  tgl_kredit: Date;
+  omset: number;
+  osl: number;
+  saldo_tabemas: number;
+  nama_produk: string;
+}
