@@ -10,7 +10,7 @@
   "fortifyExcludePath":"", 
   "ocpConfigFile":"", 
   "ocpCredential":"",
-  "chatNotifWebHookURL": "https://chat.googleapis.com/v1/spaces/AAAA-5Bl1gU/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=RxRBJ2oSOuuZtjyr6zASl2n7JeuQdMNN7XyPpY283LE%3D",
+  "chatNotifWebHookURL": "https://chat.googleapis.com/v1/spaces/AAAAK6E8e-c/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=BdmJ2UmWh__nNmQLyTgRw6dp0UFIc7RP9qKlH2iy_so%3D",
   "nameSpaceProd":"support-kamila",
   "nameSpaceDev":"support-kamila-dev",
   "nameSpaceStg":"support-kamila-staging",
