@@ -26,5 +26,6 @@
   ,"publicId" : "kamila-backend"
   ,"iqScanPatterns":[
     {"scanPattern": "package.json"}
+    
   ]
 }
