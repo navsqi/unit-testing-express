@@ -8,11 +8,15 @@ const CRON_PATTERN = {
   every7am: '15 7 * * *',
 };
 
+export const cronBigDataClosing = async () => {
+  await schedulerClosingSvc.schedulerClosing();
+  await schedulerClosingSvc.schedulerClosingTabemas();
+};
+
 const cronJob: CronJob = new CronJob(CRON_PATTERN.every7am, async () => {
   try {
     logger.info('CRON', common.tanggal(new Date(), true));
-    await schedulerClosingSvc.schedulerClosing();
-    await schedulerClosingSvc.schedulerClosingTabemas();
+    await cronBigDataClosing();
   } catch (e) {
     logger.error(common.tanggal(new Date(), true), 'CRON');
   }
