@@ -15,7 +15,10 @@ import CustomError from './utils/customError';
 import './utils/customErrorValidation';
 import './utils/customSuccess';
 import logger from './utils/logger';
-import cronJob from './config/cron';
+import cronJob, { cronBigDataClosing } from './config/cron';
+import EventEmitter from 'events';
+
+export const eventHandler: any = new EventEmitter();
 
 (async () => {
   await dbCreateConnection();
@@ -24,6 +27,11 @@ import cronJob from './config/cron';
     cronJob.start();
     logger.info('CRON', 'CRON is running...');
   }
+
+  eventHandler.on('performBackgroundTask', async () => {
+    logger.info('cron-closing', 'Query Execute');
+    await cronBigDataClosing();
+  });
 })();
 
 export const app = express();
