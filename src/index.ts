@@ -29,7 +29,7 @@ export const eventHandler: any = new EventEmitter();
   }
 
   eventHandler.on('performBackgroundTask', async () => {
-    logger.info('cron-closing', 'Query Execute');
+    logger.info('CRON_TRIGGERED_BY_REST_API', 'Query Execute');
     await cronBigDataClosing();
   });
 })();
