@@ -50,7 +50,13 @@ export const getAssignedUserByInstansi = async (req: Request, res: Response, nex
       assignUser,
     };
 
-    return res.customSuccess(200, 'Assign user succesful', dataRes);
+    return res.customSuccess(200, 'Assign user succesful', dataRes, {
+      count: count,
+      rowCount: paging.limit,
+      limit: paging.limit,
+      offset: paging.offset,
+      page: Number(req.query.page),
+    });
   } catch (e) {
     return next(e);
   }
@@ -75,7 +81,13 @@ export const getInstansiByAssignedUser = async (req: Request, res: Response, nex
       assignUser,
     };
 
-    return res.customSuccess(200, 'Assign user succesful', dataRes);
+    return res.customSuccess(200, 'Assign user succesful', dataRes, {
+      count: count,
+      rowCount: paging.limit,
+      limit: paging.limit,
+      offset: paging.offset,
+      page: Number(req.query.page),
+    });
   } catch (e) {
     return next(e);
   }

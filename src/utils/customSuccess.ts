@@ -1,13 +1,5 @@
 import { response, Response } from 'express';
-
-interface MetaPages {
-  count: number;
-  rowCount: number;
-  page: number;
-  limit: number;
-  offset: number;
-  totalPage: number;
-}
+import { MetaPages } from '~/types/metaPageTypes';
 
 response.customSuccess = function (
   httpStatusCode: number,
@@ -24,5 +16,5 @@ response.customSuccess = function (
     };
   }
 
-  return this.status(httpStatusCode).json({ status: 'success', meta: metaData, message, data });
+  return this.status(httpStatusCode).json({ status: 'success', message, meta: metaData, data });
 };

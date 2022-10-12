@@ -54,7 +54,13 @@ export const getReportInstansi = async (req: Request, res: Response, next: NextF
       report: data,
     };
 
-    return res.customSuccess(200, 'Get report instansi', dataRes);
+    return res.customSuccess(200, 'Get report instansi', dataRes, {
+      count: report.count,
+      rowCount: paging.limit,
+      limit: paging.limit,
+      offset: paging.offset,
+      page: Number(req.query.page),
+    });
   } catch (e) {
     return next(e);
   }
@@ -248,7 +254,13 @@ export const getReportEvent = async (req: Request, res: Response, next: NextFunc
       report: data,
     };
 
-    return res.customSuccess(200, 'Get report event', dataRes);
+    return res.customSuccess(200, 'Get report event', dataRes, {
+      count: report.count,
+      rowCount: paging.limit,
+      limit: paging.limit,
+      offset: paging.offset,
+      page: Number(req.query.page),
+    });
   } catch (e) {
     return next(e);
   }
@@ -436,7 +448,13 @@ export const getReportLeads = async (req: Request, res: Response, next: NextFunc
       report: data,
     };
 
-    return res.customSuccess(200, 'Get report leads', dataRes);
+    return res.customSuccess(200, 'Get report leads', dataRes, {
+      count: report.count,
+      rowCount: paging.limit,
+      limit: paging.limit,
+      offset: paging.offset,
+      page: Number(req.query.page),
+    });
   } catch (e) {
     return next(e);
   }
@@ -636,7 +654,13 @@ export const getReportClosing = async (req: Request, res: Response, next: NextFu
       report: data,
     };
 
-    return res.customSuccess(200, 'Get report leads', dataRes);
+    return res.customSuccess(200, 'Get report leads', dataRes, {
+      count: report.count,
+      rowCount: paging.limit,
+      limit: paging.limit,
+      offset: paging.offset,
+      page: Number(req.query.page),
+    });
   } catch (e) {
     return next(e);
   }
