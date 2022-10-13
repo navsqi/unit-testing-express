@@ -110,3 +110,17 @@ export const updateAssignment = async (req: Request, res: Response, next: NextFu
     return next(e);
   }
 };
+
+export const deleteAssignInstansi = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const assignment = await assignedInsRepo.delete({ id: +req.params.id });
+
+    const dataRes = {
+      assignUser: assignment,
+    };
+
+    return res.customSuccess(200, 'Delete assignment instansi success', dataRes);
+  } catch (e) {
+    return next(e);
+  }
+};
