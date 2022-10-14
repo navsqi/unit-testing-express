@@ -1,6 +1,6 @@
 import 'dotenv/config';
 
-import axios, { AxiosPromise } from 'axios';
+import axios, { AxiosPromise, AxiosRequestConfig } from 'axios';
 
 interface IBadanUsahaByCif {
   cif: string;
@@ -86,6 +86,36 @@ export const bodyEktp = {
   agama: '',
 };
 
+const apiPegadaianAuthConfig: AxiosRequestConfig = {
+  auth: {
+    username: pegadaianApiEnv.authApi.basicUser,
+    password: pegadaianApiEnv.authApi.basicPass,
+  },
+};
+
+const tscaleAuthConfig: AxiosRequestConfig = {
+  auth: {
+    username: pegadaianApiEnv.tscale.basicUser,
+    password: pegadaianApiEnv.tscale.basicPass,
+  },
+};
+
+const tscaleConfig = (bearerToken: string): AxiosRequestConfig => {
+  return {
+    headers: {
+      Authorization: `Bearer ${bearerToken}`,
+    },
+  };
+};
+
+const apiPegadaianConfig = (bearerToken: string): AxiosRequestConfig => {
+  return {
+    headers: {
+      Authorization: `Bearer ${bearerToken}`,
+    },
+  };
+};
+
 export const getToken = async (): Promise<AxiosPromise> => {
   const getToken = await axios.post(
     pegadaianApiEnv.authApi.url + '/oauth/token',
@@ -94,12 +124,7 @@ export const getToken = async (): Promise<AxiosPromise> => {
       username: pegadaianApiEnv.authApi.authUser,
       password: pegadaianApiEnv.authApi.authPass,
     }),
-    {
-      auth: {
-        username: pegadaianApiEnv.authApi.basicUser,
-        password: pegadaianApiEnv.authApi.basicPass,
-      },
-    },
+    apiPegadaianAuthConfig,
   );
 
   return getToken;
@@ -113,12 +138,7 @@ export const getTokenTScale = async (): Promise<AxiosPromise> => {
       username: pegadaianApiEnv.tscale.authUser,
       password: pegadaianApiEnv.tscale.authPass,
     }),
-    {
-      auth: {
-        username: pegadaianApiEnv.tscale.basicUser,
-        password: pegadaianApiEnv.tscale.basicPass,
-      },
-    },
+    tscaleAuthConfig,
   );
 
   return getToken;
@@ -160,11 +180,7 @@ export const checkEktpDukcapil = async (body: IKTPDukcapil): Promise<AxiosPromis
       clientId: pegadaianApiEnv.tscale.clientId,
       ipUser: body.ipUser ? body.ipUser : '10.31.78.20',
     },
-    {
-      headers: {
-        Authorization: `Bearer ${bearerToken}`,
-      },
-    },
+    tscaleConfig(bearerToken),
   );
 
   return getToken;
@@ -183,11 +199,7 @@ export const getNasabahByIdKtpPassion = async (body: IKTPPassion): Promise<Axios
       flag: body.flag,
       noIdentitas: body.nik,
     },
-    {
-      headers: {
-        Authorization: `Bearer ${bearerToken}`,
-      },
-    },
+    apiPegadaianConfig(bearerToken),
   );
 
   return nasabah;
@@ -205,11 +217,7 @@ export const getNasabahByCif = async (body): Promise<AxiosPromise> => {
       clientId: pegadaianApiEnv.api.clientId,
       cif: body.cif,
     },
-    {
-      headers: {
-        Authorization: `Bearer ${bearerToken}`,
-      },
-    },
+    apiPegadaianConfig(bearerToken),
   );
 
   return nasabah;
@@ -228,11 +236,7 @@ export const getBadanUsahaByCif = async (body: IBadanUsahaByCif): Promise<AxiosP
       cif: body.cif,
       flag: body.flag,
     },
-    {
-      headers: {
-        Authorization: `Bearer ${bearerToken}`,
-      },
-    },
+    apiPegadaianConfig(bearerToken),
   );
 
   return badanUsaha;

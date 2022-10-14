@@ -104,7 +104,13 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
       leads,
     };
 
-    return res.customSuccess(200, 'Get leads', dataRes);
+    return res.customSuccess(200, 'Get leads', dataRes, {
+      count: count,
+      rowCount: paging.limit,
+      limit: paging.limit,
+      offset: paging.offset,
+      page: Number(req.query.page),
+    });
   } catch (e) {
     return next(e);
   }
@@ -235,7 +241,13 @@ export const getKtpByInstansiId = async (req: Request, res: Response, next: Next
       leads,
     };
 
-    return res.customSuccess(200, 'Get leads', dataRes);
+    return res.customSuccess(200, 'Get leads', dataRes, {
+      count: count,
+      rowCount: paging.limit,
+      limit: paging.limit,
+      offset: paging.offset,
+      page: Number(req.query.page),
+    });
   } catch (e) {
     return next(e);
   }

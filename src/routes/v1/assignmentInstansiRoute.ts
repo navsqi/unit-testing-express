@@ -9,5 +9,6 @@ router.get('/:userNik/instansi', protect(), assignmentInstansiController.getInst
 router.get('/:instansiId/user', protect(), assignmentInstansiController.getAssignedUserByInstansi);
 router.patch('/:id', protect(), assignmentInstansiController.updateAssignment);
 router.post('/', protect(), assignmentInstansiController.assignUser);
+router.delete('/:id', protect(), assignmentInstansiController.deleteAssignInstansi);
 
 export default router;

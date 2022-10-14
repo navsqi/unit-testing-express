@@ -1,5 +1,6 @@
 import User from 'orm/entities/User';
 import { jwtPayload } from 'types/jwtPayload';
+import { MetaPages } from '../metaPageTypes';
 
 declare global {
   namespace Express {
@@ -8,7 +9,7 @@ declare global {
       user: User;
     }
     export interface Response {
-      customSuccess(httpStatusCode: number, message: string, data?: any): Response;
+      customSuccess(httpStatusCode: number, message: string, data?: any, meta?: MetaPages): Response;
       customErrorValidation(httpStatusCode: number, data?: any): Response;
     }
   }

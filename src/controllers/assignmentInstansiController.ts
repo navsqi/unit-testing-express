@@ -50,7 +50,13 @@ export const getAssignedUserByInstansi = async (req: Request, res: Response, nex
       assignUser,
     };
 
-    return res.customSuccess(200, 'Assign user succesful', dataRes);
+    return res.customSuccess(200, 'Assign user succesful', dataRes, {
+      count: count,
+      rowCount: paging.limit,
+      limit: paging.limit,
+      offset: paging.offset,
+      page: Number(req.query.page),
+    });
   } catch (e) {
     return next(e);
   }
@@ -75,7 +81,13 @@ export const getInstansiByAssignedUser = async (req: Request, res: Response, nex
       assignUser,
     };
 
-    return res.customSuccess(200, 'Assign user succesful', dataRes);
+    return res.customSuccess(200, 'Assign user succesful', dataRes, {
+      count: count,
+      rowCount: paging.limit,
+      limit: paging.limit,
+      offset: paging.offset,
+      page: Number(req.query.page),
+    });
   } catch (e) {
     return next(e);
   }
@@ -94,6 +106,20 @@ export const updateAssignment = async (req: Request, res: Response, next: NextFu
     };
 
     return res.customSuccess(200, 'Assign user succesful', dataRes);
+  } catch (e) {
+    return next(e);
+  }
+};
+
+export const deleteAssignInstansi = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const assignment = await assignedInsRepo.delete({ id: +req.params.id });
+
+    const dataRes = {
+      assignUser: assignment,
+    };
+
+    return res.customSuccess(200, 'Delete assignment instansi success', dataRes);
   } catch (e) {
     return next(e);
   }

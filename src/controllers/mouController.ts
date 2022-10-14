@@ -90,7 +90,13 @@ export const getMou = async (req: Request, res: Response, next: NextFunction) =>
       mou,
     };
 
-    return res.customSuccess(200, 'Get mou', dataRes);
+    return res.customSuccess(200, 'Get mou', dataRes, {
+      count: count,
+      rowCount: paging.limit,
+      limit: paging.limit,
+      offset: paging.offset,
+      page: Number(req.query.page),
+    });
   } catch (e) {
     return next(e);
   }
