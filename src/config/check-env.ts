@@ -52,6 +52,7 @@ const envs = [
   'DATERANGE_INSTANSI_EXCEL',
   'DATERANGE_REPORT',
   'DATERANGE_LEADS_CREATE_EVENT',
+  'CRON_CLOSING_PATTERN',
 ];
 
 for (const val of envs) {
