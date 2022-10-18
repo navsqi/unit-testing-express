@@ -71,6 +71,9 @@ class User {
   @UpdateDateColumn()
   updated_at: Date;
 
+  @Column({ type: 'timestamp' })
+  last_login: Date;
+
   hashPassword() {
     this.password = bcrypt.hashSync(this.password, 8);
   }

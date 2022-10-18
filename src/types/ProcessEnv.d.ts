@@ -55,6 +55,7 @@ declare global {
       DATERANGE_INSTANSI_EXCEL: string;
       DATERANGE_REPORT: string;
       DATERANGE_LEADS_CREATE_EVENT: string;
+      CRON_CLOSING_PATTERN: string;
     }
   }
 }

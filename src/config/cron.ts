@@ -13,7 +13,7 @@ export const cronBigDataClosing = async () => {
   await schedulerClosingSvc.schedulerClosingTabemas();
 };
 
-const cronJob: CronJob = new CronJob(CRON_PATTERN.every7am, async () => {
+const cronJob: CronJob = new CronJob(process.env.CRON_CLOSING_PATTERN, async () => {
   try {
     logger.info('CRON', common.tanggal(new Date(), true));
     await cronBigDataClosing();

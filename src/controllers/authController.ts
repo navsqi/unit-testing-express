@@ -92,6 +92,8 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
     user.password = undefined;
 
+    await userRepo.update(user.id, { last_login: new Date() });
+
     const dataRes = {
       user,
       bearer: token,
@@ -134,6 +136,7 @@ export const exchangeTokenSso = async (req: Request, res: Response, next: NextFu
         kode_role: kodeRole,
         kode_unit_kerja: kodeOutlet,
         photo: ssoRes.path_foto,
+        last_login: new Date(),
       });
     } else {
       await userRepo.update(user.id, {
@@ -143,6 +146,7 @@ export const exchangeTokenSso = async (req: Request, res: Response, next: NextFu
         kode_role: kodeRole,
         kode_unit_kerja: kodeOutlet,
         photo: ssoRes.path_foto,
+        last_login: new Date(),
       });
 
       user = await userRepo.findOne({ select: { password: false }, where: { nik: ssoRes.nik } });
