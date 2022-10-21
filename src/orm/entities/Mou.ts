@@ -22,7 +22,7 @@ export enum StatusMou {
   DITOLAK = 'DITOLAK',
 }
 
-@Entity('mou')
+@Entity('mou', { synchronize: false })
 class Mou {
   @PrimaryGeneratedColumn()
   id: number;

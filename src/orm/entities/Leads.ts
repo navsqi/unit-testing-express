@@ -12,7 +12,7 @@ import Instansi from './Instansi';
 import Outlet from './Outlet';
 import User from './User';
 
-@Entity('leads')
+@Entity('leads', { synchronize: false })
 class Leads {
   @PrimaryGeneratedColumn()
   id?: number;

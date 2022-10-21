@@ -11,7 +11,7 @@ import {
 import Outlet from './Outlet';
 import Role from './Role';
 
-@Entity('users')
+@Entity('users', { synchronize: false })
 class User {
   @PrimaryGeneratedColumn()
   id: number;

@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity('params_sso_role')
+@Entity('params_sso_role', { synchronize: false })
 class ParamsSsoRole {
   @PrimaryGeneratedColumn()
   id: number;
