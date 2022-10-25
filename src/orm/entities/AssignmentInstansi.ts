@@ -10,7 +10,7 @@ import {
 import Instansi from './Instansi';
 import User from './User';
 
-@Entity('assignment_instansi')
+@Entity('assignment_instansi', { synchronize: false })
 class AssignmentInstansi {
   @PrimaryGeneratedColumn()
   id: number;

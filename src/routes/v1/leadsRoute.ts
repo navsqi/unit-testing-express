@@ -21,6 +21,7 @@ router.post(
 );
 router.get('/nik-karyawan', protect(), leadsController.getNIKKaryawan);
 router.get('/:leadsId', leadsController.getLeadsById);
+router.get('/nik/:nikKtp', leadsController.getLeadsByNik);
 router.get('/', protect(), leadsController.getLeads);
 router.post('/perorangan', protect(), cabangOnly, inputLeadsVal, leadsController.createNewLeadsPerorangan);
 router.post('/badan-usaha', protect(), cabangOnly, inputLeadsBadanUsahaVal, leadsController.createNewLeadsBadanUsaha);

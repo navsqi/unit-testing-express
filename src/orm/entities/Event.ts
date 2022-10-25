@@ -19,7 +19,7 @@ export enum JenisAktivitas {
   LAINNYA = 'LAINNYA',
 }
 
-@Entity('event')
+@Entity('event', { synchronize: false })
 class Event {
   @PrimaryGeneratedColumn()
   id: number;

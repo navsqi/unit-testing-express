@@ -1,6 +1,6 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
-@Entity('nasabah_badan_usaha')
+@Entity('nasabah_badan_usaha', { synchronize: false })
 class NasabahBadanUsaha {
   @PrimaryGeneratedColumn()
   id: number;

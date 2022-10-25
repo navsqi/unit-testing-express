@@ -41,7 +41,7 @@ export const getUser = async (req: Request, res: Response, next: NextFunction) =
     const [users, count] = await userRepo.findAndCount({
       take: paging.limit,
       skip: paging.offset,
-      select: ['id', 'nik', 'nama', 'kode_role', 'kode_unit_kerja'],
+      select: ['id', 'nik', 'nama', 'kode_role', 'kode_unit_kerja', 'last_login'],
       where,
     });
 

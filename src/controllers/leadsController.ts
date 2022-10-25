@@ -135,6 +135,37 @@ export const getLeadsById = async (req: Request, res: Response, next: NextFuncti
   }
 };
 
+export const getLeadsByNik = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const nikKtp = req.params.nikKtp;
+
+    if (!nikKtp || nikKtp.length != 16) return next(new CustomError('NIK harus 16 digit angka', 400));
+
+    const leads = await leadsRepo.findOne({
+      relations: ['instansi', 'event', 'outlet'],
+      where: {
+        nik_ktp: nikKtp,
+      },
+    });
+
+    if (!leads)
+      return next(
+        new CustomError(
+          'Maaf anda belum dapat terdaftar. Silahkan menghubungi PIC Marketing kami pada Instansi Anda',
+          404,
+        ),
+      );
+
+    const dataRes = {
+      leads,
+    };
+
+    return res.customSuccess(200, 'Get leads', dataRes);
+  } catch (e) {
+    return next(e);
+  }
+};
+
 export const updateLeads = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const leads = await leadsRepo.update(req.params.id, {
