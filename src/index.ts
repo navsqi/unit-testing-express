@@ -28,7 +28,8 @@ export const eventHandler: any = new EventEmitter();
     logger.info('CRON', 'CRON is running...');
   }
 
-  eventHandler.on('performBackgroundTask', async () => {
+  eventHandler.on('performBackgroundTask', async (data: string) => {
+    
     logger.info('CRON_TRIGGERED_BY_REST_API', 'Query Execute');
     await cronBigDataClosing();
   });
