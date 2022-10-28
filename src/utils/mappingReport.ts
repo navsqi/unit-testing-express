@@ -120,6 +120,9 @@ export const mapClosingReport = (data: QueryResultClosingReport[]) => {
       osl: el.osl || 0,
       saldo_tabemas: el.saldo_tabemas || 0,
     };
+    
+    const channel = el.channel ?  el.channel : 'CABANG';
+    el.channel = channel;
 
     if (el.nama_unit_kerja && el.unit) {
       o[`outlet_${el.unit}`] = el.nama_unit_kerja;
