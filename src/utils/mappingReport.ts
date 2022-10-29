@@ -121,7 +121,7 @@ export const mapClosingReport = (data: QueryResultClosingReport[]) => {
       saldo_tabemas: el.saldo_tabemas || 0,
     };
     
-    const channel = el.channel ?  el.channel : 'CABANG';
+    const channel = el.channel ?  el.channel : 'Outlet';
     el.channel = channel;
 
     if (el.nama_unit_kerja && el.unit) {
