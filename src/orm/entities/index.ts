@@ -17,6 +17,8 @@ import Role from './Role';
 import MasterMenu from './MasterMenu';
 import AccessMenuRole from './AccessMenuRole';
 import ParamsSsoRole from './ParamsSsoRole';
+import MasterStatusLos from './MasterStatusLos';
+import MasterStatusPki from './MasterStatusPki';
 
 export default {
   User,
@@ -38,4 +40,6 @@ export default {
   AccessMenuRole,
   LeadsClosing,
   ParamsSsoRole,
+  MasterStatusLos,
+  MasterStatusPki
 };
