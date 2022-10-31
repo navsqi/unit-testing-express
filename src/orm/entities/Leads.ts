@@ -10,6 +10,7 @@ import {
 import Event from './Event';
 import Instansi from './Instansi';
 import Outlet from './Outlet';
+import Produk from './Produk';
 import User from './User';
 
 @Entity('leads', { synchronize: false })
@@ -170,6 +171,12 @@ class Leads {
   })
   is_karyawan: number;
 
+  @Column({
+    type: 'varchar',
+    length: 255
+  })
+  pic_selena: string;
+
   @Column()
   @CreateDateColumn()
   created_at: Date;
@@ -203,6 +210,10 @@ class Leads {
   @ManyToOne(() => Outlet)
   @JoinColumn([{ name: 'kode_unit_kerja', referencedColumnName: 'kode' }])
   outlet: Outlet;
+
+  @ManyToOne(() => Produk)
+  @JoinColumn([{ name: 'kode_produk', referencedColumnName: 'kode_produk' }])
+  produk: Produk;
 
   @ManyToOne(() => User, { onUpdate: 'CASCADE', onDelete: 'NO ACTION' })
   @JoinColumn([{ name: 'created_by', referencedColumnName: 'nik' }])

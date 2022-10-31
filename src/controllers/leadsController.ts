@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { FindOptionsWhere, ILike, In } from 'typeorm';
+import { FindOptionsWhere, ILike, In, IsNull, Not, Raw } from 'typeorm';
 import APIPegadaian from '~/apis/pegadaianApi';
 import Leads from '~/orm/entities/Leads';
 import CustomError from '~/utils/customError';
@@ -33,6 +33,10 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
       kode_unit_kerja: req.query.kode_unit_kerja,
       is_session: req.query.is_session ? +req.query.is_session : null,
       is_badan_usaha: req.query.is_badan_usaha ? +req.query.is_badan_usaha : null,
+      instansi_id: req.query.instansi_id,
+      event_id: req.query.event_id,
+      pic_selena: req.query.pic_selena as string,
+      follow_up_pic_selena: +req.query.follow_up_pic_selena as number,
     };
 
     if (common.isSalesRole(req.user.kode_role)) {
@@ -45,6 +49,26 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
 
     if (filter.status) {
       where['status'] = +filter.status;
+    }
+
+    if (filter.instansi_id) {
+      where['instansi_id'] = +filter.instansi_id;
+    }
+
+    if (filter.event_id) {
+      where['event_id'] = +filter.event_id;
+    }
+
+    if (filter.pic_selena) {
+      where['pic_selena'] = filter.pic_selena;
+    }
+
+    if (filter.follow_up_pic_selena) {
+      if (filter.follow_up_pic_selena == 1){
+        where['pic_selena'] = Raw(alias => `${alias} is not null or ${alias} <> ''`);
+      }else {
+        where['pic_selena'] = IsNull();
+      }
     }
 
     if (filter.kode_unit_kerja && filter.is_session == 0) {
@@ -85,8 +109,12 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
           unit_kerja: true,
           nama: true,
         },
+        produk:{
+          kode_produk: true,
+          nama_produk: true
+        }
       },
-      relations: ['instansi', 'event', 'outlet'],
+      relations: ['instansi', 'event', 'outlet', 'produk'],
       take: paging.limit,
       skip: paging.offset,
       where,
@@ -119,7 +147,28 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
 export const getLeadsById = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const leads = await leadsRepo.findOne({
-      relations: ['instansi', 'event', 'outlet'],
+      select: {
+        instansi: {
+          id: true,
+          nama_instansi: true,
+        },
+        event: {
+          id: true,
+          nama_event: true,
+          nama_pic: true,
+          tanggal_event: true,
+        },
+        outlet: {
+          kode: true,
+          unit_kerja: true,
+          nama: true,
+        },
+        produk:{
+          kode_produk: true,
+          nama_produk: true
+        }
+      },
+      relations: ['instansi', 'event', 'outlet', 'produk'],
       where: {
         id: +req.params.leadsId,
       },
