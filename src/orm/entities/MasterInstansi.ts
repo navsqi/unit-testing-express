@@ -23,7 +23,7 @@ export enum CakupanInstansi {
   CABANG = 'CABANG',
 }
 
-@Entity('master_instansi')
+@Entity('master_instansi', { synchronize: false })
 class MasterInstansi {
   @PrimaryGeneratedColumn()
   id: number;

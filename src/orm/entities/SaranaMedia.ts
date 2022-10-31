@@ -1,6 +1,6 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
-@Entity('sarana_media')
+@Entity('sarana_media', { synchronize: false })
 class SaranaMedia {
   @PrimaryGeneratedColumn()
   id: number;

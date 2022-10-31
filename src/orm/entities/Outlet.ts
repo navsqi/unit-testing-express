@@ -1,6 +1,6 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
-@Entity('outlet')
+@Entity('outlet', { synchronize: false })
 class Outlet {
   @PrimaryGeneratedColumn()
   id: number;

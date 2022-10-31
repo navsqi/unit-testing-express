@@ -9,9 +9,9 @@ router.get('/', (req, res) => {
 });
 
 router.put('/closing-scheduler', basicAuth, async (req, res) => {
-  eventHandler.emit('performBackgroundTask');
+  eventHandler.emit('performBackgroundTask', 'ini data lho');
 
-  res.send('Updated at 06/10/2022 10:38 | Cron dieksekusi');
+  res.send('Updated at 25/10/2022 10:38 | Cron dieksekusi');
 });
 
 export default router;

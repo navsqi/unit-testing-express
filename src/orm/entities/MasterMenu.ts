@@ -1,7 +1,7 @@
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import AccessMenuRole from './AccessMenuRole';
 
-@Entity('master_menu')
+@Entity('master_menu', { synchronize: false })
 class MasterMenu {
   @PrimaryGeneratedColumn()
   id: number;
