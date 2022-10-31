@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { FindOptionsWhere, ILike, In } from 'typeorm';
+import { FindOptionsWhere, ILike, In, IsNull, Not, Raw } from 'typeorm';
 import APIPegadaian from '~/apis/pegadaianApi';
 import Leads from '~/orm/entities/Leads';
 import CustomError from '~/utils/customError';
@@ -36,7 +36,7 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
       instansi_id: req.query.instansi_id,
       event_id: req.query.event_id,
       pic_selena: req.query.pic_selena as string,
-      follow_up_pic_selena: req.query.follow_up_pic_selena,
+      follow_up_pic_selena: +req.query.follow_up_pic_selena as number,
     };
 
     if (common.isSalesRole(req.user.kode_role)) {
@@ -61,6 +61,14 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
 
     if (filter.pic_selena) {
       where['pic_selena'] = filter.pic_selena;
+    }
+
+    if (filter.follow_up_pic_selena) {
+      if (filter.follow_up_pic_selena == 1){
+        where['pic_selena'] = Raw(alias => `${alias} is not null or ${alias} <> ''`);
+      }else {
+        where['pic_selena'] = IsNull();
+      }
     }
 
     if (filter.kode_unit_kerja && filter.is_session == 0) {
