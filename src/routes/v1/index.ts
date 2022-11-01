@@ -15,6 +15,7 @@ import roleRoute from './roleRoute';
 import reportRoute from './reportRoute';
 import testingRoute from './testingRoute';
 import dashboardRoute from './dashboardRoute';
+import pkiRoute from './pkiRoute';
 
 const router = Router();
 
@@ -33,5 +34,6 @@ router.use('/role', roleRoute);
 router.use('/report', reportRoute);
 router.use('/dashboard', dashboardRoute);
 router.use('/testing', testingRoute);
+router.use('/pki', pkiRoute);
 
 export default router;
