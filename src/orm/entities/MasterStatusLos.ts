@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryColumn, Table } from 'typeorm';
 
-@Entity('master_status_los', { synchronize: true })
+@Entity('master_status_los', { synchronize: false })
 class MasterStatusLos {
   @Column({
     length: 20,

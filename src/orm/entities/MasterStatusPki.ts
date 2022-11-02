@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity('master_status_pki', { synchronize: true })
+@Entity('master_status_pki', { synchronize: false })
 class MasterStatusPki {
   @PrimaryGeneratedColumn()
   id: number;

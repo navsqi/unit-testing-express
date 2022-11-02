@@ -1,5 +1,4 @@
-import { fstat } from 'fs';
-import { Column, CreateDateColumn, Entity, PrimaryColumn, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity('pki_pengajuan', { synchronize: false })
 class PkiPengajuan {
