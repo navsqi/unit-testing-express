@@ -1,8 +1,115 @@
 import { NextFunction, Request, Response } from 'express';
+import { FindOptionsWhere, ILike, In, IsNull, Not, Raw, Between } from 'typeorm';
 import { dataSource } from '~/orm/dbCreateConnection';
+import CustomError from '~/utils/customError';
+import queryHelper from '~/utils/queryHelper';
+import * as common from '~/utils/common';
 import PkiAgunan from '~/orm/entities/PkiAgunan';
 import PkiNasabah from '~/orm/entities/PkiNasabah';
 import PkiPengajuan from '~/orm/entities/PkiPengajuan';
+
+const pkiPengajuanRepo = dataSource.getRepository(PkiPengajuan);
+const pkiAgunanRepo = dataSource.getRepository(PkiAgunan);
+const pkiNasabahRepo = dataSource.getRepository(PkiNasabah);
+
+
+export const getPki = async (req: Request, res: Response, next: NextFunction) => {
+  try{
+    const where: FindOptionsWhere<PkiPengajuan> = {};
+    const filter = {
+      no_pengajuan: req.query.no_pengajuan as string,
+      nama: req.query.nama as string,
+      start_date: (req.query.start_date as string) || '',
+      end_date: (req.query.end_date as string) || '',
+      kode_produk: req.query.kode_produk as string,
+      kode_instansi:req.query.kode_instansi,
+      status_pengajuan:req.query.status_pengajuan,
+    };
+
+    if(filter.no_pengajuan){
+      where['no_pengajuan'] = ILike(`%${filter.no_pengajuan}%`);
+    }
+    if(filter.kode_produk){
+      where['kode_produk'] = filter.kode_produk;
+    }
+    if(filter.kode_instansi){
+      where['kode_instansi'] = +filter.kode_instansi;
+    }
+
+    if(filter.nama){
+      where.pki_nasabah = {
+        nama: ILike(`%${filter.nama}%`)
+      };
+    }
+
+    if (filter.start_date && filter.end_date) {
+      where['tgl_pengajuan'] = Between(new Date(`${filter.start_date} 00:00:00`), new Date(`${filter.end_date} 23:59:59`));
+    }
+    const paging = queryHelper.paging(req.query);
+
+    const [pki, count] = await pkiPengajuanRepo.findAndCount({
+      select:{
+        pki_nasabah: {
+          no_ktp: true,
+          nama: true,
+          tgl_lahir: true,
+          no_hp: true,
+          email: true,
+          created_date: true,
+          modified_date: true,
+          file_path_ektp: true,
+          data_consent: true,
+        },
+        pki_agunan:{
+          no_pengajuan: true,
+          jenis_agunan: true,
+          jenis_kendaraan: true,
+          kondisi_kendaraan: true,
+          tahun_produksi: true,
+          harga_kendaraan: true,
+          uang_muka: true,
+          merk_kendaraan: true,
+          tipe_kendaraan: true,
+          no_sertifikat: true,
+          kepemilikan_agunan: true,
+        },
+        instansi:{
+          id: true,
+          nama_instansi: true,
+          jenis_instansi: true,
+        },
+        produk:{
+          kode_produk: true,
+          nama_produk: true,
+        }
+      },
+      relations:['pki_agunan','pki_nasabah','instansi','produk'],
+      take: paging.limit,
+      skip: paging.offset,
+      where,
+      order: {
+        created_at: 'desc',
+      },
+    })
+    const dataRes = {
+      meta: {
+        count,
+        limit: paging.limit,
+        offset: paging.offset,
+      },
+      pki,
+    };
+    return res.customSuccess(200, 'Get P2KI', dataRes,{
+      count: count,
+      rowCount: paging.limit,
+      limit: paging.limit,
+      offset: paging.offset,
+      page: Number(req.query.page),
+    });
+  } catch (e){
+    return next(e);
+  }
+}
 
 export const createNewPki = async (req: Request, res: Response, next: NextFunction) => {
   const queryRunner = dataSource.createQueryRunner();

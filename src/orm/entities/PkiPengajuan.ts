@@ -1,5 +1,18 @@
 import { fstat } from 'fs';
-import { Column, CreateDateColumn, Entity, PrimaryColumn, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { 
+  Column,
+  CreateDateColumn,
+  Entity, 
+  PrimaryColumn,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+  OneToOne,
+  JoinColumn
+  } from 'typeorm';
+import Instansi from './Instansi';
+import PkiAgunan from './PkiAgunan';
+import PkiNasabah from './PkiNasabah';
+import Produk from './Produk';
 
 @Entity('pki_pengajuan', { synchronize: false })
 class PkiPengajuan {
@@ -149,6 +162,22 @@ class PkiPengajuan {
   @Column()
   @UpdateDateColumn()
   updated_at: Date;
+
+  @OneToOne(() => PkiNasabah)
+  @JoinColumn([{ name: 'no_ktp', referencedColumnName: 'no_ktp' }])
+  pki_nasabah: PkiNasabah;
+
+  @OneToOne(() => PkiAgunan)
+  @JoinColumn([{ name: 'no_pengajuan', referencedColumnName: 'no_pengajuan' }])
+  pki_agunan: PkiAgunan;
+
+  @OneToOne(() => Instansi)
+  @JoinColumn([{ name: 'kode_instansi', referencedColumnName: 'id' }])
+  instansi: Instansi;
+
+  @OneToOne(() => Produk)
+  @JoinColumn([{ name: 'kode_produk', referencedColumnName: 'kode_produk' }])
+  produk: Produk;
 }
 
 export default PkiPengajuan;
