@@ -36,6 +36,7 @@ class PkiNasabah {
   email: string;
 
   @Column({type:"timestamp"})
+  @CreateDateColumn()
   created_date: Date;
 
   @Column({
