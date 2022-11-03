@@ -49,6 +49,7 @@ export const createNewPki = async (req: Request, res: Response, next: NextFuncti
     pkiPengajuan.no_aplikasi_los = bodyPkiPengajuan?.no_aplikasi_los;
     pkiPengajuan.kode_instansi = bodyPkiPengajuan?.kode_instansi;
     pkiPengajuan.response_los = bodyPkiPengajuan?.response_los;
+    pkiPengajuan.body_los = bodyPkiPengajuan?.body_los;
 
     const bodyPkiNasabah = req.body.pki_nasabah as PkiNasabah;
     const pkiNasabah = new PkiNasabah();
