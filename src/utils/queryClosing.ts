@@ -35,7 +35,6 @@ WHERE
 
 export const selectTmpKreditTabemas = `
 SELECT
-	DISTINCT ON (tmpk.no_rek, tmpk.omset_te)
 	l.id AS leads_id,
 	tmpk.product_code,
 	l.nik_ktp,
