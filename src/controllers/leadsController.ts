@@ -491,7 +491,7 @@ export const createNewLeadsBadanUsaha = async (req: Request, res: Response, next
 export const createNewLeadsByCsv = async (req: Request, res: Response, next: NextFunction) => {
   const queryRunner = dataSource.createQueryRunner();
 
-  queryRunner.connect();
+  await queryRunner.connect();
   await queryRunner.startTransaction();
 
   try {
