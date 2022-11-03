@@ -3,11 +3,12 @@ import { dataSource } from '~/orm/dbCreateConnection';
 import PkiAgunan from '~/orm/entities/PkiAgunan';
 import PkiNasabah from '~/orm/entities/PkiNasabah';
 import PkiPengajuan from '~/orm/entities/PkiPengajuan';
+import CustomError from '~/utils/customError';
 
 export const createNewPki = async (req: Request, res: Response, next: NextFunction) => {
   const queryRunner = dataSource.createQueryRunner();
 
-  queryRunner.connect();
+  await queryRunner.connect();
   await queryRunner.startTransaction();
   try {
     const bodyPkiAgunan = req.body.pki_agunan as PkiAgunan;
@@ -51,6 +52,15 @@ export const createNewPki = async (req: Request, res: Response, next: NextFuncti
     pkiPengajuan.response_los = bodyPkiPengajuan?.response_los;
     pkiPengajuan.body_los = bodyPkiPengajuan?.body_los;
 
+
+    const cekIdPengajuan = await queryRunner.manager.findOne(PkiPengajuan, {where: {no_pengajuan: pkiPengajuan.no_pengajuan}});
+
+    if(cekIdPengajuan){
+      await queryRunner.rollbackTransaction();
+      await queryRunner.release();
+      return next(new CustomError('No Pengajuan telah ada', 400));
+    }
+
     const bodyPkiNasabah = req.body.pki_nasabah as PkiNasabah;
     const pkiNasabah = new PkiNasabah();
 
@@ -73,6 +83,7 @@ export const createNewPki = async (req: Request, res: Response, next: NextFuncti
       pkiPengajuan: pkiPengajuan,
       pkiNasabah: pkiNasabah,
     };
+
     await queryRunner.commitTransaction();
     await queryRunner.release();
 
