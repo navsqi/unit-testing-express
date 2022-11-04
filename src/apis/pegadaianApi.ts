@@ -1,6 +1,7 @@
 import 'dotenv/config';
 
 import axios, { AxiosPromise, AxiosRequestConfig } from 'axios';
+import { ILOSPengajuan } from '~/types/LOSTypes';
 
 interface IBadanUsahaByCif {
   cif: string;
@@ -241,6 +242,22 @@ export const getBadanUsahaByCif = async (body: IBadanUsahaByCif): Promise<AxiosP
 
   return badanUsaha;
 };
+
+//  ============== LOS ==============
+export const losPengajuanKredit = async (body: ILOSPengajuan): Promise<AxiosPromise> => {
+  const reqBearerToken = await getToken();
+
+  const bearerToken = reqBearerToken.data.access_token;
+
+  const pengajuanKredit = await axios.post(
+    pegadaianApiEnv.api.url + '/microsite/pengajuankredit',
+    body,
+    apiPegadaianConfig(bearerToken),
+  );
+
+  return pengajuanKredit;
+};
+// ============== END OF LOS ==============
 
 const APIPegadaian = {
   checkEktpDukcapil,
