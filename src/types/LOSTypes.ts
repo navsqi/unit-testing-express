@@ -182,6 +182,14 @@ export interface JaminanBarangKantong {
   beratBersih: string;
 }
 
+export interface ILOSPengajuanResponse {
+  noAplikasiLos: string;
+  nik: string;
+  kodeProduk: string;
+  up: string;
+  kodeOutlet: string;
+}
+
 export interface ILOSPengajuan {
   channelId: string;
   clientId: string;

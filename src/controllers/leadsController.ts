@@ -1,22 +1,22 @@
 import { NextFunction, Request, Response } from 'express';
-import { FindOptionsWhere, ILike, In, IsNull, Not, Raw } from 'typeorm';
+import { FindOptionsWhere, ILike, In, IsNull, Raw } from 'typeorm';
 import APIPegadaian from '~/apis/pegadaianApi';
 import Leads from '~/orm/entities/Leads';
+import * as common from '~/utils/common';
 import CustomError from '~/utils/customError';
 import queryHelper from '~/utils/queryHelper';
-import * as common from '~/utils/common';
 
 import { parse } from 'csv-parse';
+import dayjs from 'dayjs';
+import { IResponseBadanUsaha } from '~/interfaces/IApiPegadaian';
 import { dataSource } from '~/orm/dbCreateConnection';
+import Event from '~/orm/entities/Event';
+import NasabahBadanUsaha from '~/orm/entities/NasabahBadanUsaha';
 import NasabahPerorangan from '~/orm/entities/NasabahPerorangan';
+import { konsolidasiTopBottom } from '~/services/konsolidasiSvc';
 import { IKTPPassion } from '~/types/APIPegadaianTypes';
 import { addDays, bufferToStream, parseIp } from '~/utils/common';
 import validationCsv from '~/utils/validationCsv';
-import { konsolidasiTopBottom } from '~/services/konsolidasiSvc';
-import dayjs from 'dayjs';
-import Event from '~/orm/entities/Event';
-import NasabahBadanUsaha from '~/orm/entities/NasabahBadanUsaha';
-import { IResponseBadanUsaha } from '~/interfaces/IApiPegadaian';
 
 const leadsRepo = dataSource.getRepository(Leads);
 const eventRepo = dataSource.getRepository(Event);
@@ -64,9 +64,9 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
     }
 
     if (filter.follow_up_pic_selena) {
-      if (filter.follow_up_pic_selena == 1){
-        where['pic_selena'] = Raw(alias => `${alias} is not null or ${alias} <> ''`);
-      }else {
+      if (filter.follow_up_pic_selena == 1) {
+        where['pic_selena'] = Raw((alias) => `${alias} is not null or ${alias} <> ''`);
+      } else {
         where['pic_selena'] = IsNull();
       }
     }
@@ -109,10 +109,10 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
           unit_kerja: true,
           nama: true,
         },
-        produk:{
+        produk: {
           kode_produk: true,
-          nama_produk: true
-        }
+          nama_produk: true,
+        },
       },
       relations: ['instansi', 'event', 'outlet', 'produk'],
       take: paging.limit,
@@ -163,10 +163,10 @@ export const getLeadsById = async (req: Request, res: Response, next: NextFuncti
           unit_kerja: true,
           nama: true,
         },
-        produk:{
+        produk: {
           kode_produk: true,
-          nama_produk: true
-        }
+          nama_produk: true,
+        },
       },
       relations: ['instansi', 'event', 'outlet', 'produk'],
       where: {
@@ -230,7 +230,7 @@ export const getLeadsInstansiByNik = async (req: Request, res: Response, next: N
           id: true,
           nama_instansi: true,
           master_instansi_id: true,
-        }
+        },
       },
       relations: ['instansi'],
       where: {

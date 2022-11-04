@@ -1,6 +1,6 @@
 /* eslint-disable no-array-reduce/no-reduce */
 import { Readable } from 'stream';
-import crypto from 'crypto';
+import crypto, { createHash } from 'crypto';
 import dayjs from 'dayjs';
 import { IGenerateNestedArrOfObj } from '~/types/commonTypes';
 import { IPaging } from './queryHelper';
@@ -135,3 +135,7 @@ export const pagingExcel = (): IPaging => {
     offset: undefined,
   };
 };
+
+export function md5(content) {
+  return createHash('md5').update(content).digest('hex');
+}

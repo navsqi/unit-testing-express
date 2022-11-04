@@ -257,6 +257,24 @@ export const losPengajuanKredit = async (body: ILOSPengajuan): Promise<AxiosProm
 
   return pengajuanKredit;
 };
+
+export const losHistoryKredit = async (noAplikasiLos: string): Promise<AxiosPromise> => {
+  const reqBearerToken = await getToken();
+
+  const bearerToken = reqBearerToken.data.access_token;
+
+  const pengajuanKredit = await axios.post(
+    pegadaianApiEnv.api.url + '/microsite/gethistorykredit',
+    {
+      channelId: pegadaianApiEnv.api.channelId,
+      clientId: pegadaianApiEnv.api.clientId,
+      noAplikasiLos: noAplikasiLos,
+    },
+    apiPegadaianConfig(bearerToken),
+  );
+
+  return pengajuanKredit;
+};
 // ============== END OF LOS ==============
 
 const APIPegadaian = {
@@ -264,6 +282,8 @@ const APIPegadaian = {
   getNasabahByIdKtpPassion,
   getNasabahByCif,
   getBadanUsahaByCif,
+  losPengajuanKredit,
+  losHistoryKredit,
 };
 
 export default APIPegadaian;
