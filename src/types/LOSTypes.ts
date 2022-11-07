@@ -225,3 +225,47 @@ export interface ILOSPengajuan {
   jaminanPersediaan: JaminanPersediaan[];
   jaminanBarangKantong: JaminanBarangKantong[];
 }
+
+export interface AppFlag {
+  trDesc: string;
+  aging: string;
+  appNumber: string;
+  currTrCode: string;
+  nextTrBy: string;
+  processBy: string;
+  lastTrDate: string;
+  lastTrCode: string;
+  lastTrBy: string;
+  reject: string;
+  cancel: string;
+  approved: string;
+  jabatan: string;
+  fullName: string;
+  decsSta: string;
+  decsDate: string;
+  decsBy: string;
+  trackFlag: string;
+  sla: string;
+  key: string;
+}
+
+export interface TrackHistory {
+  appNumber: string;
+  thSeq: string;
+  trCode: string;
+  trDate: string;
+  trBy: string;
+  lastTrDate: string;
+  lastTrBy: string;
+  trackTpl: string;
+  trDesc: string;
+  aging: string;
+  jabatan: string;
+  agingSecond: string;
+  key: string;
+}
+
+export interface ILOSHistoryKreditResponse {
+  appFlag: AppFlag[];
+  trackHistory: TrackHistory[];
+}

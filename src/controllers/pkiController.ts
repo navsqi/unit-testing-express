@@ -7,8 +7,9 @@ import PkiPengajuan from '~/orm/entities/PkiPengajuan';
 import CustomError from '~/utils/customError';
 import queryHelper from '~/utils/queryHelper';
 import APIPegadaian from '~/apis/pegadaianApi';
-import { ILOSPengajuan, ILOSPengajuanResponse } from '~/types/LOSTypes';
+import { ILOSHistoryKreditResponse, ILOSPengajuan, ILOSPengajuanResponse } from '~/types/LOSTypes';
 import micrositeSvc from '~/services/micrositeSvc';
+import mappingLosResponse from '~/utils/mappingLosResponse';
 
 const pkiPengajuanRepo = dataSource.getRepository(PkiPengajuan);
 // const pkiAgunanRepo = dataSource.getRepository(PkiAgunan);
@@ -247,6 +248,8 @@ export const historyKreditLos = async (req: Request, res: Response, next: NextFu
 
     if (!noPengajuan || !pkiPengajuan) return next(new CustomError('Nomor pengajuan tidak ditemukan', 404));
 
+    if (!pkiPengajuan.no_aplikasi_los) return next(new CustomError('Nomor aplikasi LOS belum ada', 404));
+
     const pengajuanLOS = await APIPegadaian.losHistoryKredit(pkiPengajuan.no_aplikasi_los);
 
     if (pengajuanLOS.status != 200) return next(new CustomError('Pengajuan ke LOS gagal', 400));
@@ -255,11 +258,25 @@ export const historyKreditLos = async (req: Request, res: Response, next: NextFu
 
     if (dataPengajuanLOS.responseCode != '00') return next(new CustomError(dataPengajuanLOS.responseDesc, 400));
 
+    const parseResponseHistoryKredit = JSON.parse(dataPengajuanLOS.data) as ILOSHistoryKreditResponse;
+
+    const mappingResponse = mappingLosResponse.mappingHistoryKredit(parseResponseHistoryKredit);
+
+    if (mappingResponse && mappingResponse.length > 0) {
+      const lastIndex = mappingResponse[mappingResponse.length - 1];
+      await pkiPengajuanRepo.update(
+        { no_pengajuan: noPengajuan },
+        { status_pengajuan: lastIndex.status_microsite.id_status_microsite },
+      );
+
+      await micrositeSvc.updateStatusLosMicrosite(lastIndex.status_microsite.id_status_microsite, noPengajuan);
+    }
+
     const dataRes = {
-      los: JSON.parse(dataPengajuanLOS.data),
+      los: mappingResponse,
     };
 
-    return res.customSuccess(200, 'Pengajuan kredit ke LOS berhasil', dataRes);
+    return res.customSuccess(200, 'Get history kredit LOS berhasil', dataRes);
   } catch (e) {
     return next(e);
   }

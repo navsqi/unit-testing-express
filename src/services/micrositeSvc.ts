@@ -13,6 +13,20 @@ export const updateNoAplikasiLosMicrosite = async (noAplikasiLos: string, noPeng
   }
 };
 
+export const updateStatusLosMicrosite = async (statusLos: string, noPengajuan: string): Promise<string[]> => {
+  try {
+    const updateNoAplikasiLos = await micrositeDb.dataSource.query(
+      `UPDATE hbl_pengajuan SET status_pengajuan = $1 WHERE no_pengajuan = $2`,
+      [statusLos, noPengajuan],
+    );
+
+    return updateNoAplikasiLos;
+  } catch (error) {
+    return error;
+  }
+};
+
 export default {
   updateNoAplikasiLosMicrosite,
+  updateStatusLosMicrosite,
 };
