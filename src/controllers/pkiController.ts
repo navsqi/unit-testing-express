@@ -9,8 +9,6 @@ import PkiNasabah from '~/orm/entities/PkiNasabah';
 import PkiPengajuan from '~/orm/entities/PkiPengajuan';
 
 const pkiPengajuanRepo = dataSource.getRepository(PkiPengajuan);
-const pkiAgunanRepo = dataSource.getRepository(PkiAgunan);
-const pkiNasabahRepo = dataSource.getRepository(PkiNasabah);
 
 
 export const getPki = async (req: Request, res: Response, next: NextFunction) => {
@@ -24,6 +22,9 @@ export const getPki = async (req: Request, res: Response, next: NextFunction) =>
       kode_produk: req.query.kode_produk as string,
       kode_instansi:req.query.kode_instansi,
       status_pengajuan:req.query.status_pengajuan,
+      page: Number(req.query.page) || 1,
+      limit: Number(req.query.limit) || 250,
+      offset: null,
     };
 
     if(filter.no_pengajuan){
@@ -92,19 +93,14 @@ export const getPki = async (req: Request, res: Response, next: NextFunction) =>
       },
     })
     const dataRes = {
-      meta: {
-        count,
-        limit: paging.limit,
-        offset: paging.offset,
-      },
-      pki,
+      report: pki,
     };
     return res.customSuccess(200, 'Get P2KI', dataRes,{
       count: count,
       rowCount: paging.limit,
       limit: paging.limit,
       offset: paging.offset,
-      page: Number(req.query.page),
+      page: Number(filter.page),
     });
   } catch (e){
     return next(e);
