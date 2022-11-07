@@ -7,9 +7,24 @@ import * as common from '~/utils/common';
 import PkiAgunan from '~/orm/entities/PkiAgunan';
 import PkiNasabah from '~/orm/entities/PkiNasabah';
 import PkiPengajuan from '~/orm/entities/PkiPengajuan';
+import MasterStatusLos from '~/orm/entities/MasterStatusLos';
 
 const pkiPengajuanRepo = dataSource.getRepository(PkiPengajuan);
+const statusLosRepo = dataSource.getRepository(MasterStatusLos);
 
+export const getStatusLos = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const statusLos = await statusLosRepo.find();
+
+    const dataRes = {
+      statusLos,
+    };
+
+    return res.customSuccess(200, 'Get status los', dataRes);
+  } catch (e) {
+    return next(e);
+  }
+};
 
 export const getPki = async (req: Request, res: Response, next: NextFunction) => {
   try{

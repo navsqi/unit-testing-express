@@ -11,6 +11,7 @@ import Instansi from './Instansi';
 import PkiAgunan from './PkiAgunan';
 import PkiNasabah from './PkiNasabah';
 import Produk from './Produk';
+import MasterStatusLos from './MasterStatusLos';
 
 @Entity('pki_pengajuan', { synchronize: false })
 class PkiPengajuan {
@@ -176,6 +177,10 @@ class PkiPengajuan {
   @OneToOne(() => Produk)
   @JoinColumn([{ name: 'kode_produk', referencedColumnName: 'kode_produk' }])
   produk: Produk;
+
+  @OneToOne(() => MasterStatusLos)
+  @JoinColumn([{ name: 'status_pengajuan', referencedColumnName: 'id_status_microsite' }])
+  master_status_los: MasterStatusLos;
 }
 
 export default PkiPengajuan;
