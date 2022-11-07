@@ -1,19 +1,33 @@
 import { NextFunction, Request, Response } from 'express';
 import { Between, FindOptionsWhere, ILike } from 'typeorm';
+import APIPegadaian from '~/apis/pegadaianApi';
 import { dataSource } from '~/orm/dbCreateConnection';
+import MasterStatusLos from '~/orm/entities/MasterStatusLos';
 import PkiAgunan from '~/orm/entities/PkiAgunan';
 import PkiNasabah from '~/orm/entities/PkiNasabah';
 import PkiPengajuan from '~/orm/entities/PkiPengajuan';
-import CustomError from '~/utils/customError';
-import queryHelper from '~/utils/queryHelper';
-import APIPegadaian from '~/apis/pegadaianApi';
-import { ILOSHistoryKreditResponse, ILOSPengajuan, ILOSPengajuanResponse } from '~/types/LOSTypes';
 import micrositeSvc from '~/services/micrositeSvc';
+import { ILOSHistoryKreditResponse, ILOSPengajuan, ILOSPengajuanResponse } from '~/types/LOSTypes';
+import CustomError from '~/utils/customError';
 import mappingLosResponse from '~/utils/mappingLosResponse';
+import queryHelper from '~/utils/queryHelper';
 
 const pkiPengajuanRepo = dataSource.getRepository(PkiPengajuan);
-// const pkiAgunanRepo = dataSource.getRepository(PkiAgunan);
-// const pkiNasabahRepo = dataSource.getRepository(PkiNasabah);
+const statusLosRepo = dataSource.getRepository(MasterStatusLos);
+
+export const getStatusLos = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const statusLos = await statusLosRepo.find();
+
+    const dataRes = {
+      statusLos,
+    };
+
+    return res.customSuccess(200, 'Get status los', dataRes);
+  } catch (e) {
+    return next(e);
+  }
+};
 
 export const getPki = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -26,6 +40,9 @@ export const getPki = async (req: Request, res: Response, next: NextFunction) =>
       kode_produk: req.query.kode_produk as string,
       kode_instansi: req.query.kode_instansi,
       status_pengajuan: req.query.status_pengajuan,
+      page: Number(req.query.page) || 1,
+      limit: Number(req.query.limit) || 250,
+      offset: null,
     };
 
     if (filter.no_pengajuan) {
@@ -97,19 +114,14 @@ export const getPki = async (req: Request, res: Response, next: NextFunction) =>
       },
     });
     const dataRes = {
-      meta: {
-        count,
-        limit: paging.limit,
-        offset: paging.offset,
-      },
-      pki,
+      report: pki,
     };
     return res.customSuccess(200, 'Get P2KI', dataRes, {
       count: count,
       rowCount: paging.limit,
       limit: paging.limit,
       offset: paging.offset,
-      page: Number(req.query.page),
+      page: Number(filter.page),
     });
   } catch (e) {
     return next(e);

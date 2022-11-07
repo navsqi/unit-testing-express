@@ -6,6 +6,7 @@ import protect from '../../middlewares/protect';
 
 const router = Router();
 
+router.get('/status-los', protect(), pkiController.getStatusLos);
 router.post('/los/pengajuan', protect(), pkiController.sendPengajuanToLos);
 router.post('/los/historykredit-raw', protect(), pkiController.historyKreditLos);
 
