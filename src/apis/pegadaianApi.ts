@@ -255,8 +255,9 @@ export const losPengajuanKredit = async (body: ILOSPengajuan): Promise<AxiosProm
     apiPegadaianConfig(bearerToken),
   );
 
-  console.log('[LOS] HIT TO PEGADAIAN API / SEND PENGAJUAN KREDIT');
+  console.log('START OF ===> [LOS] HIT TO PEGADAIAN API / SEND PENGAJUAN KREDIT');
   console.log(pengajuanKredit);
+  console.log('END OF ===> [LOS] HIT TO PEGADAIAN API / SEND PENGAJUAN KREDIT');
 
   return pengajuanKredit;
 };
@@ -276,8 +277,9 @@ export const losHistoryKredit = async (noAplikasiLos: string): Promise<AxiosProm
     apiPegadaianConfig(bearerToken),
   );
 
-  console.log('[LOS] HIT TO PEGADAIAN API / GET HISTORY KREDIT');
+  console.log('START OF ===> [LOS] HIT TO PEGADAIAN API / GET HISTORY KREDIT');
   console.log(pengajuanKredit);
+  console.log('END OF ===> [LOS] HIT TO PEGADAIAN API / GET HISTORY KREDIT');
 
   return pengajuanKredit;
 };

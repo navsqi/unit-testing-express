@@ -6,7 +6,7 @@ import protect from '../../middlewares/protect';
 
 const router = Router();
 
-router.get('/p2ki', protect(), pkiController.getPki);
+router.get('/p2ki', protect(), pkiController.getReportPki);
 router.get('/event', protect(), reportController.getReportEvent);
 router.get('/event/excel', protect(), reportController.genExcelReportEvent);
 router.get('/instansi', protect(), reportController.getReportInstansi);

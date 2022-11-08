@@ -7,6 +7,7 @@ import PkiAgunan from '~/orm/entities/PkiAgunan';
 import PkiNasabah from '~/orm/entities/PkiNasabah';
 import PkiPengajuan from '~/orm/entities/PkiPengajuan';
 import micrositeSvc from '~/services/micrositeSvc';
+import { p2kiReport } from '~/services/reportSvc';
 import { ILOSHistoryKreditResponse, ILOSPengajuan, ILOSPengajuanResponse } from '~/types/LOSTypes';
 import CustomError from '~/utils/customError';
 import mappingLosResponse from '~/utils/mappingLosResponse';
@@ -289,6 +290,47 @@ export const historyKreditLos = async (req: Request, res: Response, next: NextFu
     };
 
     return res.customSuccess(200, 'Get history kredit LOS berhasil', dataRes);
+  } catch (e) {
+    return next(e);
+  }
+};
+
+export const getReportPki = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const filter = {
+      start_date: (req.query.start_date as string) || '',
+      end_date: (req.query.end_date as string) || '',
+      nama: (req.query.nama as string) || '',
+      no_pengajuan: (req.query.no_pengajuan as string) || '',
+      kode_produk: (req.query.kode_produk as string) || '',
+      instansi_id: (req.query.instansi_id as string) || '',
+      status_pengajuan: (req.query.status_pengajuan as string) || '',
+      page: Number(req.query.page) || 1,
+      limit: Number(req.query.limit) || 250,
+      offset: null,
+    };
+
+    const paging = queryHelper.paging({ ...filter });
+    filter.offset = paging.offset;
+    filter.limit = paging.limit;
+
+    if (!filter.start_date || !filter.end_date) return next(new CustomError('Pilih tanggal awal dan akhir', 400));
+
+    const report = await p2kiReport(filter);
+
+    if (report.err) return next(new CustomError(report.err, 400));
+
+    const dataRes = {
+      report: report.data,
+    };
+
+    return res.customSuccess(200, 'Get P2KI', dataRes, {
+      count: report.count,
+      rowCount: null,
+      limit: paging.limit,
+      offset: paging.offset,
+      page: Number(req.query.page),
+    });
   } catch (e) {
     return next(e);
   }
