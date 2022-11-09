@@ -18,6 +18,7 @@ export const getUser = async (req: Request, res: Response, next: NextFunction) =
       kode_unit_kerja: (req.query.kode_unit_kerja as string) ?? null,
       nik_user: common.isSalesRole(req.user.kode_role) ? req.user.nik : undefined,
       nama: (req.query.nama as string) ?? null,
+      is_active: (+req.query.is_active as number) ?? null,
     };
 
     if (filter.kode_role) {
@@ -34,6 +35,10 @@ export const getUser = async (req: Request, res: Response, next: NextFunction) =
 
     if (filter.nama) {
       where.nama = ILike(`%${filter.nama}%`);
+    }
+
+    if (filter.is_active) {
+      where.is_active = filter.is_active;
     }
 
     const paging = queryHelper.paging(req.query);

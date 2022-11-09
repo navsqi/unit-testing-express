@@ -5,9 +5,11 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import AssignmentInstansi from './AssignmentInstansi';
 import Outlet from './Outlet';
 import Role from './Role';
 
@@ -89,6 +91,10 @@ class User {
   @ManyToOne(() => Outlet)
   @JoinColumn([{ name: 'kode_unit_kerja', referencedColumnName: 'kode' }])
   unit_kerja: Outlet;
+
+  @OneToOne(() => AssignmentInstansi)
+  @JoinColumn([{ name: 'nik', referencedColumnName: 'user_nik' }])
+  assignment_instansi: AssignmentInstansi;
 }
 
 export default User;

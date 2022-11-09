@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
+import { FindOptionsWhere } from 'typeorm';
 import { dataSource } from '~/orm/dbCreateConnection';
 import AssignmentInstansi from '~/orm/entities/AssignmentInstansi';
+import User from '~/orm/entities/User';
 import assignmentInstansiSvc, { IFilterInstansi } from '~/services/assignmentInstansiSvc';
 import CustomError from '~/utils/customError';
 import queryHelper from '~/utils/queryHelper';
@@ -123,4 +125,47 @@ export const deleteAssignInstansi = async (req: Request, res: Response, next: Ne
   } catch (e) {
     return next(e);
   }
+};
+
+export const getUserBpoMo = async (req: Request, res: Response, next: NextFunction) => {
+  // try {
+  //   const where: FindOptionsWhere<User> = {};
+  //     where.kode_role = In(['']);
+  //   if (filter.kode_unit_kerja) {
+  //     where.kode_unit_kerja = In(filter.kode_unit_kerja.split(','));
+  //   }
+  //   if (filter.nik_user) {
+  //     where.nik = filter.nik_user;
+  //   }
+  //   if (filter.nama) {
+  //     where.nama = ILike(`%${filter.nama}%`);
+  //   }
+  //   if (filter.is_active) {
+  //     where.is_active = filter.is_active;
+  //   }
+  //   const paging = queryHelper.paging(req.query);
+  //   const [users, count] = await userRepo.findAndCount({
+  //     take: paging.limit,
+  //     skip: paging.offset,
+  //     select: ['id', 'nik', 'nama', 'kode_role', 'kode_unit_kerja', 'last_login'],
+  //     where,
+  //   });
+  //   const dataRes = {
+  //     meta: {
+  //       count,
+  //       limit: paging.limit,
+  //       offset: paging.offset,
+  //     },
+  //     users,
+  //   };
+  //   return res.customSuccess(200, 'Get users success', dataRes, {
+  //     count: count,
+  //     rowCount: paging.limit,
+  //     limit: paging.limit,
+  //     offset: paging.offset,
+  //     page: Number(req.query.page),
+  //   });
+  // } catch (e) {
+  //   return next(e);
+  // }
 };

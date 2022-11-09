@@ -15,6 +15,7 @@ const listAssignUser = async (instansiId: number, paging: IPaging) => {
     .leftJoin('ai.user', 'user')
     .leftJoin('ai.assignor', 'assignor')
     .where('ai.instansi_id = :instansiId', { instansiId })
+    .andWhere('user.is_active = 1')
     .take(paging.limit)
     .skip(paging.offset)
     .getManyAndCount();
