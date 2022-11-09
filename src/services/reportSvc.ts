@@ -13,6 +13,19 @@ interface IFilter {
   offset?: any;
 }
 
+interface IFilterP2KI {
+  no_pengajuan?: string;
+  nama?: string;
+  start_date?: string;
+  end_date?: string;
+  kode_produk?: string;
+  instansi_id?: any;
+  status_pengajuan?: any;
+  page?: number;
+  limit?: number;
+  offset?: any;
+}
+
 export const instansiReport = async (filter?: IFilter) => {
   const queryRunner = dataSource.createQueryRunner();
   await queryRunner.connect();
@@ -435,6 +448,90 @@ export const closingReport = async (filter?: IFilter) => {
       err: false,
       data,
       count: count ?? data.length,
+    };
+  } catch (error) {
+    await queryRunner.release();
+    return { err: error.message, data: null };
+  }
+};
+
+export const p2kiReport = async (filter?: IFilterP2KI) => {
+  const queryRunner = dataSource.createQueryRunner();
+  await queryRunner.connect();
+  const manager = queryRunner.manager;
+
+  try {
+    const q = manager.createQueryBuilder();
+    q.from('pki_pengajuan', 'pp');
+    q.select('pp.no_pengajuan', 'no_pengajuan');
+    q.addSelect('pp.no_aplikasi_los', 'no_aplikasi_los');
+    q.addSelect('pp.kode_channel', 'kode_channel');
+    q.addSelect('pp.kode_produk', 'kode_produk');
+    q.addSelect('pp.kode_instansi', 'kode_instansi');
+    q.addSelect('produk.nama_produk', 'nama_produk');
+    q.addSelect('pki_nasabah.nama', 'nama_nasabah');
+    q.addSelect('instansi.nama_instansi', 'nama_instansi');
+    q.addSelect('outlet_instansi.nama', 'unit_kerja_instansi');
+    q.addSelect('pp.tgl_pengajuan', 'tgl_pengajuan');
+    q.addSelect('mra.prefix', 'mra_prefix');
+    q.addSelect('mra.label', 'mra_label');
+    q.addSelect('pp.kode_outlet', 'kode_outlet');
+    q.addSelect('outlet_pengajuan.nama', 'outlet_pengajuan');
+    q.addSelect('pp.status_pengajuan', 'kode_status_pengajuan');
+    q.addSelect('msl.deskripsi_status_los', 'status_pengajuan');
+    q.addSelect('msl.status_los', 'kode_status_los');
+
+    q.leftJoin('produk', 'produk', 'produk.kode_produk = pp.kode_produk');
+    q.leftJoin('pki_nasabah', 'pki_nasabah', 'pki_nasabah.no_ktp = pp.no_ktp');
+    q.leftJoin('instansi', 'instansi', 'instansi.id = pp.kode_instansi');
+    q.leftJoin('outlet', 'outlet_instansi', 'outlet_instansi.kode = instansi.kode_unit_kerja');
+    q.leftJoin('pki_agunan', 'pki_agunan', 'pki_agunan.no_pengajuan = pp.no_pengajuan');
+    q.leftJoin('master_rubrik_agunan', 'mra', 'mra.kode = pki_agunan.jenis_agunan');
+    q.leftJoin('master_status_los', 'master_status_los', 'master_status_los.id_status_microsite = pp.status_pengajuan');
+    q.leftJoin('outlet', 'outlet_pengajuan', 'outlet_pengajuan.kode = pp.kode_outlet');
+    q.leftJoin('master_status_los', 'msl', 'pp.status_pengajuan = msl.id_status_microsite');
+
+    q.where('CAST(pp.tgl_pengajuan AS date) >= :startDate', { startDate: filter.start_date });
+    q.andWhere('CAST(pp.tgl_pengajuan AS date) <= :endDate', { endDate: filter.end_date });
+
+    if (filter.no_pengajuan) {
+      q.andWhere(`pp.no_pengajuan ~* :noPengajuan`, { noPengajuan: filter.no_pengajuan });
+    }
+
+    if (filter.kode_produk) {
+      q.andWhere('pp.kode_produk = :kodeProduk', { kodeProduk: filter.kode_produk });
+    }
+
+    if (filter.instansi_id) {
+      q.andWhere('pp.kode_instansi = :kodeInstansi', { kodeInstansi: filter.instansi_id });
+    }
+
+    if (filter.status_pengajuan) {
+      q.andWhere('pp.status_pengajuan = :statusPengajuan', { statusPengajuan: filter.status_pengajuan });
+    }
+
+    if (filter.nama) {
+      q.andWhere('pki_nasabah.nama = :nama', { nama: filter.nama });
+    }
+
+    let count = null;
+
+    if (filter.page && filter.limit && filter.offset !== null) {
+      count = await q.getCount();
+
+      q.limit(filter.limit);
+      q.offset(filter.offset);
+    }
+
+    q.orderBy('pp.tgl_pengajuan', 'DESC');
+
+    const data: QueryResultClosingReport[] = await q.getRawMany();
+    await queryRunner.release();
+
+    return {
+      err: false,
+      data,
+      count: count,
     };
   } catch (error) {
     await queryRunner.release();

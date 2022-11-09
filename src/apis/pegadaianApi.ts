@@ -1,6 +1,7 @@
 import 'dotenv/config';
 
 import axios, { AxiosPromise, AxiosRequestConfig } from 'axios';
+import { ILOSPengajuan } from '~/types/LOSTypes';
 
 interface IBadanUsahaByCif {
   cif: string;
@@ -242,11 +243,55 @@ export const getBadanUsahaByCif = async (body: IBadanUsahaByCif): Promise<AxiosP
   return badanUsaha;
 };
 
+//  ============== LOS ==============
+export const losPengajuanKredit = async (body: ILOSPengajuan): Promise<AxiosPromise> => {
+  const reqBearerToken = await getToken();
+
+  const bearerToken = reqBearerToken.data.access_token;
+
+  const pengajuanKredit = await axios.post(
+    pegadaianApiEnv.api.url + '/microsite/pengajuankredit',
+    body,
+    apiPegadaianConfig(bearerToken),
+  );
+
+  console.log('START OF ===> [LOS] HIT TO PEGADAIAN API / SEND PENGAJUAN KREDIT');
+  console.log(pengajuanKredit);
+  console.log('END OF ===> [LOS] HIT TO PEGADAIAN API / SEND PENGAJUAN KREDIT');
+
+  return pengajuanKredit;
+};
+
+export const losHistoryKredit = async (noAplikasiLos: string): Promise<AxiosPromise> => {
+  const reqBearerToken = await getToken();
+
+  const bearerToken = reqBearerToken.data.access_token;
+
+  const pengajuanKredit = await axios.post(
+    pegadaianApiEnv.api.url + '/microsite/gethistorykredit',
+    {
+      channelId: pegadaianApiEnv.api.channelId,
+      clientId: pegadaianApiEnv.api.clientId,
+      noAplikasiLos: noAplikasiLos,
+    },
+    apiPegadaianConfig(bearerToken),
+  );
+
+  console.log('START OF ===> [LOS] HIT TO PEGADAIAN API / GET HISTORY KREDIT');
+  console.log(pengajuanKredit);
+  console.log('END OF ===> [LOS] HIT TO PEGADAIAN API / GET HISTORY KREDIT');
+
+  return pengajuanKredit;
+};
+// ============== END OF LOS ==============
+
 const APIPegadaian = {
   checkEktpDukcapil,
   getNasabahByIdKtpPassion,
   getNasabahByCif,
   getBadanUsahaByCif,
+  losPengajuanKredit,
+  losHistoryKredit,
 };
 
 export default APIPegadaian;

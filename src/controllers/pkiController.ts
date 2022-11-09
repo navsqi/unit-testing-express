@@ -1,9 +1,133 @@
 import { NextFunction, Request, Response } from 'express';
+import { Between, FindOptionsWhere, ILike } from 'typeorm';
+import APIPegadaian from '~/apis/pegadaianApi';
 import { dataSource } from '~/orm/dbCreateConnection';
+import MasterStatusLos from '~/orm/entities/MasterStatusLos';
 import PkiAgunan from '~/orm/entities/PkiAgunan';
 import PkiNasabah from '~/orm/entities/PkiNasabah';
 import PkiPengajuan from '~/orm/entities/PkiPengajuan';
+import micrositeSvc from '~/services/micrositeSvc';
+import { p2kiReport } from '~/services/reportSvc';
+import { ILOSHistoryKreditResponse, ILOSPengajuan, ILOSPengajuanResponse } from '~/types/LOSTypes';
 import CustomError from '~/utils/customError';
+import mappingLosResponse from '~/utils/mappingLosResponse';
+import queryHelper from '~/utils/queryHelper';
+
+const pkiPengajuanRepo = dataSource.getRepository(PkiPengajuan);
+const statusLosRepo = dataSource.getRepository(MasterStatusLos);
+
+export const getStatusLos = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const statusLos = await statusLosRepo.find();
+
+    const dataRes = {
+      statusLos,
+    };
+
+    return res.customSuccess(200, 'Get status los', dataRes);
+  } catch (e) {
+    return next(e);
+  }
+};
+
+export const getPki = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const where: FindOptionsWhere<PkiPengajuan> = {};
+    const filter = {
+      no_pengajuan: req.query.no_pengajuan as string,
+      nama: req.query.nama as string,
+      start_date: (req.query.start_date as string) || '',
+      end_date: (req.query.end_date as string) || '',
+      kode_produk: req.query.kode_produk as string,
+      kode_instansi: req.query.kode_instansi,
+      status_pengajuan: req.query.status_pengajuan,
+      page: Number(req.query.page) || 1,
+      limit: Number(req.query.limit) || 250,
+      offset: null,
+    };
+
+    if (filter.no_pengajuan) {
+      where['no_pengajuan'] = ILike(`%${filter.no_pengajuan}%`);
+    }
+    if (filter.kode_produk) {
+      where['kode_produk'] = filter.kode_produk;
+    }
+    if (filter.kode_instansi) {
+      where['kode_instansi'] = +filter.kode_instansi;
+    }
+
+    if (filter.nama) {
+      where.pki_nasabah = {
+        nama: ILike(`%${filter.nama}%`),
+      };
+    }
+
+    if (filter.start_date && filter.end_date) {
+      where['tgl_pengajuan'] = Between(
+        new Date(`${filter.start_date} 00:00:00`),
+        new Date(`${filter.end_date} 23:59:59`),
+      );
+    }
+    const paging = queryHelper.paging(req.query);
+
+    const [pki, count] = await pkiPengajuanRepo.findAndCount({
+      select: {
+        pki_nasabah: {
+          no_ktp: true,
+          nama: true,
+          tgl_lahir: true,
+          no_hp: true,
+          email: true,
+          created_date: true,
+          modified_date: true,
+          file_path_ektp: true,
+          data_consent: true,
+        },
+        pki_agunan: {
+          no_pengajuan: true,
+          jenis_agunan: true,
+          jenis_kendaraan: true,
+          kondisi_kendaraan: true,
+          tahun_produksi: true,
+          harga_kendaraan: true,
+          uang_muka: true,
+          merk_kendaraan: true,
+          tipe_kendaraan: true,
+          no_sertifikat: true,
+          kepemilikan_agunan: true,
+        },
+        instansi: {
+          id: true,
+          nama_instansi: true,
+          jenis_instansi: true,
+        },
+        produk: {
+          kode_produk: true,
+          nama_produk: true,
+        },
+      },
+      relations: ['pki_agunan', 'pki_nasabah', 'instansi', 'produk'],
+      take: paging.limit,
+      skip: paging.offset,
+      where,
+      order: {
+        created_at: 'desc',
+      },
+    });
+    const dataRes = {
+      report: pki,
+    };
+    return res.customSuccess(200, 'Get P2KI', dataRes, {
+      count: count,
+      rowCount: paging.limit,
+      limit: paging.limit,
+      offset: paging.offset,
+      page: Number(filter.page),
+    });
+  } catch (e) {
+    return next(e);
+  }
+};
 
 export const createNewPki = async (req: Request, res: Response, next: NextFunction) => {
   const queryRunner = dataSource.createQueryRunner();
@@ -52,10 +176,11 @@ export const createNewPki = async (req: Request, res: Response, next: NextFuncti
     pkiPengajuan.response_los = bodyPkiPengajuan?.response_los;
     pkiPengajuan.body_los = bodyPkiPengajuan?.body_los;
 
+    const cekIdPengajuan = await queryRunner.manager.findOne(PkiPengajuan, {
+      where: { no_pengajuan: pkiPengajuan.no_pengajuan },
+    });
 
-    const cekIdPengajuan = await queryRunner.manager.findOne(PkiPengajuan, {where: {no_pengajuan: pkiPengajuan.no_pengajuan}});
-
-    if(cekIdPengajuan){
+    if (cekIdPengajuan) {
       await queryRunner.rollbackTransaction();
       await queryRunner.release();
       return next(new CustomError('No Pengajuan telah ada', 400));
@@ -91,6 +216,122 @@ export const createNewPki = async (req: Request, res: Response, next: NextFuncti
   } catch (e) {
     await queryRunner.rollbackTransaction();
     await queryRunner.release();
+    return next(e);
+  }
+};
+
+export const sendPengajuanToLos = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const noPengajuan = req.body.no_pengajuan as string;
+    const pkiPengajuan = await pkiPengajuanRepo.findOne({ where: { no_pengajuan: noPengajuan } });
+
+    if (!noPengajuan || !pkiPengajuan) return next(new CustomError('Nomor pengajuan tidak ditemukan', 404));
+
+    const payloadLOS = JSON.parse(pkiPengajuan.body_los) as ILOSPengajuan;
+
+    const pengajuanLOS = await APIPegadaian.losPengajuanKredit(payloadLOS);
+
+    if (pengajuanLOS.status != 200) return next(new CustomError('Pengajuan ke LOS gagal', 400));
+
+    const dataPengajuanLOS = pengajuanLOS?.data;
+
+    if (dataPengajuanLOS.responseCode != '00') return next(new CustomError(dataPengajuanLOS.responseDesc, 400));
+
+    const lesResponse: ILOSPengajuanResponse = JSON.parse(dataPengajuanLOS.data);
+
+    // update no aplikasi los ke db kamila
+    await pkiPengajuanRepo.update({ no_pengajuan: noPengajuan }, { no_aplikasi_los: lesResponse.noAplikasiLos });
+    // update no aplikasi los ke db microsite
+    await micrositeSvc.updateNoAplikasiLosMicrosite(lesResponse.noAplikasiLos, pkiPengajuan.no_pengajuan);
+
+    const dataRes = {
+      los: lesResponse,
+    };
+
+    return res.customSuccess(200, 'Pengajuan kredit ke LOS berhasil', dataRes);
+  } catch (e) {
+    return next(e);
+  }
+};
+
+export const historyKreditLos = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const noPengajuan = req.body.no_pengajuan as string;
+    const pkiPengajuan = await pkiPengajuanRepo.findOne({ where: { no_pengajuan: noPengajuan } });
+
+    if (!noPengajuan || !pkiPengajuan) return next(new CustomError('Nomor pengajuan tidak ditemukan', 404));
+
+    if (!pkiPengajuan.no_aplikasi_los) return next(new CustomError('Nomor aplikasi LOS belum ada', 404));
+
+    const pengajuanLOS = await APIPegadaian.losHistoryKredit(pkiPengajuan.no_aplikasi_los);
+
+    if (pengajuanLOS.status != 200) return next(new CustomError('Pengajuan ke LOS gagal', 400));
+
+    const dataPengajuanLOS = pengajuanLOS?.data;
+
+    if (dataPengajuanLOS.responseCode != '00') return next(new CustomError(dataPengajuanLOS.responseDesc, 400));
+
+    const parseResponseHistoryKredit = JSON.parse(dataPengajuanLOS.data) as ILOSHistoryKreditResponse;
+
+    const mappingResponse = mappingLosResponse.mappingHistoryKredit(parseResponseHistoryKredit);
+
+    if (mappingResponse && mappingResponse.length > 0) {
+      const lastIndex = mappingResponse[mappingResponse.length - 1];
+      await pkiPengajuanRepo.update(
+        { no_pengajuan: noPengajuan },
+        { status_pengajuan: lastIndex.status_microsite.id_status_microsite },
+      );
+
+      await micrositeSvc.updateStatusLosMicrosite(lastIndex.status_microsite.id_status_microsite, noPengajuan);
+    }
+
+    const dataRes = {
+      los: mappingResponse,
+    };
+
+    return res.customSuccess(200, 'Get history kredit LOS berhasil', dataRes);
+  } catch (e) {
+    return next(e);
+  }
+};
+
+export const getReportPki = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const filter = {
+      start_date: (req.query.start_date as string) || '',
+      end_date: (req.query.end_date as string) || '',
+      nama: (req.query.nama as string) || '',
+      no_pengajuan: (req.query.no_pengajuan as string) || '',
+      kode_produk: (req.query.kode_produk as string) || '',
+      instansi_id: (req.query.instansi_id as string) || '',
+      status_pengajuan: (req.query.status_pengajuan as string) || '',
+      page: Number(req.query.page) || 1,
+      limit: Number(req.query.limit) || 250,
+      offset: null,
+    };
+
+    const paging = queryHelper.paging({ ...filter });
+    filter.offset = paging.offset;
+    filter.limit = paging.limit;
+
+    if (!filter.start_date || !filter.end_date) return next(new CustomError('Pilih tanggal awal dan akhir', 400));
+
+    const report = await p2kiReport(filter);
+
+    if (report.err) return next(new CustomError(report.err, 400));
+
+    const dataRes = {
+      report: report.data,
+    };
+
+    return res.customSuccess(200, 'Get P2KI', dataRes, {
+      count: report.count,
+      rowCount: null,
+      limit: paging.limit,
+      offset: paging.offset,
+      page: Number(req.query.page),
+    });
+  } catch (e) {
     return next(e);
   }
 };

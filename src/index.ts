@@ -7,6 +7,7 @@ import 'reflect-metadata';
 import cors from 'cors';
 import globalError from './middlewares/globalError';
 import { dbCreateConnection } from './orm/dbCreateConnection';
+import micrositeDb from './orm/micrositeDb/index';
 import * as Sentry from '@sentry/node';
 import * as Tracing from '@sentry/tracing';
 // import { redisCreateConnection } from './config/redis';
@@ -22,6 +23,7 @@ export const eventHandler: any = new EventEmitter();
 
 (async () => {
   await dbCreateConnection();
+  await micrositeDb.dbCreateConnection();
 
   if (!cronJob.running) {
     cronJob.start();
@@ -29,7 +31,6 @@ export const eventHandler: any = new EventEmitter();
   }
 
   eventHandler.on('performBackgroundTask', async (data: string) => {
-    
     logger.info('CRON_TRIGGERED_BY_REST_API', 'Query Execute');
     await cronBigDataClosing();
   });
