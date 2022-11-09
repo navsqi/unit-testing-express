@@ -5,6 +5,7 @@ import protect from '../../middlewares/protect';
 
 const router = Router();
 
+router.get('/user-bpo-mo', protect(), assignmentInstansiController.getUserBpoMo);
 router.get('/:userNik/instansi', protect(), assignmentInstansiController.getInstansiByAssignedUser);
 router.get('/:instansiId/user', protect(), assignmentInstansiController.getAssignedUserByInstansi);
 router.patch('/:id', protect(), assignmentInstansiController.updateAssignment);

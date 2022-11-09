@@ -1,13 +1,15 @@
 import { NextFunction, Request, Response } from 'express';
-import { FindOptionsWhere } from 'typeorm';
+import { FindOptionsWhere, ILike, In, IsNull } from 'typeorm';
 import { dataSource } from '~/orm/dbCreateConnection';
 import AssignmentInstansi from '~/orm/entities/AssignmentInstansi';
 import User from '~/orm/entities/User';
 import assignmentInstansiSvc, { IFilterInstansi } from '~/services/assignmentInstansiSvc';
+import { konsolidasiTopBottom } from '~/services/konsolidasiSvc';
 import CustomError from '~/utils/customError';
 import queryHelper from '~/utils/queryHelper';
 
 const assignedInsRepo = dataSource.getRepository(AssignmentInstansi);
+// const userRepo = dataSource.getRepository(User);
 
 export const assignUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -128,44 +130,42 @@ export const deleteAssignInstansi = async (req: Request, res: Response, next: Ne
 };
 
 export const getUserBpoMo = async (req: Request, res: Response, next: NextFunction) => {
-  // try {
-  //   const where: FindOptionsWhere<User> = {};
-  //     where.kode_role = In(['']);
-  //   if (filter.kode_unit_kerja) {
-  //     where.kode_unit_kerja = In(filter.kode_unit_kerja.split(','));
-  //   }
-  //   if (filter.nik_user) {
-  //     where.nik = filter.nik_user;
-  //   }
-  //   if (filter.nama) {
-  //     where.nama = ILike(`%${filter.nama}%`);
-  //   }
-  //   if (filter.is_active) {
-  //     where.is_active = filter.is_active;
-  //   }
-  //   const paging = queryHelper.paging(req.query);
-  //   const [users, count] = await userRepo.findAndCount({
-  //     take: paging.limit,
-  //     skip: paging.offset,
-  //     select: ['id', 'nik', 'nama', 'kode_role', 'kode_unit_kerja', 'last_login'],
-  //     where,
-  //   });
-  //   const dataRes = {
-  //     meta: {
-  //       count,
-  //       limit: paging.limit,
-  //       offset: paging.offset,
-  //     },
-  //     users,
-  //   };
-  //   return res.customSuccess(200, 'Get users success', dataRes, {
-  //     count: count,
-  //     rowCount: paging.limit,
-  //     limit: paging.limit,
-  //     offset: paging.offset,
-  //     page: Number(req.query.page),
-  //   });
-  // } catch (e) {
-  //   return next(e);
-  // }
+  try {
+    const filter = {
+      kode_role: (req.query.kode_role as string) ?? null,
+      kode_unit_kerja: (req.query.kode_unit_kerja as string) ?? null,
+      nik_user: undefined,
+      nama: (req.query.nama as string) ?? '',
+      is_active: (+req.query.is_active as number) ?? null,
+    };
+
+    const where: FindOptionsWhere<User> = {};
+    where.kode_role = In(['MKTO', 'BPO1', 'BPO2']);
+
+    const outletId = (filter.kode_unit_kerja || req.user.kode_unit_kerja) as string;
+    let outletIds = [];
+
+    if (!outletId.startsWith('000')) {
+      outletIds = await konsolidasiTopBottom(outletId as string);
+    }
+
+    const outletIdStr = outletIds.length > 0 ? outletIds.join(',') : '';
+
+    const bpoMo = await assignmentInstansiSvc.listBpoMo(filter.nama, outletIdStr);
+
+    if (bpoMo.err) return next(new CustomError('Terjadi kesalahan saat mendapatkan BPO MO', 400));
+
+    const dataRes = {
+      meta: {
+        count: bpoMo.data.length,
+        limit: 0,
+        offset: 0,
+      },
+      users: bpoMo.data,
+    };
+
+    return res.customSuccess(200, 'Get users success', dataRes);
+  } catch (e) {
+    return next(e);
+  }
 };
