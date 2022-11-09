@@ -53,11 +53,12 @@ const envs = [
   'DATERANGE_REPORT',
   'DATERANGE_LEADS_CREATE_EVENT',
   'CRON_CLOSING_PATTERN',
-  'DB_HOST_MICROSITE',
-  'DB_PORT_MICROSITE',
-  'DB_USER_MICROSITE',
-  'DB_PASS_MICROSITE',
-  'DB_NAME_MICROSITE',
+  // develop microsite
+  // 'DB_HOST_MICROSITE',
+  // 'DB_PORT_MICROSITE',
+  // 'DB_USER_MICROSITE',
+  // 'DB_PASS_MICROSITE',
+  // 'DB_NAME_MICROSITE',
 ];
 
 for (const val of envs) {
