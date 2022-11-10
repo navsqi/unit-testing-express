@@ -199,9 +199,18 @@ export const createNewPki = async (req: Request, res: Response, next: NextFuncti
     pkiNasabah.file_path_ektp = bodyPkiNasabah?.file_path_ektp;
     pkiNasabah.data_consent = bodyPkiNasabah?.data_consent;
 
+
+    const cekNoKtp = await queryRunner.manager.findOne(PkiNasabah, {
+      where: { no_ktp: pkiNasabah.no_ktp },
+    });
+
+    if (!cekNoKtp) {
+      await queryRunner.manager.save(PkiNasabah, pkiNasabah);
+    }
+
     await queryRunner.manager.save(PkiAgunan, pkiAgunan);
     await queryRunner.manager.save(PkiPengajuan, pkiPengajuan);
-    await queryRunner.manager.save(PkiNasabah, pkiNasabah);
+    
 
     const dataRes = {
       pkiAgunan: pkiAgunan,
