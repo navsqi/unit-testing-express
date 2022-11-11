@@ -476,6 +476,7 @@ export const p2kiReport = async (filter?: IFilterP2KI) => {
     q.addSelect('mra.prefix', 'mra_prefix');
     q.addSelect('mra.label', 'mra_label');
     q.addSelect('pp.kode_outlet', 'kode_outlet');
+    q.addSelect('pp.jumlah_pinjaman', 'jumlah_pinjaman');
     q.addSelect('outlet_pengajuan.nama', 'outlet_pengajuan');
     q.addSelect('pp.status_pengajuan', 'kode_status_pengajuan');
     q.addSelect('msl.deskripsi_status_los', 'status_pengajuan');
