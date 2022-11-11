@@ -512,7 +512,7 @@ export const p2kiReport = async (filter?: IFilterP2KI) => {
     }
 
     if (filter.nama) {
-      q.andWhere('pki_nasabah.nama = :nama', { nama: filter.nama });
+      q.andWhere('pki_nasabah.nama ~* :nama', { nama: filter.nama });
     }
 
     let count = null;
