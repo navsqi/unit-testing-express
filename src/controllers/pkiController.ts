@@ -313,7 +313,7 @@ export const getReportPki = async (req: Request, res: Response, next: NextFuncti
       no_pengajuan: (req.query.no_pengajuan as string) || '',
       kode_produk: (req.query.kode_produk as string) || '',
       instansi_id: (req.query.instansi_id as string) || '',
-      status_pengajuan: (req.query.status_pengajuan as string) || '',
+      kode_status_pengajuan: (req.query.kode_status_pengajuan as string) || '',
       page: Number(req.query.page) || 1,
       limit: Number(req.query.limit) || 250,
       offset: null,
