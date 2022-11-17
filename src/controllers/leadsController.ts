@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { FindOptionsWhere, ILike, In, IsNull, Raw } from 'typeorm';
+import { FindOptionsOrder, FindOptionsWhere, ILike, In, IsNull, Raw } from 'typeorm';
 import APIPegadaian from '~/apis/pegadaianApi';
 import Leads from '~/orm/entities/Leads';
 import * as common from '~/utils/common';
@@ -37,6 +37,7 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
       event_id: req.query.event_id,
       pic_selena: req.query.pic_selena as string,
       follow_up_pic_selena: +req.query.follow_up_pic_selena as number,
+      order_by: req.query.order_by as string
     };
 
     if (common.isSalesRole(req.user.kode_role)) {
@@ -90,6 +91,29 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
       where['is_badan_usaha'] = filter.is_badan_usaha;
     }
 
+    // order
+    // The null value sorts higher than any other value. 
+    // In other words, with ascending sort order, null values sort at the end, and with descending sort order, 
+    // null values sort at the beginning.
+    let order: FindOptionsOrder<Leads> = {
+      created_at: 'desc',
+    }
+
+    if(filter.order_by === 'pic_selena-LAST') {
+      order = {
+        pic_selena: 'DESC',
+        updated_at_selena: 'DESC'
+      }
+    }
+
+    if(filter.order_by === 'pic_selena-FIRST') {
+      order = {
+        pic_selena: 'ASC',
+        updated_at: 'ASC'
+      }
+    }
+    // end of order
+
     const paging = queryHelper.paging(req.query);
 
     const [leads, count] = await leadsRepo.findAndCount({
@@ -118,9 +142,7 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
       take: paging.limit,
       skip: paging.offset,
       where,
-      order: {
-        created_at: 'desc',
-      },
+      order: order
     });
 
     const dataRes = {
@@ -258,8 +280,12 @@ export const getLeadsInstansiByNik = async (req: Request, res: Response, next: N
 
 export const updateLeads = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const body = req.body as Leads;
+
+    if(body.pic_selena) body.updated_at_selena = new Date();
+
     const leads = await leadsRepo.update(req.params.id, {
-      ...req.body,
+      ...body,
       updated_by: req.user.nik,
     });
 
