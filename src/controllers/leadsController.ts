@@ -60,6 +60,7 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
       where['event_id'] = +filter.event_id;
     }
 
+    // FILTER KHUSUS SELENA FRONTING
     if (filter.pic_selena) {
       where['pic_selena'] = filter.pic_selena;
     }
@@ -71,6 +72,7 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
         where['pic_selena'] = IsNull();
       }
     }
+    // END OF FILTER KHUSUS SELENA FRONTING
 
     if (filter.kode_unit_kerja && filter.is_session == 0) {
       const outletId = (req.query.kode_unit_kerja || req.user.kode_unit_kerja) as string;
@@ -93,23 +95,20 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
 
     // order
     // The null value sorts higher than any other value. 
-    // In other words, with ascending sort order, null values sort at the end, and with descending sort order, 
-    // null values sort at the beginning.
+    // with ascending sort order ==> null values sort at the end, 
+    // with descending sort order ==> null values sort at the beginning.
     let order: FindOptionsOrder<Leads> = {
       created_at: 'desc',
     }
 
-    if(filter.order_by === 'pic_selena-LAST') {
-      order = {
-        pic_selena: 'DESC',
-        updated_at_selena: 'DESC'
-      }
-    }
+    if(filter.order_by && filter.order_by.includes('pic_selena:')) {
+      const orderSplit = filter.order_by.split(":");
+      const orderType = orderSplit[1] as any;
 
-    if(filter.order_by === 'pic_selena-FIRST') {
+
       order = {
-        pic_selena: 'ASC',
-        updated_at: 'ASC'
+        pic_selena: orderType,
+        updated_at_selena: orderType
       }
     }
     // end of order
