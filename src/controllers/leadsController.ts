@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { FindOptionsWhere, ILike, In, IsNull, Raw } from 'typeorm';
+import { FindOptionsOrder, FindOptionsWhere, ILike, In, IsNull, Raw } from 'typeorm';
 import APIPegadaian from '~/apis/pegadaianApi';
 import Leads from '~/orm/entities/Leads';
 import * as common from '~/utils/common';
@@ -37,6 +37,7 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
       event_id: req.query.event_id,
       pic_selena: req.query.pic_selena as string,
       follow_up_pic_selena: +req.query.follow_up_pic_selena as number,
+      order_by: req.query.order_by as string
     };
 
     if (common.isSalesRole(req.user.kode_role)) {
@@ -59,6 +60,7 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
       where['event_id'] = +filter.event_id;
     }
 
+    // FILTER KHUSUS SELENA FRONTING
     if (filter.pic_selena) {
       where['pic_selena'] = filter.pic_selena;
     }
@@ -70,6 +72,7 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
         where['pic_selena'] = IsNull();
       }
     }
+    // END OF FILTER KHUSUS SELENA FRONTING
 
     if (filter.kode_unit_kerja && filter.is_session == 0) {
       const outletId = (req.query.kode_unit_kerja || req.user.kode_unit_kerja) as string;
@@ -89,6 +92,26 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
     if (filter.is_badan_usaha != null) {
       where['is_badan_usaha'] = filter.is_badan_usaha;
     }
+
+    // order
+    // The null value sorts higher than any other value. 
+    // with ascending sort order ==> null values sort at the end, 
+    // with descending sort order ==> null values sort at the beginning.
+    let order: FindOptionsOrder<Leads> = {
+      created_at: 'desc',
+    }
+
+    if(filter.order_by && filter.order_by.includes('pic_selena:')) {
+      const orderSplit = filter.order_by.split(":");
+      const orderType = orderSplit[1] as any;
+
+
+      order = {
+        pic_selena: orderType,
+        updated_at_selena: orderType
+      }
+    }
+    // end of order
 
     const paging = queryHelper.paging(req.query);
 
@@ -118,9 +141,7 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
       take: paging.limit,
       skip: paging.offset,
       where,
-      order: {
-        created_at: 'desc',
-      },
+      order: order
     });
 
     const dataRes = {
@@ -258,8 +279,12 @@ export const getLeadsInstansiByNik = async (req: Request, res: Response, next: N
 
 export const updateLeads = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const body = req.body as Leads;
+
+    if(body.pic_selena) body.updated_at_selena = new Date();
+
     const leads = await leadsRepo.update(req.params.id, {
-      ...req.body,
+      ...body,
       updated_by: req.user.nik,
     });
 
