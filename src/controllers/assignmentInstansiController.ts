@@ -1,11 +1,15 @@
 import { NextFunction, Request, Response } from 'express';
+import { FindOptionsWhere, ILike, In, IsNull } from 'typeorm';
 import { dataSource } from '~/orm/dbCreateConnection';
 import AssignmentInstansi from '~/orm/entities/AssignmentInstansi';
+import User from '~/orm/entities/User';
 import assignmentInstansiSvc, { IFilterInstansi } from '~/services/assignmentInstansiSvc';
+import { konsolidasiTopBottom } from '~/services/konsolidasiSvc';
 import CustomError from '~/utils/customError';
 import queryHelper from '~/utils/queryHelper';
 
 const assignedInsRepo = dataSource.getRepository(AssignmentInstansi);
+// const userRepo = dataSource.getRepository(User);
 
 export const assignUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -120,6 +124,47 @@ export const deleteAssignInstansi = async (req: Request, res: Response, next: Ne
     };
 
     return res.customSuccess(200, 'Delete assignment instansi success', dataRes);
+  } catch (e) {
+    return next(e);
+  }
+};
+
+export const getUserBpoMo = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const filter = {
+      kode_role: (req.query.kode_role as string) ?? null,
+      kode_unit_kerja: (req.query.kode_unit_kerja as string) ?? null,
+      nik_user: undefined,
+      nama: (req.query.nama as string) ?? '',
+      is_active: (+req.query.is_active as number) ?? null,
+    };
+
+    const where: FindOptionsWhere<User> = {};
+    where.kode_role = In(['MKTO', 'BPO1', 'BPO2']);
+
+    const outletId = (filter.kode_unit_kerja || req.user.kode_unit_kerja) as string;
+    let outletIds = [];
+
+    if (!outletId.startsWith('000')) {
+      outletIds = await konsolidasiTopBottom(outletId as string);
+    }
+
+    const outletIdStr = outletIds.length > 0 ? outletIds.join(',') : '';
+
+    const bpoMo = await assignmentInstansiSvc.listBpoMo(filter.nama, outletIdStr);
+
+    if (bpoMo.err) return next(new CustomError('Terjadi kesalahan saat mendapatkan BPO MO', 400));
+
+    const dataRes = {
+      meta: {
+        count: bpoMo.data.length,
+        limit: 0,
+        offset: 0,
+      },
+      users: bpoMo.data,
+    };
+
+    return res.customSuccess(200, 'Get users success', dataRes);
   } catch (e) {
     return next(e);
   }

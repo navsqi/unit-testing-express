@@ -199,6 +199,11 @@ class Leads {
   })
   updated_by: string;
 
+  @Column({
+    type: 'timestamptz'
+  })
+  updated_at_selena: Date;
+
   @ManyToOne(() => Event)
   @JoinColumn([{ name: 'event_id', referencedColumnName: 'id' }])
   event: Event;
