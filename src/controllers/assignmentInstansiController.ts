@@ -133,7 +133,7 @@ export const getUserBpoMo = async (req: Request, res: Response, next: NextFuncti
   try {
     const filter = {
       kode_role: (req.query.kode_role as string) ?? null,
-      kode_unit_kerja: (req.query.kode_unit_kerja as string) ?? null,
+      kode_unit_kerja: (req.query.kode_unit_kerja as string) || req.user.kode_unit_kerja as string,
       nik_user: undefined,
       nama: (req.query.nama as string) ?? '',
       is_active: (+req.query.is_active as number) ?? null,
@@ -142,16 +142,7 @@ export const getUserBpoMo = async (req: Request, res: Response, next: NextFuncti
     const where: FindOptionsWhere<User> = {};
     where.kode_role = In(['MKTO', 'BPO1', 'BPO2']);
 
-    const outletId = (filter.kode_unit_kerja || req.user.kode_unit_kerja) as string;
-    let outletIds = [];
-
-    if (!outletId.startsWith('000')) {
-      outletIds = await konsolidasiTopBottom(outletId as string);
-    }
-
-    const outletIdStr = outletIds.length > 0 ? outletIds.join(',') : '';
-
-    const bpoMo = await assignmentInstansiSvc.listBpoMo(filter.nama, outletIdStr);
+    const bpoMo = await assignmentInstansiSvc.listBpoMo(filter.nama, filter.kode_unit_kerja);
 
     if (bpoMo.err) return next(new CustomError('Terjadi kesalahan saat mendapatkan BPO MO', 400));
 

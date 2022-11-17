@@ -20,7 +20,7 @@ interface IFilterP2KI {
   end_date?: string;
   kode_produk?: string;
   instansi_id?: any;
-  status_pengajuan?: any;
+  kode_status_pengajuan?: any;
   page?: number;
   limit?: number;
   offset?: any;
@@ -507,12 +507,12 @@ export const p2kiReport = async (filter?: IFilterP2KI) => {
       q.andWhere('pp.kode_instansi = :kodeInstansi', { kodeInstansi: filter.instansi_id });
     }
 
-    if (filter.status_pengajuan) {
-      q.andWhere('pp.status_pengajuan = :statusPengajuan', { statusPengajuan: filter.status_pengajuan });
+    if (filter.kode_status_pengajuan) {
+      q.andWhere('pp.status_pengajuan = :statusPengajuan', { statusPengajuan: filter.kode_status_pengajuan });
     }
 
     if (filter.nama) {
-      q.andWhere('pki_nasabah.nama = :nama', { nama: filter.nama });
+      q.andWhere('pki_nasabah.nama ~* :nama', { nama: filter.nama });
     }
 
     let count = null;
