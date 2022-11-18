@@ -24,6 +24,7 @@ export const approvedInstansi = async (filter?: IFilter) => {
     }
 
     const data = await q.getRawMany();
+    await queryRunner.commitTransaction();
     await queryRunner.release();
 
     const res = {
@@ -41,6 +42,7 @@ export const approvedInstansi = async (filter?: IFilter) => {
       data: res,
     };
   } catch (error) {
+    await queryRunner.rollbackTransaction();
     await queryRunner.release();
     return { err: error.message, data: null };
   }
@@ -65,6 +67,7 @@ export const approvedLeads = async (filter?: IFilter) => {
     }
 
     const data = await q.getRawMany();
+    await queryRunner.commitTransaction();
     await queryRunner.release();
 
     const res = {
@@ -82,6 +85,7 @@ export const approvedLeads = async (filter?: IFilter) => {
       data: res,
     };
   } catch (error) {
+    await queryRunner.rollbackTransaction();
     await queryRunner.release();
     return { err: error.message, data: null };
   }
@@ -115,6 +119,7 @@ export const approvedMou = async (filter?: IFilter) => {
 
     const dataPengajuan = await pengajuan.getRawOne();
 
+    await queryRunner.commitTransaction();
     await queryRunner.release();
 
     const res = {
@@ -127,6 +132,7 @@ export const approvedMou = async (filter?: IFilter) => {
       data: res,
     };
   } catch (error) {
+    await queryRunner.rollbackTransaction();
     await queryRunner.release();
     return { err: error.message, data: null };
   }
@@ -210,6 +216,9 @@ export const omsetPerKategoriProduk = async (filter?: IFilter) => {
       `,
     );
 
+    await queryRunner.commitTransaction();
+    await queryRunner.release();
+
     return {
       err: false,
       data: {
@@ -218,6 +227,7 @@ export const omsetPerKategoriProduk = async (filter?: IFilter) => {
       },
     };
   } catch (error) {
+    await queryRunner.rollbackTransaction();
     await queryRunner.release();
     return { err: error.message, data: null };
   }
