@@ -8,6 +8,7 @@ interface IFilter {
 export const approvedInstansi = async (filter?: IFilter) => {
   const queryRunner = dataSource.createQueryRunner();
   await queryRunner.connect();
+  await queryRunner.startTransaction();
   const manager = queryRunner.manager;
 
   try {
@@ -51,6 +52,7 @@ export const approvedInstansi = async (filter?: IFilter) => {
 export const approvedLeads = async (filter?: IFilter) => {
   const queryRunner = dataSource.createQueryRunner();
   await queryRunner.connect();
+  await queryRunner.startTransaction();
   const manager = queryRunner.manager;
 
   try {
@@ -94,6 +96,7 @@ export const approvedLeads = async (filter?: IFilter) => {
 export const approvedMou = async (filter?: IFilter) => {
   const queryRunner = dataSource.createQueryRunner();
   await queryRunner.connect();
+  await queryRunner.startTransaction();
   const manager = queryRunner.manager;
 
   try {
@@ -141,6 +144,7 @@ export const approvedMou = async (filter?: IFilter) => {
 export const omsetPerKategoriProduk = async (filter?: IFilter) => {
   const queryRunner = dataSource.createQueryRunner();
   await queryRunner.connect();
+  await queryRunner.startTransaction();
   const manager = queryRunner.manager;
 
   try {
