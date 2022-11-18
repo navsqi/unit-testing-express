@@ -1,10 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
-import { FindOptionsWhere, ILike, In, IsNull } from 'typeorm';
+import { FindOptionsWhere, In } from 'typeorm';
 import { dataSource } from '~/orm/dbCreateConnection';
 import AssignmentInstansi from '~/orm/entities/AssignmentInstansi';
 import User from '~/orm/entities/User';
 import assignmentInstansiSvc, { IFilterInstansi } from '~/services/assignmentInstansiSvc';
-import { konsolidasiTopBottom } from '~/services/konsolidasiSvc';
 import CustomError from '~/utils/customError';
 import queryHelper from '~/utils/queryHelper';
 

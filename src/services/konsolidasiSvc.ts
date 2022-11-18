@@ -156,3 +156,39 @@ export const getOutletChild = async (outletId: string, isIdOnly = true): Promise
     return error;
   }
 };
+
+export const getRecursiveOutletQuery = (kodeOutlet: string) => {
+  const query = `
+                  WITH RECURSIVE cte AS (
+                      SELECT 
+                        kode, 
+                        parent 
+                      FROM 
+                        outlet 
+                      WHERE 
+                        kode = '${kodeOutlet}' 
+                      UNION 
+                      SELECT 
+                        o2.kode, 
+                        o2.parent 
+                      FROM 
+                        outlet o2 
+                        INNER JOIN cte s ON o2.parent = s.kode
+                    ) 
+                    SELECT 
+                      kode 
+                    FROM 
+                      cte
+                  `;
+
+  return query;
+};
+
+export default {
+  konsolidasiTopBottom,
+  konsolidasiTopBottomFull,
+  konsolidasiBottomTop,
+  getOutletParent,
+  getOutletChild,
+  getRecursiveOutletQuery,
+};
