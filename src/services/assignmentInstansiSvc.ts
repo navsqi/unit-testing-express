@@ -2,6 +2,7 @@ import { dataSource } from '~/orm/dbCreateConnection';
 import AssignmentInstansi from '~/orm/entities/AssignmentInstansi';
 import Instansi from '~/orm/entities/Instansi';
 import { IPaging } from '~/utils/queryHelper';
+import { getRecursiveOutletQuery } from './konsolidasiSvc';
 
 export interface IFilterInstansi {
   nama_instansi?: string;
@@ -44,27 +45,7 @@ const listAssignInstansi = async (userNik: string, paging: IPaging, filter?: IFi
 const listBpoMo = async (nama: string, outlet?: string) => {
   const kodeUnitKerja = outlet
     ? `AND u.kode_unit_kerja IN (
-    WITH RECURSIVE cte AS (
-        SELECT
-          kode,
-          parent
-        FROM
-          outlet
-        WHERE
-          kode = '${outlet}'
-      UNION
-        SELECT
-          o2.kode,
-          o2.parent
-        FROM
-          outlet o2
-        INNER JOIN cte s ON
-          o2.parent = s.kode
-              )
-        SELECT
-          kode
-        FROM
-          cte
+    ${getRecursiveOutletQuery(outlet)}
   )`
     : '';
   try {

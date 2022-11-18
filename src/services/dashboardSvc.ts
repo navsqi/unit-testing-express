@@ -1,4 +1,5 @@
 import { dataSource } from '~/orm/dbCreateConnection';
+import { getRecursiveOutletQuery } from './konsolidasiSvc';
 
 interface IFilter {
   outlet_id?: string[] | string;
@@ -141,35 +142,14 @@ export const omsetPerKategoriProduk = async (filter?: IFilter) => {
     const omset_pembiayaan = await manager.query(
       `
       SELECT
-        COALESCE (SUM(lc.osl), 0) as total
+        COALESCE (SUM(lc.up), 0) as total
       FROM
         leads_closing lc
       INNER JOIN leads l ON
         l.id = lc.leads_id
       WHERE
         lc.kode_unit_kerja IN (
-      
-      WITH RECURSIVE cte AS (
-        SELECT
-          kode,
-          parent
-        FROM
-          outlet
-        WHERE
-          kode = '${filter.outlet_id}'
-      UNION
-        SELECT
-          o2.kode,
-          o2.parent
-        FROM
-          outlet o2
-        INNER JOIN cte s ON
-          o2.parent = s.kode
-              )
-        SELECT
-          kode
-        FROM
-          cte
+          ${getRecursiveOutletQuery(filter.outlet_id as string)}
       ) AND l.kode_produk <> '62'
       `,
     );
@@ -177,35 +157,14 @@ export const omsetPerKategoriProduk = async (filter?: IFilter) => {
     const omset_tabemas = await manager.query(
       `
       SELECT
-        COALESCE (SUM(lc.osl), 0) as total
+        COALESCE (SUM(lc.up), 0) as total
       FROM
         leads_closing lc
       INNER JOIN leads l ON
         l.id = lc.leads_id
       WHERE
         lc.kode_unit_kerja IN (
-      
-      WITH RECURSIVE cte AS (
-        SELECT
-          kode,
-          parent
-        FROM
-          outlet
-        WHERE
-          kode = '${filter.outlet_id}'
-      UNION
-        SELECT
-          o2.kode,
-          o2.parent
-        FROM
-          outlet o2
-        INNER JOIN cte s ON
-          o2.parent = s.kode
-              )
-        SELECT
-          kode
-        FROM
-          cte
+      ${getRecursiveOutletQuery(filter.outlet_id as string)}
       ) AND l.kode_produk = '62'
       `,
     );
