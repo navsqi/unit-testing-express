@@ -9,6 +9,8 @@ const mappingHistoryKredit = (losHistory: ILOSHistoryKreditResponse) => {
       result.push({
         status_los: h.trCode,
         description: h.trDesc,
+        date: h.trDate,
+        channel: h.trBy,
         status_microsite: los.statusLos[h.trCode],
       });
     }
