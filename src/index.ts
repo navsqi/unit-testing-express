@@ -7,7 +7,8 @@ import 'reflect-metadata';
 import cors from 'cors';
 import globalError from './middlewares/globalError';
 import { dbCreateConnection } from './orm/dbCreateConnection';
-import micrositeDb from './orm/micrositeDb/index';
+// P2KI DEV
+// import micrositeDb from './orm/micrositeDb/index';
 import * as Sentry from '@sentry/node';
 import * as Tracing from '@sentry/tracing';
 // import { redisCreateConnection } from './config/redis';
@@ -23,7 +24,8 @@ export const eventHandler: any = new EventEmitter();
 
 (async () => {
   await dbCreateConnection();
-  await micrositeDb.dbCreateConnection();
+  // P2KI DEV
+  // await micrositeDb.dbCreateConnection();
 
   if (!cronJob.running) {
     cronJob.start();
