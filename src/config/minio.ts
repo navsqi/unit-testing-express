@@ -24,6 +24,16 @@ try {
 
 minioClient.setRequestOptions({ rejectUnauthorized: false });
 
+export const minioInit = async () => {
+  minioClient.getBucketPolicy(process.env.MINIO_BUCKET, (err, res) => {
+    if (err) {
+      logger.error('Error when connecting to minio service', 'MINIO_INIT');
+      process.exit(1);
+    }
+    logger.info('MINIO_INIT', `Connection to minio ${process.env.MINIO_BUCKET} success`);
+  });
+};
+
 const isBucketExist = (bucketName) => {
   return new Promise((resolve, reject) => {
     minioClient.bucketExists(bucketName, (err, exists) => {
