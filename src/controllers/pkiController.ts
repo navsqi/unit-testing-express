@@ -9,9 +9,11 @@ import PkiPengajuan from '~/orm/entities/PkiPengajuan';
 import micrositeSvc from '~/services/micrositeSvc';
 import { p2kiReport } from '~/services/reportSvc';
 import { ILOSHistoryKreditResponse, ILOSPengajuan, ILOSPengajuanResponse } from '~/types/LOSTypes';
+import * as common from '~/utils/common';
 import CustomError from '~/utils/customError';
 import mappingLosResponse from '~/utils/mappingLosResponse';
 import queryHelper from '~/utils/queryHelper';
+import xls from '~/utils/xls';
 
 const pkiPengajuanRepo = dataSource.getRepository(PkiPengajuan);
 const statusLosRepo = dataSource.getRepository(MasterStatusLos);
@@ -199,7 +201,6 @@ export const createNewPki = async (req: Request, res: Response, next: NextFuncti
     pkiNasabah.file_path_ektp = bodyPkiNasabah?.file_path_ektp;
     pkiNasabah.data_consent = bodyPkiNasabah?.data_consent;
 
-
     const cekNoKtp = await queryRunner.manager.findOne(PkiNasabah, {
       where: { no_ktp: pkiNasabah.no_ktp },
     });
@@ -210,7 +211,6 @@ export const createNewPki = async (req: Request, res: Response, next: NextFuncti
 
     await queryRunner.manager.save(PkiAgunan, pkiAgunan);
     await queryRunner.manager.save(PkiPengajuan, pkiPengajuan);
-    
 
     const dataRes = {
       pkiAgunan: pkiAgunan,
@@ -342,5 +342,134 @@ export const getReportPki = async (req: Request, res: Response, next: NextFuncti
     });
   } catch (e) {
     return next(e);
+  }
+};
+
+export const genExcelReportPki = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const filter = {
+      start_date: (req.query.start_date as string) || '',
+      end_date: (req.query.end_date as string) || '',
+      nama: (req.query.nama as string) || '',
+      no_pengajuan: (req.query.no_pengajuan as string) || '',
+      kode_produk: (req.query.kode_produk as string) || '',
+      instansi_id: (req.query.instansi_id as string) || '',
+      status_pengajuan: (req.query.status_pengajuan as string) || '',
+      page: Number(req.query.page) || 1,
+      limit: Number(req.query.limit) || 250,
+      offset: null,
+    };
+
+    const paging = queryHelper.paging({ ...filter });
+    filter.offset = paging.offset;
+    filter.limit = paging.limit;
+
+    if (!filter.start_date || !filter.end_date) return next(new CustomError('Pilih tanggal awal dan akhir', 400));
+
+    const report = await p2kiReport(filter);
+
+    if (report.err) return next(new CustomError(report.err, 400));
+
+    const data = report.data;
+
+    const { workbook, worksheet, headingStyle, outlineHeadingStyle, outlineStyle } = xls();
+
+    const col = 16;
+
+    worksheet.column(1).setWidth(5);
+    for (let i = 2; i <= col; i++) {
+      const exclude = [];
+      worksheet.column(i).setWidth(exclude.includes(i) ? 10 : 25);
+    }
+
+    worksheet.cell(1, 1, 1, 9, true).string('REPORT MICROSITE P2KI').style(headingStyle);
+    worksheet
+      .cell(2, 1, 2, 9, true)
+      .string(
+        `TANGGAL ${common.tanggal(req.query.start_date as string)} S.D. ${common.tanggal(
+          req.query.end_date as string,
+        )}`,
+      )
+      .style(headingStyle);
+
+    const barisHeading = 5;
+    let noHeading = 0;
+
+    const judulKolom = [
+      'NO',
+      'NOMOR PENGAJUAN / KODE BOOKING',
+      'NAMA CHANNEL',
+      'NAMA PRODUK',
+      'NAMA NASABAH',
+      'INSTANSI',
+      'UNIT KERJA INSTANSI',
+      'TANGGAL PENGAJUAN',
+      'UANG PINJAMAN',
+      'AGUNAN',
+      'OUTLET PENGAJUAN',
+      'AREA PENGAJUAN',
+      'STATUS',
+    ];
+
+    for (const header of judulKolom) {
+      worksheet
+        .cell(barisHeading, ++noHeading)
+        .string(header)
+        .style(outlineHeadingStyle);
+    }
+
+    let rows = 6;
+
+    const valueKolom = [
+      { property: 'no_pengajuan', isMoney: false, isDate: false },
+      { property: 'kode_channel', isMoney: false, isDate: false },
+      { property: 'nama_produk', isMoney: false, isDate: false },
+      { property: 'nama_nasabah', isMoney: false, isDate: false },
+      { property: 'nama_instansi', isMoney: false, isDate: false },
+      { property: 'unit_kerja_instansi', isMoney: false, isDate: false },
+      { property: 'tgl_pengajuan', isMoney: false, isDate: true },
+      { property: 'jumlah_pinjaman', isMoney: false, isDate: false },
+      { property: 'mra_full', isMoney: false, isDate: false },
+      { property: 'outlet_pengajuan_full', isMoney: false, isDate: false },
+      { property: 'area_pengajuan', isMoney: false, isDate: false },
+      { property: 'status_pengajuan_full', isMoney: false, isDate: false },
+    ];
+
+    for (const [index, val] of data.entries()) {
+      let bodyLineNum = 1;
+      worksheet
+        .cell(rows, 1)
+        .string(`${index + 1}`)
+        .style(outlineStyle);
+
+      for (const col of valueKolom) {
+        let data = String(val[col.property]);
+
+        if (col.isDate) {
+          data = common.tanggal(val[col.property]);
+        }
+
+        if (col.isMoney) {
+          data = common.rupiah(+val[col.property], false);
+        }
+
+        worksheet
+          .cell(rows, ++bodyLineNum)
+          .string(data && data != 'null' ? data : '-')
+          .style(outlineStyle);
+      }
+
+      rows++;
+    }
+
+    const fileBuffer = await workbook.writeToBuffer();
+
+    res.set({
+      'Content-Disposition': `attachment; filename="REPORTP2KIMICROSITE-${Date.now()}.xlsx"`,
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+    return res.end(fileBuffer);
+  } catch (e) {
+    next(e);
   }
 };
