@@ -475,12 +475,16 @@ export const p2kiReport = async (filter?: IFilterP2KI) => {
     q.addSelect('pp.tgl_pengajuan', 'tgl_pengajuan');
     q.addSelect('mra.prefix', 'mra_prefix');
     q.addSelect('mra.label', 'mra_label');
-    q.addSelect('pp.kode_outlet', 'kode_outlet');
+    q.addSelect("CONCAT(mra.prefix, ' - ',  mra.label)", 'mra_full');
     q.addSelect('pp.jumlah_pinjaman', 'jumlah_pinjaman');
+    q.addSelect('pp.kode_outlet', 'kode_outlet');
     q.addSelect('outlet_pengajuan.nama', 'outlet_pengajuan');
+    q.addSelect("CONCAT(pp.kode_outlet, ' - ',  outlet_pengajuan.nama)", 'outlet_pengajuan_full');
+    q.addSelect('outlet_area_pengajuan.nama', 'area_pengajuan');
     q.addSelect('pp.status_pengajuan', 'kode_status_pengajuan');
     q.addSelect('msl.deskripsi_status_los', 'status_pengajuan');
     q.addSelect('msl.status_los', 'kode_status_los');
+    q.addSelect("CONCAT(msl.status_los, ' - ', msl.deskripsi_status_los)", 'status_pengajuan_full');
 
     q.leftJoin('produk', 'produk', 'produk.kode_produk = pp.kode_produk');
     q.leftJoin('pki_nasabah', 'pki_nasabah', 'pki_nasabah.no_ktp = pp.no_ktp');
@@ -490,6 +494,7 @@ export const p2kiReport = async (filter?: IFilterP2KI) => {
     q.leftJoin('master_rubrik_agunan', 'mra', 'mra.kode = pki_agunan.jenis_agunan');
     q.leftJoin('master_status_los', 'master_status_los', 'master_status_los.id_status_microsite = pp.status_pengajuan');
     q.leftJoin('outlet', 'outlet_pengajuan', 'outlet_pengajuan.kode = pp.kode_outlet');
+    q.leftJoin('outlet', 'outlet_area_pengajuan', 'outlet_area_pengajuan.kode = outlet_pengajuan.parent');
     q.leftJoin('master_status_los', 'msl', 'pp.status_pengajuan = msl.id_status_microsite');
 
     q.where('CAST(pp.tgl_pengajuan AS date) >= :startDate', { startDate: filter.start_date });

@@ -118,6 +118,8 @@ const apiPegadaianConfig = (bearerToken: string): AxiosRequestConfig => {
 };
 
 export const getToken = async (): Promise<AxiosPromise> => {
+  console.log('START OF ===> HIT TO PEGADAIAN API GET TOKEN');
+
   const getToken = await axios.post(
     pegadaianApiEnv.authApi.url + '/oauth/token',
     new URLSearchParams({
@@ -127,6 +129,9 @@ export const getToken = async (): Promise<AxiosPromise> => {
     }),
     apiPegadaianAuthConfig,
   );
+
+  console.log(getToken);
+  console.log('END OF ===> HIT TO PEGADAIAN API GET TOKEN');
 
   return getToken;
 };
