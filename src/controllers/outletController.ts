@@ -50,7 +50,13 @@ export const getOutlet = async (req: Request, res: Response, next: NextFunction)
       outlet,
     };
 
-    return res.customSuccess(200, 'Get outlet', dataRes);
+    return res.customSuccess(200, 'Get outlet', dataRes, {
+      count: count,
+      rowCount: paging.limit,
+      limit: paging.limit,
+      offset: paging.offset,
+      page: Number(req.query.page),
+    });
   } catch (e) {
     return next(e);
   }

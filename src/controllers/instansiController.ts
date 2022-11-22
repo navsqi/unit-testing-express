@@ -74,7 +74,13 @@ export const getMasterInstansi = async (req: Request, res: Response, next: NextF
       masterInstansi,
     };
 
-    return res.customSuccess(200, 'Get master instansi', dataRes);
+    return res.customSuccess(200, 'Get master instansi', dataRes, {
+      count: count,
+      rowCount: paging.limit,
+      limit: paging.limit,
+      offset: paging.offset,
+      page: Number(req.query.page),
+    });
   } catch (e) {
     return next(e);
   }
@@ -303,7 +309,13 @@ export const getInstansi = async (req: Request, res: Response, next: NextFunctio
       instansi,
     };
 
-    return res.customSuccess(200, 'Get instansi', dataRes);
+    return res.customSuccess(200, 'Get instansi', dataRes, {
+      count: count,
+      rowCount: paging.limit,
+      limit: paging.limit,
+      offset: paging.offset,
+      page: Number(req.query.page),
+    });
   } catch (e) {
     return next(e);
   }

@@ -10,7 +10,7 @@ const axiosError = (msg: string) => new CustomError(msg, 400);
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default (err: CustomError | any, req: Request, res: Response, next: NextFunction) => {
-  logger.error(err);
+  logger.error(process.env.NODE_ENV === 'development' ? err : JSON.stringify(err.JSON));
 
   const stack = err.stack;
 

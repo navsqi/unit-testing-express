@@ -10,7 +10,7 @@ import {
 import MasterMenu from './MasterMenu';
 import Role from './Role';
 
-@Entity('access_menu_role')
+@Entity('access_menu_role', { synchronize: false })
 class AccessMenuRole {
   @PrimaryGeneratedColumn()
   id: number;

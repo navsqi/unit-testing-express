@@ -54,7 +54,13 @@ export const getReportInstansi = async (req: Request, res: Response, next: NextF
       report: data,
     };
 
-    return res.customSuccess(200, 'Get report instansi', dataRes);
+    return res.customSuccess(200, 'Get report instansi', dataRes, {
+      count: report.count,
+      rowCount: paging.limit,
+      limit: paging.limit,
+      offset: paging.offset,
+      page: Number(req.query.page),
+    });
   } catch (e) {
     return next(e);
   }
@@ -248,7 +254,13 @@ export const getReportEvent = async (req: Request, res: Response, next: NextFunc
       report: data,
     };
 
-    return res.customSuccess(200, 'Get report event', dataRes);
+    return res.customSuccess(200, 'Get report event', dataRes, {
+      count: report.count,
+      rowCount: paging.limit,
+      limit: paging.limit,
+      offset: paging.offset,
+      page: Number(req.query.page),
+    });
   } catch (e) {
     return next(e);
   }
@@ -436,7 +448,13 @@ export const getReportLeads = async (req: Request, res: Response, next: NextFunc
       report: data,
     };
 
-    return res.customSuccess(200, 'Get report leads', dataRes);
+    return res.customSuccess(200, 'Get report leads', dataRes, {
+      count: report.count,
+      rowCount: paging.limit,
+      limit: paging.limit,
+      offset: paging.offset,
+      page: Number(req.query.page),
+    });
   } catch (e) {
     return next(e);
   }
@@ -534,7 +552,7 @@ export const genExcelReportLeads = async (req: Request, res: Response, next: Nex
       { property: 'is_karyawan', isMoney: false, isDate: false },
       { property: 'nama_produk', isMoney: false, isDate: false },
       { property: 'cif', isMoney: false, isDate: false },
-      { property: 'omset', isMoney: true, isDate: false },
+      { property: 'omset', isMoney: false, isDate: false },
       { property: 'osl', isMoney: false, isDate: false },
       { property: 'saldo_tabemas', isMoney: false, isDate: false },
       { property: 'nama_instansi', isMoney: false, isDate: false },
@@ -636,7 +654,13 @@ export const getReportClosing = async (req: Request, res: Response, next: NextFu
       report: data,
     };
 
-    return res.customSuccess(200, 'Get report leads', dataRes);
+    return res.customSuccess(200, 'Get report leads', dataRes, {
+      count: report.count,
+      rowCount: paging.limit,
+      limit: paging.limit,
+      offset: paging.offset,
+      page: Number(req.query.page),
+    });
   } catch (e) {
     return next(e);
   }
@@ -732,7 +756,7 @@ export const genExcelReportClosing = async (req: Request, res: Response, next: N
       { property: 'nama_nasabah', isMoney: false, isDate: false },
       { property: 'nama_produk', isMoney: false, isDate: false },
       { property: 'no_kontrak', isMoney: false, isDate: false },
-      { property: 'omset', isMoney: true, isDate: false },
+      { property: 'omset', isMoney: false, isDate: false },
       { property: 'osl', isMoney: false, isDate: false },
       { property: 'saldo_tabemas', isMoney: false, isDate: false },
       { property: 'outlet_4', isMoney: false, isDate: false },

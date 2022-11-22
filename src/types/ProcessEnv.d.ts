@@ -55,6 +55,12 @@ declare global {
       DATERANGE_INSTANSI_EXCEL: string;
       DATERANGE_REPORT: string;
       DATERANGE_LEADS_CREATE_EVENT: string;
+      CRON_CLOSING_PATTERN: string;
+      DB_HOST_MICROSITE: string;
+      DB_PORT_MICROSITE: string;
+      DB_USER_MICROSITE: string;
+      DB_PASS_MICROSITE: string;
+      DB_NAME_MICROSITE: string;
     }
   }
 }

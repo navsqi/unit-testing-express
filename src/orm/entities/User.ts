@@ -5,13 +5,15 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import AssignmentInstansi from './AssignmentInstansi';
 import Outlet from './Outlet';
 import Role from './Role';
 
-@Entity('users')
+@Entity('users', { synchronize: false })
 class User {
   @PrimaryGeneratedColumn()
   id: number;
@@ -71,6 +73,9 @@ class User {
   @UpdateDateColumn()
   updated_at: Date;
 
+  @Column({ type: 'timestamp' })
+  last_login: Date;
+
   hashPassword() {
     this.password = bcrypt.hashSync(this.password, 8);
   }
@@ -86,6 +91,10 @@ class User {
   @ManyToOne(() => Outlet)
   @JoinColumn([{ name: 'kode_unit_kerja', referencedColumnName: 'kode' }])
   unit_kerja: Outlet;
+
+  @OneToOne(() => AssignmentInstansi)
+  @JoinColumn([{ name: 'nik', referencedColumnName: 'user_nik' }])
+  assignment_instansi: AssignmentInstansi;
 }
 
 export default User;

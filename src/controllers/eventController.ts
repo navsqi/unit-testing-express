@@ -144,7 +144,13 @@ export const getEvent = async (req: Request, res: Response, next: NextFunction) 
       event,
     };
 
-    return res.customSuccess(200, 'Get event', dataRes);
+    return res.customSuccess(200, 'Get event', dataRes, {
+      count: count,
+      rowCount: paging.limit,
+      limit: paging.limit,
+      offset: paging.offset,
+      page: Number(req.query.page),
+    });
   } catch (e) {
     return next(e);
   }

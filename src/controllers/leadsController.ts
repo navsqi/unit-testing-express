@@ -1,22 +1,22 @@
 import { NextFunction, Request, Response } from 'express';
-import { FindOptionsWhere, ILike, In } from 'typeorm';
+import { FindOptionsOrder, FindOptionsWhere, ILike, In, IsNull, Raw } from 'typeorm';
 import APIPegadaian from '~/apis/pegadaianApi';
 import Leads from '~/orm/entities/Leads';
+import * as common from '~/utils/common';
 import CustomError from '~/utils/customError';
 import queryHelper from '~/utils/queryHelper';
-import * as common from '~/utils/common';
 
 import { parse } from 'csv-parse';
+import dayjs from 'dayjs';
+import { IResponseBadanUsaha } from '~/interfaces/IApiPegadaian';
 import { dataSource } from '~/orm/dbCreateConnection';
+import Event from '~/orm/entities/Event';
+import NasabahBadanUsaha from '~/orm/entities/NasabahBadanUsaha';
 import NasabahPerorangan from '~/orm/entities/NasabahPerorangan';
+import { konsolidasiTopBottom } from '~/services/konsolidasiSvc';
 import { IKTPPassion } from '~/types/APIPegadaianTypes';
 import { addDays, bufferToStream, parseIp } from '~/utils/common';
 import validationCsv from '~/utils/validationCsv';
-import { konsolidasiTopBottom } from '~/services/konsolidasiSvc';
-import dayjs from 'dayjs';
-import Event from '~/orm/entities/Event';
-import NasabahBadanUsaha from '~/orm/entities/NasabahBadanUsaha';
-import { IResponseBadanUsaha } from '~/interfaces/IApiPegadaian';
 
 const leadsRepo = dataSource.getRepository(Leads);
 const eventRepo = dataSource.getRepository(Event);
@@ -33,6 +33,11 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
       kode_unit_kerja: req.query.kode_unit_kerja,
       is_session: req.query.is_session ? +req.query.is_session : null,
       is_badan_usaha: req.query.is_badan_usaha ? +req.query.is_badan_usaha : null,
+      instansi_id: req.query.instansi_id,
+      event_id: req.query.event_id,
+      pic_selena: req.query.pic_selena as string,
+      follow_up_pic_selena: +req.query.follow_up_pic_selena as number,
+      order_by: req.query.order_by as string
     };
 
     if (common.isSalesRole(req.user.kode_role)) {
@@ -45,6 +50,26 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
 
     if (filter.status) {
       where['status'] = +filter.status;
+    }
+
+    if (filter.instansi_id) {
+      where['instansi_id'] = +filter.instansi_id;
+    }
+
+    if (filter.event_id) {
+      where['event_id'] = +filter.event_id;
+    }
+
+    if (filter.pic_selena) {
+      where['pic_selena'] = filter.pic_selena;
+    }
+
+    if (filter.follow_up_pic_selena) {
+      if (filter.follow_up_pic_selena == 1) {
+        where['pic_selena'] = Raw((alias) => `${alias} is not null or ${alias} <> ''`);
+      } else {
+        where['pic_selena'] = IsNull();
+      }
     }
 
     if (filter.kode_unit_kerja && filter.is_session == 0) {
@@ -66,6 +91,29 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
       where['is_badan_usaha'] = filter.is_badan_usaha;
     }
 
+    // order
+    // The null value sorts higher than any other value. 
+    // In other words, with ascending sort order, null values sort at the end, and with descending sort order, 
+    // null values sort at the beginning.
+    let order: FindOptionsOrder<Leads> = {
+      created_at: 'desc',
+    }
+
+    if(filter.order_by === 'pic_selena-LAST') {
+      order = {
+        pic_selena: 'DESC',
+        updated_at_selena: 'DESC'
+      }
+    }
+
+    if(filter.order_by === 'pic_selena-FIRST') {
+      order = {
+        pic_selena: 'ASC',
+        updated_at: 'ASC'
+      }
+    }
+    // end of order
+
     const paging = queryHelper.paging(req.query);
 
     const [leads, count] = await leadsRepo.findAndCount({
@@ -85,14 +133,16 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
           unit_kerja: true,
           nama: true,
         },
+        produk: {
+          kode_produk: true,
+          nama_produk: true,
+        },
       },
-      relations: ['instansi', 'event', 'outlet'],
+      relations: ['instansi', 'event', 'outlet', 'produk'],
       take: paging.limit,
       skip: paging.offset,
       where,
-      order: {
-        created_at: 'desc',
-      },
+      order: order
     });
 
     const dataRes = {
@@ -104,7 +154,13 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
       leads,
     };
 
-    return res.customSuccess(200, 'Get leads', dataRes);
+    return res.customSuccess(200, 'Get leads', dataRes, {
+      count: count,
+      rowCount: paging.limit,
+      limit: paging.limit,
+      offset: paging.offset,
+      page: Number(req.query.page),
+    });
   } catch (e) {
     return next(e);
   }
@@ -113,7 +169,28 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
 export const getLeadsById = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const leads = await leadsRepo.findOne({
-      relations: ['instansi', 'event', 'outlet'],
+      select: {
+        instansi: {
+          id: true,
+          nama_instansi: true,
+        },
+        event: {
+          id: true,
+          nama_event: true,
+          nama_pic: true,
+          tanggal_event: true,
+        },
+        outlet: {
+          kode: true,
+          unit_kerja: true,
+          nama: true,
+        },
+        produk: {
+          kode_produk: true,
+          nama_produk: true,
+        },
+      },
+      relations: ['instansi', 'event', 'outlet', 'produk'],
       where: {
         id: +req.params.leadsId,
       },
@@ -129,10 +206,86 @@ export const getLeadsById = async (req: Request, res: Response, next: NextFuncti
   }
 };
 
+export const getLeadsByNik = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const nikKtp = req.params.nikKtp;
+
+    if (!nikKtp || nikKtp.length != 16) return next(new CustomError('NIK harus 16 digit angka', 400));
+
+    const leads = await leadsRepo.findOne({
+      relations: ['instansi', 'event', 'outlet'],
+      where: {
+        nik_ktp: nikKtp,
+      },
+    });
+
+    if (!leads)
+      return next(
+        new CustomError(
+          'Maaf anda belum dapat terdaftar. Silahkan menghubungi PIC Marketing kami pada Instansi Anda',
+          404,
+        ),
+      );
+
+    const dataRes = {
+      leads,
+    };
+
+    return res.customSuccess(200, 'Get leads', dataRes);
+  } catch (e) {
+    return next(e);
+  }
+};
+
+export const getLeadsInstansiByNik = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const nikKtp = req.params.nikKtp;
+
+    if (!nikKtp || nikKtp.length != 16) return next(new CustomError('NIK harus 16 digit angka', 400));
+
+    const leads = await leadsRepo.findOne({
+      select: {
+        id: true,
+        nik_ktp: true,
+        nama: true,
+        instansi: {
+          id: true,
+          nama_instansi: true,
+          master_instansi_id: true,
+        },
+      },
+      relations: ['instansi'],
+      where: {
+        nik_ktp: nikKtp,
+      },
+    });
+
+    if (!leads)
+      return next(
+        new CustomError(
+          'Maaf anda belum dapat terdaftar. Silahkan menghubungi PIC Marketing kami pada Instansi Anda',
+          404,
+        ),
+      );
+
+    const dataRes = {
+      leads,
+    };
+
+    return res.customSuccess(200, 'Get leads', dataRes);
+  } catch (e) {
+    return next(e);
+  }
+};
+
 export const updateLeads = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const body = req.body as Leads;
+
+    if(body.pic_selena) body.updated_at_selena = new Date();
+
     const leads = await leadsRepo.update(req.params.id, {
-      ...req.body,
+      ...body,
       updated_by: req.user.nik,
     });
 
@@ -235,7 +388,13 @@ export const getKtpByInstansiId = async (req: Request, res: Response, next: Next
       leads,
     };
 
-    return res.customSuccess(200, 'Get leads', dataRes);
+    return res.customSuccess(200, 'Get leads', dataRes, {
+      count: count,
+      rowCount: paging.limit,
+      limit: paging.limit,
+      offset: paging.offset,
+      page: Number(req.query.page),
+    });
   } catch (e) {
     return next(e);
   }
@@ -358,7 +517,7 @@ export const createNewLeadsBadanUsaha = async (req: Request, res: Response, next
 export const createNewLeadsByCsv = async (req: Request, res: Response, next: NextFunction) => {
   const queryRunner = dataSource.createQueryRunner();
 
-  queryRunner.connect();
+  await queryRunner.connect();
   await queryRunner.startTransaction();
 
   try {
