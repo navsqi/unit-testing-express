@@ -22,7 +22,7 @@ export const JENIS_INSTANSI = {
   KOMUNITAS: '04',
 };
 
-@Entity('instansi')
+@Entity('instansi', { synchronize: false })
 class Instansi {
   @PrimaryGeneratedColumn()
   id: number;

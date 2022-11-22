@@ -1,10 +1,15 @@
 import { Router } from 'express';
 
 import * as reportController from '../../controllers/reportController';
+// P2KI DEV
+// import * as pkiController from '../../controllers/pkiController';
 import protect from '../../middlewares/protect';
 
 const router = Router();
 
+// P2KI DEV
+// router.get('/p2ki/excel', protect(), pkiController.genExcelReportPki);
+// router.get('/p2ki', protect(), pkiController.getReportPki);
 router.get('/event', protect(), reportController.getReportEvent);
 router.get('/event/excel', protect(), reportController.genExcelReportEvent);
 router.get('/instansi', protect(), reportController.getReportInstansi);

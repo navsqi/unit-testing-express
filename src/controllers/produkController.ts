@@ -41,7 +41,13 @@ export const getProduk = async (req: Request, res: Response, next: NextFunction)
       produk,
     };
 
-    return res.customSuccess(200, 'Get produk', dataRes);
+    return res.customSuccess(200, 'Get produk', dataRes, {
+      count: count,
+      rowCount: paging.limit,
+      limit: paging.limit,
+      offset: paging.offset,
+      page: Number(req.query.page),
+    });
   } catch (e) {
     return next(e);
   }

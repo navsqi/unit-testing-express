@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import protect, { cabangOnly } from '~/middlewares/protect';
 import { uploadBuffer } from '~/utils/uploadFile';
+import { basicAuth } from '~/middlewares/basicAuth';
 
 import * as leadsController from '../../controllers/leadsController';
 import { inputLeadsBadanUsahaVal, inputLeadsVal } from '../../validations/leadsVal';
@@ -21,6 +22,8 @@ router.post(
 );
 router.get('/nik-karyawan', protect(), leadsController.getNIKKaryawan);
 router.get('/:leadsId', leadsController.getLeadsById);
+router.get('/nik/:nikKtp', leadsController.getLeadsByNik);
+router.get('/p2ki/noid/:nikKtp', basicAuth, leadsController.getLeadsInstansiByNik);
 router.get('/', protect(), leadsController.getLeads);
 router.post('/perorangan', protect(), cabangOnly, inputLeadsVal, leadsController.createNewLeadsPerorangan);
 router.post('/badan-usaha', protect(), cabangOnly, inputLeadsBadanUsahaVal, leadsController.createNewLeadsBadanUsaha);
