@@ -398,9 +398,9 @@ export const genExcelReportPki = async (req: Request, res: Response, next: NextF
     const judulKolom = [
       'NO',
       'NOMOR PENGAJUAN / KODE BOOKING',
-      'NAMA CHANNEL',
       'NAMA PRODUK',
       'NAMA NASABAH',
+      'NO HP',
       'INSTANSI',
       'UNIT KERJA INSTANSI',
       'TANGGAL PENGAJUAN',
@@ -422,9 +422,9 @@ export const genExcelReportPki = async (req: Request, res: Response, next: NextF
 
     const valueKolom = [
       { property: 'no_pengajuan', isMoney: false, isDate: false },
-      { property: 'kode_channel', isMoney: false, isDate: false },
       { property: 'nama_produk', isMoney: false, isDate: false },
       { property: 'nama_nasabah', isMoney: false, isDate: false },
+      { property: 'no_hp', isMoney: false, isDate: false },
       { property: 'nama_instansi', isMoney: false, isDate: false },
       { property: 'unit_kerja_instansi', isMoney: false, isDate: false },
       { property: 'tgl_pengajuan', isMoney: false, isDate: true },
