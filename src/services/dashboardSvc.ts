@@ -160,7 +160,8 @@ export const omsetPerKategoriProduk = async (filter?: IFilter) => {
       WHERE
         lc.kode_unit_kerja IN (
           ${getRecursiveOutletQuery(filter.outlet_id as string)}
-      ) AND l.kode_produk <> '62'
+      ) AND l.kode_produk <> '62' 
+      AND date_part('year', CAST(lc.tgl_kredit AS date)) = date_part('year', CURRENT_DATE)
       `,
     );
 
@@ -175,7 +176,8 @@ export const omsetPerKategoriProduk = async (filter?: IFilter) => {
       WHERE
         lc.kode_unit_kerja IN (
       ${getRecursiveOutletQuery(filter.outlet_id as string)}
-      ) AND l.kode_produk = '62'
+      ) AND l.kode_produk = '62' 
+      AND date_part('year', CAST(lc.tgl_kredit AS date)) = date_part('year', CURRENT_DATE) 
       `,
     );
 
