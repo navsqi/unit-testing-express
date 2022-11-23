@@ -285,13 +285,13 @@ export const historyKreditLos = async (req: Request, res: Response, next: NextFu
     const mappingResponse = mappingLosResponse.mappingHistoryKredit(parseResponseHistoryKredit);
 
     if (mappingResponse && mappingResponse.length > 0) {
-      const lastIndex = mappingResponse[mappingResponse.length - 1];
+      const newStatus = mappingResponse[0];
       await pkiPengajuanRepo.update(
         { no_pengajuan: noPengajuan },
-        { status_pengajuan: lastIndex.status_microsite.id_status_microsite },
+        { status_pengajuan: newStatus.status_microsite.id_status_microsite },
       );
 
-      await micrositeSvc.updateStatusLosMicrosite(lastIndex.status_microsite.id_status_microsite, noPengajuan);
+      await micrositeSvc.updateStatusLosMicrosite(newStatus.status_microsite.id_status_microsite, noPengajuan);
     }
 
     const dataRes = {
@@ -398,9 +398,9 @@ export const genExcelReportPki = async (req: Request, res: Response, next: NextF
     const judulKolom = [
       'NO',
       'NOMOR PENGAJUAN / KODE BOOKING',
-      'NAMA CHANNEL',
       'NAMA PRODUK',
       'NAMA NASABAH',
+      'NO HP',
       'INSTANSI',
       'UNIT KERJA INSTANSI',
       'TANGGAL PENGAJUAN',
@@ -422,9 +422,9 @@ export const genExcelReportPki = async (req: Request, res: Response, next: NextF
 
     const valueKolom = [
       { property: 'no_pengajuan', isMoney: false, isDate: false },
-      { property: 'kode_channel', isMoney: false, isDate: false },
       { property: 'nama_produk', isMoney: false, isDate: false },
       { property: 'nama_nasabah', isMoney: false, isDate: false },
+      { property: 'no_hp', isMoney: false, isDate: false },
       { property: 'nama_instansi', isMoney: false, isDate: false },
       { property: 'unit_kerja_instansi', isMoney: false, isDate: false },
       { property: 'tgl_pengajuan', isMoney: false, isDate: true },

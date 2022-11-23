@@ -470,6 +470,7 @@ export const p2kiReport = async (filter?: IFilterP2KI) => {
     q.addSelect('pp.kode_instansi', 'kode_instansi');
     q.addSelect('produk.nama_produk', 'nama_produk');
     q.addSelect('pki_nasabah.nama', 'nama_nasabah');
+    q.addSelect('pki_nasabah.no_hp', 'no_hp');
     q.addSelect('instansi.nama_instansi', 'nama_instansi');
     q.addSelect('outlet_instansi.nama', 'unit_kerja_instansi');
     q.addSelect('pp.tgl_pengajuan', 'tgl_pengajuan');
