@@ -285,13 +285,13 @@ export const historyKreditLos = async (req: Request, res: Response, next: NextFu
     const mappingResponse = mappingLosResponse.mappingHistoryKredit(parseResponseHistoryKredit);
 
     if (mappingResponse && mappingResponse.length > 0) {
-      const lastIndex = mappingResponse[mappingResponse.length - 1];
+      const newStatus = mappingResponse[0];
       await pkiPengajuanRepo.update(
         { no_pengajuan: noPengajuan },
-        { status_pengajuan: lastIndex.status_microsite.id_status_microsite },
+        { status_pengajuan: newStatus.status_microsite.id_status_microsite },
       );
 
-      await micrositeSvc.updateStatusLosMicrosite(lastIndex.status_microsite.id_status_microsite, noPengajuan);
+      await micrositeSvc.updateStatusLosMicrosite(newStatus.status_microsite.id_status_microsite, noPengajuan);
     }
 
     const dataRes = {
