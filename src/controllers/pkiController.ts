@@ -35,6 +35,8 @@ export const getStatusLos = async (req: Request, res: Response, next: NextFuncti
 export const getPki = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const where: FindOptionsWhere<PkiPengajuan> = {};
+    const kodeOutlet = req.user.kode_unit_kerja;
+
     const filter = {
       no_pengajuan: req.query.no_pengajuan as string,
       nama: req.query.nama as string,
@@ -46,6 +48,7 @@ export const getPki = async (req: Request, res: Response, next: NextFunction) =>
       page: Number(req.query.page) || 1,
       limit: Number(req.query.limit) || 250,
       offset: null,
+      kode_outlet: kodeOutlet.startsWith('0000') ? null : kodeOutlet,
     };
 
     if (filter.no_pengajuan) {
@@ -116,9 +119,11 @@ export const getPki = async (req: Request, res: Response, next: NextFunction) =>
         created_at: 'desc',
       },
     });
+
     const dataRes = {
       report: pki,
     };
+
     return res.customSuccess(200, 'Get P2KI', dataRes, {
       count: count,
       rowCount: paging.limit,
@@ -306,6 +311,8 @@ export const historyKreditLos = async (req: Request, res: Response, next: NextFu
 
 export const getReportPki = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const kodeOutlet = req.user.kode_unit_kerja;
+
     const filter = {
       start_date: (req.query.start_date as string) || '',
       end_date: (req.query.end_date as string) || '',
@@ -317,6 +324,7 @@ export const getReportPki = async (req: Request, res: Response, next: NextFuncti
       page: Number(req.query.page) || 1,
       limit: Number(req.query.limit) || 250,
       offset: null,
+      kode_outlet: kodeOutlet.startsWith('0000') ? null : kodeOutlet,
     };
 
     const paging = queryHelper.paging({ ...filter });
