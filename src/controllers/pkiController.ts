@@ -35,6 +35,8 @@ export const getStatusLos = async (req: Request, res: Response, next: NextFuncti
 export const getPki = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const where: FindOptionsWhere<PkiPengajuan> = {};
+    const kodeOutlet = req.user.kode_unit_kerja;
+
     const filter = {
       no_pengajuan: req.query.no_pengajuan as string,
       nama: req.query.nama as string,
@@ -46,6 +48,7 @@ export const getPki = async (req: Request, res: Response, next: NextFunction) =>
       page: Number(req.query.page) || 1,
       limit: Number(req.query.limit) || 250,
       offset: null,
+      kode_outlet: kodeOutlet.startsWith('0000') ? null : kodeOutlet,
     };
 
     if (filter.no_pengajuan) {
@@ -116,9 +119,11 @@ export const getPki = async (req: Request, res: Response, next: NextFunction) =>
         created_at: 'desc',
       },
     });
+
     const dataRes = {
       report: pki,
     };
+
     return res.customSuccess(200, 'Get P2KI', dataRes, {
       count: count,
       rowCount: paging.limit,
@@ -249,7 +254,10 @@ export const sendPengajuanToLos = async (req: Request, res: Response, next: Next
     const lesResponse: ILOSPengajuanResponse = JSON.parse(dataPengajuanLOS.data);
 
     // update no aplikasi los ke db kamila
-    await pkiPengajuanRepo.update({ no_pengajuan: noPengajuan }, { no_aplikasi_los: lesResponse.noAplikasiLos });
+    await pkiPengajuanRepo.update(
+      { no_pengajuan: noPengajuan },
+      { no_aplikasi_los: lesResponse.noAplikasiLos, updated_by: req.user.nik },
+    );
     // update no aplikasi los ke db microsite
     await micrositeSvc.updateNoAplikasiLosMicrosite(lesResponse.noAplikasiLos, pkiPengajuan.no_pengajuan);
 
@@ -286,12 +294,17 @@ export const historyKreditLos = async (req: Request, res: Response, next: NextFu
 
     if (mappingResponse && mappingResponse.length > 0) {
       const newStatus = mappingResponse[0];
-      await pkiPengajuanRepo.update(
-        { no_pengajuan: noPengajuan },
-        { status_pengajuan: newStatus.status_microsite.id_status_microsite },
-      );
 
-      await micrositeSvc.updateStatusLosMicrosite(newStatus.status_microsite.id_status_microsite, noPengajuan);
+      const statusLos = newStatus.status_microsite;
+
+      if (statusLos) {
+        await pkiPengajuanRepo.update(
+          { no_pengajuan: noPengajuan },
+          { status_pengajuan: newStatus.status_microsite.id_status_microsite, updated_by: req.user.nik },
+        );
+
+        await micrositeSvc.updateStatusLosMicrosite(newStatus.status_microsite.id_status_microsite, noPengajuan);
+      }
     }
 
     const dataRes = {
@@ -306,6 +319,8 @@ export const historyKreditLos = async (req: Request, res: Response, next: NextFu
 
 export const getReportPki = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const kodeOutlet = req.user.kode_unit_kerja;
+
     const filter = {
       start_date: (req.query.start_date as string) || '',
       end_date: (req.query.end_date as string) || '',
@@ -317,6 +332,7 @@ export const getReportPki = async (req: Request, res: Response, next: NextFuncti
       page: Number(req.query.page) || 1,
       limit: Number(req.query.limit) || 250,
       offset: null,
+      kode_outlet: kodeOutlet.startsWith('0000') ? null : kodeOutlet,
     };
 
     const paging = queryHelper.paging({ ...filter });

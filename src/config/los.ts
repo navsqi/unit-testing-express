@@ -66,6 +66,9 @@ const statusLos = {
   },
 };
 
+const listStatusNumber = ['1.0', '1.1', '2.0', '6.0', '6.5', '7.0', '7.4', '7.5', '8.0', '9.0', '9.1', '9.2', '9.3'];
+
 export default {
   statusLos,
+  listStatusNumber,
 };

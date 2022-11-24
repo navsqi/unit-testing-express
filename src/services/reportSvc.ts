@@ -1,6 +1,7 @@
 import { SelectQueryBuilder } from 'typeorm';
 import { dataSource } from '~/orm/dbCreateConnection';
 import { QueryResultClosingReport } from '~/types/reportTypes';
+import { getRecursiveOutletQuery } from './konsolidasiSvc';
 
 interface IFilter {
   start_date: string;
@@ -24,6 +25,7 @@ interface IFilterP2KI {
   page?: number;
   limit?: number;
   offset?: any;
+  kode_outlet?: string;
 }
 
 export const instansiReport = async (filter?: IFilter) => {
@@ -519,6 +521,10 @@ export const p2kiReport = async (filter?: IFilterP2KI) => {
 
     if (filter.nama) {
       q.andWhere('pki_nasabah.nama ~* :nama', { nama: filter.nama });
+    }
+
+    if (filter.kode_outlet) {
+      q.andWhere(`pp.kode_outlet IN (${getRecursiveOutletQuery(filter.kode_outlet)})`);
     }
 
     let count = null;
