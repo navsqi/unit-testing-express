@@ -254,7 +254,10 @@ export const sendPengajuanToLos = async (req: Request, res: Response, next: Next
     const lesResponse: ILOSPengajuanResponse = JSON.parse(dataPengajuanLOS.data);
 
     // update no aplikasi los ke db kamila
-    await pkiPengajuanRepo.update({ no_pengajuan: noPengajuan }, { no_aplikasi_los: lesResponse.noAplikasiLos });
+    await pkiPengajuanRepo.update(
+      { no_pengajuan: noPengajuan },
+      { no_aplikasi_los: lesResponse.noAplikasiLos, updated_by: req.user.nik },
+    );
     // update no aplikasi los ke db microsite
     await micrositeSvc.updateNoAplikasiLosMicrosite(lesResponse.noAplikasiLos, pkiPengajuan.no_pengajuan);
 
@@ -291,12 +294,17 @@ export const historyKreditLos = async (req: Request, res: Response, next: NextFu
 
     if (mappingResponse && mappingResponse.length > 0) {
       const newStatus = mappingResponse[0];
-      await pkiPengajuanRepo.update(
-        { no_pengajuan: noPengajuan },
-        { status_pengajuan: newStatus.status_microsite.id_status_microsite },
-      );
 
-      await micrositeSvc.updateStatusLosMicrosite(newStatus.status_microsite.id_status_microsite, noPengajuan);
+      const statusLos = newStatus.status_microsite;
+
+      if (statusLos) {
+        await pkiPengajuanRepo.update(
+          { no_pengajuan: noPengajuan },
+          { status_pengajuan: newStatus.status_microsite.id_status_microsite, updated_by: req.user.nik },
+        );
+
+        await micrositeSvc.updateStatusLosMicrosite(newStatus.status_microsite.id_status_microsite, noPengajuan);
+      }
     }
 
     const dataRes = {
