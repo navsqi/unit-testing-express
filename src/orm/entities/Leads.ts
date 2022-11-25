@@ -173,7 +173,7 @@ class Leads {
 
   @Column({
     type: 'varchar',
-    length: 255
+    length: 255,
   })
   pic_selena: string;
 
@@ -200,9 +200,14 @@ class Leads {
   updated_by: string;
 
   @Column({
-    type: 'timestamptz'
+    type: 'timestamptz',
   })
   updated_at_selena: Date;
+
+  @Column({
+    nullable: true,
+  })
+  keterangan_selena: string;
 
   @ManyToOne(() => Event)
   @JoinColumn([{ name: 'event_id', referencedColumnName: 'id' }])
