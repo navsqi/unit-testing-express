@@ -7,7 +7,6 @@ interface IFilter {
   start_date: string;
   end_date: string;
   outlet_id?: string[];
-  user_id?: any;
   created_by?: any;
   page?: number;
   limit?: number;
@@ -138,6 +137,10 @@ export const instansiReport = async (filter?: IFilter) => {
       q.andWhere('i.kode_unit_kerja IN (:...kodeUnitKerja)', { kodeUnitKerja: filter.outlet_id });
     }
 
+    if (filter.created_by) {
+      q.andWhere('i.created_by = :userId', { userId: filter.created_by });
+    }
+
     let count = null;
 
     if (filter.page && filter.limit && filter.offset !== null) {
@@ -221,6 +224,10 @@ export const eventReport = async (filter?: IFilter) => {
 
     if (filter.outlet_id && filter.outlet_id.length > 0) {
       q.andWhere('e.kode_unit_kerja IN (:...kodeUnitKerja)', { kodeUnitKerja: filter.outlet_id });
+    }
+
+    if (filter.created_by) {
+      q.andWhere('e.created_by = :userId', { userId: filter.created_by });
     }
 
     let count = null;
@@ -327,8 +334,8 @@ export const leadsReport = async (filter?: IFilter) => {
       q.andWhere('leads.kode_unit_kerja IN (:...kodeUnitKerja)', { kodeUnitKerja: filter.outlet_id });
     }
 
-    if (filter.user_id) {
-      q.andWhere('leads.created_by = :userId', { userId: filter.user_id });
+    if (filter.created_by) {
+      q.andWhere('leads.created_by = :userId', { userId: filter.created_by });
     }
 
     let count = null;
