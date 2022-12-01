@@ -102,6 +102,8 @@ export const mapLeadsReport = (data: QueryResultLeadsReport[]) => {
       delete el['unit_parent_3'];
     }
 
+    el.nama_produk = el.nama_produk || '—';
+
     return {
       ...el,
       ...o,
@@ -120,8 +122,8 @@ export const mapClosingReport = (data: QueryResultClosingReport[]) => {
       osl: el.osl || 0,
       saldo_tabemas: el.saldo_tabemas || 0,
     };
-    
-    const channel = el.channel ?  el.channel : 'Outlet';
+
+    const channel = el.channel ? el.channel : 'Outlet';
     el.channel = channel;
 
     if (el.nama_unit_kerja && el.unit) {
