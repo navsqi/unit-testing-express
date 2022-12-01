@@ -1,4 +1,4 @@
-import { Between, ILike, In } from 'typeorm';
+import { Between, ILike, Raw } from 'typeorm';
 import { dataSource } from '~/orm/dbCreateConnection';
 import Instansi from '~/orm/entities/Instansi';
 import MasterInstansi from '~/orm/entities/MasterInstansi';
@@ -57,8 +57,12 @@ export const listInstansi = async (filter: any, paging: any): Promise<[Instansi[
     f['created_at'] = Between(new Date(`${filter.start_date} 00:00:00`), new Date(`${filter.end_date} 23:59:59`));
   }
 
-  if (filter.outlet_id && filter.outlet_id.length > 0) {
-    f['kode_unit_kerja'] = In(filter.outlet_id);
+  // if (filter.outlet_id && filter.outlet_id.length > 0) {
+  //   f['kode_unit_kerja'] = In(filter.outlet_id);
+  // }
+
+  if (filter.kode_outlet) {
+    f['kode_unit_kerja'] = filter.kode_outlet;
   }
 
   if (filter.kategori_instansi) {
@@ -73,7 +77,9 @@ export const listInstansi = async (filter: any, paging: any): Promise<[Instansi[
     f['status_potensial'] = filter.status_potensial;
   }
 
-  const fWithOr = Object.keys(f).length > 0 ? [f, { ...f, created_by: filter.user_nik }] : f;
+  // ...f, created_by: filter.user_nik
+  const fWithOr =
+    Object.keys(f).length > 0 ? [f, { unit_assign: Raw((alias) => `${alias} ~* '${filter.unit_assign}'`) }] : f;
 
   const [instansi, count] = await instansiRepo.findAndCount({
     take: paging.limit,
