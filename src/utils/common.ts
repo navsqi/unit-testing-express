@@ -139,3 +139,19 @@ export const pagingExcel = (): IPaging => {
 export function md5(content) {
   return createHash('md5').update(content).digest('hex');
 }
+
+export const convertToCSV = (arr) => {
+  if (!arr || arr.length <= 0) return '';
+
+  const array = [Object.keys(arr[0])].concat(arr);
+
+  return array
+    .map((it) => {
+      const objVal = Object.values(it).map((el: any) => {
+        return el instanceof Date ? dayjs(el).format('YYYY-MM-DD HH:mm:ss') : el;
+      });
+
+      return objVal.toString();
+    })
+    .join('\n');
+};
