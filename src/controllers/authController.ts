@@ -191,7 +191,7 @@ export const changePassword = async (req: Request, res: Response, next: NextFunc
 
     if (!user) return next(new CustomError('User not found', 404));
 
-    if (req.user.nik != user.nik && req.user.kode_role != 'SADM')
+    if (req.user.nik != req.params.nik && !(req.user.kode_role == 'SADM' || req.user.kode_role == 'ADMN'))
       return next(new CustomError('User is not allowed to change password', 404));
 
     user.password = bodies.newPass;

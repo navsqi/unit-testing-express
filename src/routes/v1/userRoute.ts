@@ -12,7 +12,7 @@ router.get('/:id', protect(), userController.getUserById);
 
 router.put(
   '/edit-profile/:nik',
-  protect(['ADMN', 'SADM']),
+  protect(),
   userVal.editUserVal,
   uploadBuffer([{ name: 'photo', maxCount: 1 }]),
   userController.editUser,

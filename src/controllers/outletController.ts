@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { ILike } from 'typeorm';
 import { dataSource } from '~/orm/dbCreateConnection';
 import Outlet from '~/orm/entities/Outlet';
-import { konsolidasiTopBottomFull } from '~/services/konsolidasiSvc';
+import { konsolidasiTopBottomFullWithoutUpc } from '~/services/konsolidasiSvc';
 import queryHelper from '~/utils/queryHelper';
 
 const outletRepo = dataSource.getRepository(Outlet);
@@ -64,10 +64,19 @@ export const getOutlet = async (req: Request, res: Response, next: NextFunction)
 
 export const getOutletSessionWithChild = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const outlet = await konsolidasiTopBottomFull(req.user.kode_unit_kerja, {
-      nama: (req.query.nama as string) || '',
-      kode: (req.query.kode as string) || '',
-    });
+    const isOneLevel = Number(req.query.is_one_level);
+    let level = null;
+
+    if (isOneLevel === 1) level = req.user.unit_kerja.unit_kerja;
+
+    const outlet = await konsolidasiTopBottomFullWithoutUpc(
+      req.user.kode_unit_kerja,
+      {
+        nama: (req.query.nama as string) || '',
+        kode: (req.query.kode as string) || '',
+      },
+      level,
+    );
 
     const dataRes = {
       meta: {

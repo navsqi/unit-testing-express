@@ -2,17 +2,45 @@ import { NextFunction, Request, Response } from 'express';
 import { FindOptionsWhere, In } from 'typeorm';
 import { dataSource } from '~/orm/dbCreateConnection';
 import AssignmentInstansi from '~/orm/entities/AssignmentInstansi';
+import Instansi from '~/orm/entities/Instansi';
 import User from '~/orm/entities/User';
 import assignmentInstansiSvc, { IFilterInstansi } from '~/services/assignmentInstansiSvc';
 import CustomError from '~/utils/customError';
 import queryHelper from '~/utils/queryHelper';
 
 const assignedInsRepo = dataSource.getRepository(AssignmentInstansi);
+const insRepo = dataSource.getRepository(Instansi);
 // const userRepo = dataSource.getRepository(User);
 
 export const assignUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const body = req.body;
+    const body = {
+      instansi_id: req.body.instansi_id,
+      user_nik: req.body.user_nik,
+      outlet_id: req.body.outlet_id,
+    };
+
+    if (req.user.unit_kerja.unit_kerja !== 4) {
+      const currentInstansi = await insRepo.findOne({ where: { id: body.instansi_id } });
+      const unitAssign: string[] = JSON.parse(currentInstansi.unit_assign);
+
+      if (unitAssign.includes(body.outlet_id)) return next(new CustomError('Unit kerja sudah di-assign', 400));
+
+      unitAssign.push(body.outlet_id);
+
+      const assignIns = await insRepo.update(
+        { id: body.instansi_id },
+        {
+          unit_assign: JSON.stringify(unitAssign),
+        },
+      );
+
+      const dataRes = {
+        assignUser: assignIns,
+      };
+
+      return res.customSuccess(200, 'Assign user succesful', dataRes);
+    }
 
     const findAssignment = await assignedInsRepo.find({
       where: { user_nik: req.body.user_nik, instansi_id: body.instansi_id },
@@ -132,7 +160,7 @@ export const getUserBpoMo = async (req: Request, res: Response, next: NextFuncti
   try {
     const filter = {
       kode_role: (req.query.kode_role as string) ?? null,
-      kode_unit_kerja: (req.query.kode_unit_kerja as string) || req.user.kode_unit_kerja as string,
+      kode_unit_kerja: (req.query.kode_unit_kerja as string) || (req.user.kode_unit_kerja as string),
       nik_user: undefined,
       nama: (req.query.nama as string) ?? '',
       is_active: (+req.query.is_active as number) ?? null,
