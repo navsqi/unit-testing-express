@@ -1,6 +1,8 @@
 import dayjs from 'dayjs';
+import { objectUpload } from '~/config/minio';
 import { dataSource } from '~/orm/dbCreateConnection';
 import { ITmpKreditQuery, ITmpKreditTabemasQuery } from '~/types/queryClosingTypes';
+import { convertToCSV } from '~/utils/common';
 import logger from '~/utils/logger';
 import queryClosing from '~/utils/queryClosing';
 
@@ -100,7 +102,19 @@ export const schedulerClosing = async () => {
     );
 
     // insert data yang dikirim bigdata ke table history
-    await manager.query(`INSERT INTO history_tmp_kredit SELECT * FROM tmp_kredit`);
+    // INSERT INTO history_tmp_kredit SELECT * FROM tmp_kredit
+    const bigDataRaw = await manager.query(`SELECT * FROM tmp_kredit`);
+
+    const csvFormat = convertToCSV(bigDataRaw);
+    const buffer = Buffer.from(csvFormat);
+    const fileName = 'hblkreditbigdata/' + dayjs().format(`DD-MM-YYYY`) + `_TMP_KRED_BIGDATA_${Date.now()}.csv`;
+
+    const uploadCsv = await objectUpload(process.env.MINIO_BUCKET, fileName, buffer, {
+      'Content-Type': 'text/csv',
+      'Content-Disposision': 'inline',
+    });
+
+    // logger.info('IS_MINIO_UPLOADED', uploadCsv);
 
     await manager.query(`TRUNCATE tmp_kredit RESTART IDENTITY`);
 
@@ -223,7 +237,18 @@ export const schedulerClosingTabemas = async () => {
     );
 
     // insert data yang dikirim bigdata ke table history
-    await manager.query(`INSERT INTO history_tmp_kredit_tabemas SELECT * FROM tmp_kredit_tabemas`);
+    const bigDataRaw = await manager.query(`SELECT * FROM tmp_kredit_tabemas`);
+
+    const csvFormat = convertToCSV(bigDataRaw);
+    const buffer = Buffer.from(csvFormat);
+    const fileName = 'hblkreditbigdata/' + dayjs().format(`DD-MM-YYYY`) + `_TMP_KRED_TABEMAS_BIGDATA_${Date.now()}.csv`;
+
+    const uploadCsv = await objectUpload(process.env.MINIO_BUCKET, fileName, buffer, {
+      'Content-Type': 'text/csv',
+      'Content-Disposision': 'inline',
+    });
+
+    // logger.info('IS_MINIO_UPLOADED', uploadCsv);
 
     await manager.query(`TRUNCATE tmp_kredit_tabemas RESTART IDENTITY`);
 
