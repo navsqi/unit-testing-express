@@ -103,6 +103,7 @@ export const listInstansi = async (filter: any, paging: any): Promise<[Instansi[
     },
     order: {
       created_at: 'desc',
+      nama_instansi: 'asc',
     },
     relations: {
       master_instansi: true,
