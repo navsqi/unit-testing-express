@@ -79,11 +79,11 @@ export const konsolidasiTopBottomFullWithoutUpc = async (
   try {
     const konsolidasi: any[] = await manager.query(
       `with recursive cte as (
-             select kode,nama,parent,unit_kerja from outlet WHERE kode = $1 and (nama NOT ILIKE 'UPC%' OR nama NOT ILIKE 'UPS%')
+             select kode,nama,parent,unit_kerja from outlet WHERE kode = $1 and nama NOT ILIKE 'UPC%' AND nama NOT ILIKE 'UPS%'
              union
              select o2.kode, o2.nama, o2.parent, o2.unit_kerja from outlet o2
              inner join cte s on o2.parent = s.kode
-             WHERE o2.nama NOT ILIKE 'UPC%' OR o2.nama NOT ILIKE 'UPS%'
+             WHERE o2.nama NOT ILIKE 'UPC%' AND o2.nama NOT ILIKE 'UPS%'
          )
          select * from cte where nama ~* $2 and kode ~* $3 ${lvl} order by kode asc
            `,
