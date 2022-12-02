@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { ILike } from 'typeorm';
+import { ILike, Raw } from 'typeorm';
 import { dataSource } from '~/orm/dbCreateConnection';
 import Outlet from '~/orm/entities/Outlet';
 import { konsolidasiTopBottomFullWithoutUpc } from '~/services/konsolidasiSvc';
@@ -17,8 +17,12 @@ export const getOutlet = async (req: Request, res: Response, next: NextFunction)
       kode: req.query.kode,
     };
 
+    where['nama'] = Raw((alias) => `${alias} NOT ILIKE 'UPC%' AND ${alias} NOT ILIKE 'UPS%' `);
+
     if (filter.nama) {
-      where['nama'] = ILike(`%${filter.nama}%`);
+      where['nama'] = Raw(
+        (alias) => `${alias} ~* '${filter.nama}' AND ${alias} NOT ILIKE 'UPC%' AND ${alias} NOT ILIKE 'UPS%' `,
+      );
     }
 
     if (filter.parent) {
