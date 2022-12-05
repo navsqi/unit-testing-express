@@ -77,9 +77,15 @@ export const listInstansi = async (filter: any, paging: any): Promise<[Instansi[
     f['status_potensial'] = filter.status_potensial;
   }
 
+  const f2 = {
+    ...f,
+  };
+
+  delete f2['kode_unit_kerja'];
+
   // ...f, created_by: filter.user_nik
   const fWithOr =
-    Object.keys(f).length > 0 ? [f, { unit_assign: Raw((alias) => `${alias} ~* '${filter.unit_assign}'`) }] : f;
+    Object.keys(f).length > 0 ? [f, { ...f2, unit_assign: Raw((alias) => `${alias} ~* '${filter.unit_assign}'`) }] : f;
 
   const [instansi, count] = await instansiRepo.findAndCount({
     take: paging.limit,
