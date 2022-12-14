@@ -164,6 +164,9 @@ class Instansi {
   @Column()
   updated_by: string;
 
+  @Column('text', { array: true, default: [] })
+  unit_assign: string;
+
   @ManyToOne(() => MasterInstansi)
   @JoinColumn([{ name: 'master_instansi_id', referencedColumnName: 'id' }])
   master_instansi: MasterInstansi;

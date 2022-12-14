@@ -146,6 +146,13 @@ class PkiPengajuan {
   })
   body_los: string;
 
+  @Column({
+    type: 'varchar',
+    length: 100,
+    nullable: true,
+  })
+  updated_by: string;
+
   @Column()
   @CreateDateColumn()
   created_at: Date;

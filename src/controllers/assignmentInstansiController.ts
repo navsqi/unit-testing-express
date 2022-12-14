@@ -1,19 +1,46 @@
 import { NextFunction, Request, Response } from 'express';
-import { FindOptionsWhere, ILike, In, IsNull } from 'typeorm';
+import { FindOptionsWhere, In } from 'typeorm';
 import { dataSource } from '~/orm/dbCreateConnection';
 import AssignmentInstansi from '~/orm/entities/AssignmentInstansi';
+import Instansi from '~/orm/entities/Instansi';
 import User from '~/orm/entities/User';
 import assignmentInstansiSvc, { IFilterInstansi } from '~/services/assignmentInstansiSvc';
-import { konsolidasiTopBottom } from '~/services/konsolidasiSvc';
 import CustomError from '~/utils/customError';
 import queryHelper from '~/utils/queryHelper';
 
 const assignedInsRepo = dataSource.getRepository(AssignmentInstansi);
+const insRepo = dataSource.getRepository(Instansi);
 // const userRepo = dataSource.getRepository(User);
 
 export const assignUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const body = req.body;
+    const body = {
+      instansi_id: req.body.instansi_id,
+      user_nik: req.body.user_nik,
+      outlet_id: req.body.outlet_id,
+    };
+
+    if (req.user.unit_kerja.unit_kerja !== 4) {
+      const currentInstansi = await insRepo.findOne({ where: { id: body.instansi_id } });
+      const unitAssign: string[] = JSON.parse(currentInstansi.unit_assign);
+
+      if (unitAssign.includes(body.outlet_id)) return next(new CustomError('Unit kerja sudah di-assign', 400));
+
+      unitAssign.push(body.outlet_id);
+
+      const assignIns = await insRepo.update(
+        { id: body.instansi_id },
+        {
+          unit_assign: JSON.stringify(unitAssign),
+        },
+      );
+
+      const dataRes = {
+        assignUser: assignIns,
+      };
+
+      return res.customSuccess(200, 'Assign user succesful', dataRes);
+    }
 
     const findAssignment = await assignedInsRepo.find({
       where: { user_nik: req.body.user_nik, instansi_id: body.instansi_id },
@@ -133,7 +160,7 @@ export const getUserBpoMo = async (req: Request, res: Response, next: NextFuncti
   try {
     const filter = {
       kode_role: (req.query.kode_role as string) ?? null,
-      kode_unit_kerja: (req.query.kode_unit_kerja as string) ?? null,
+      kode_unit_kerja: (req.query.kode_unit_kerja as string) || (req.user.kode_unit_kerja as string),
       nik_user: undefined,
       nama: (req.query.nama as string) ?? '',
       is_active: (+req.query.is_active as number) ?? null,
@@ -142,16 +169,7 @@ export const getUserBpoMo = async (req: Request, res: Response, next: NextFuncti
     const where: FindOptionsWhere<User> = {};
     where.kode_role = In(['MKTO', 'BPO1', 'BPO2']);
 
-    const outletId = (filter.kode_unit_kerja || req.user.kode_unit_kerja) as string;
-    let outletIds = [];
-
-    if (!outletId.startsWith('000')) {
-      outletIds = await konsolidasiTopBottom(outletId as string);
-    }
-
-    const outletIdStr = outletIds.length > 0 ? outletIds.join(',') : '';
-
-    const bpoMo = await assignmentInstansiSvc.listBpoMo(filter.nama, outletIdStr);
+    const bpoMo = await assignmentInstansiSvc.listBpoMo(filter.nama, filter.kode_unit_kerja);
 
     if (bpoMo.err) return next(new CustomError('Terjadi kesalahan saat mendapatkan BPO MO', 400));
 

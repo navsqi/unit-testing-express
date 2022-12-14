@@ -35,6 +35,8 @@ export const getStatusLos = async (req: Request, res: Response, next: NextFuncti
 export const getPki = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const where: FindOptionsWhere<PkiPengajuan> = {};
+    const kodeOutlet = req.user.kode_unit_kerja;
+
     const filter = {
       no_pengajuan: req.query.no_pengajuan as string,
       nama: req.query.nama as string,
@@ -46,6 +48,7 @@ export const getPki = async (req: Request, res: Response, next: NextFunction) =>
       page: Number(req.query.page) || 1,
       limit: Number(req.query.limit) || 250,
       offset: null,
+      kode_outlet: kodeOutlet.startsWith('0000') ? null : kodeOutlet,
     };
 
     if (filter.no_pengajuan) {
@@ -116,9 +119,11 @@ export const getPki = async (req: Request, res: Response, next: NextFunction) =>
         created_at: 'desc',
       },
     });
+
     const dataRes = {
       report: pki,
     };
+
     return res.customSuccess(200, 'Get P2KI', dataRes, {
       count: count,
       rowCount: paging.limit,
@@ -249,7 +254,10 @@ export const sendPengajuanToLos = async (req: Request, res: Response, next: Next
     const lesResponse: ILOSPengajuanResponse = JSON.parse(dataPengajuanLOS.data);
 
     // update no aplikasi los ke db kamila
-    await pkiPengajuanRepo.update({ no_pengajuan: noPengajuan }, { no_aplikasi_los: lesResponse.noAplikasiLos });
+    await pkiPengajuanRepo.update(
+      { no_pengajuan: noPengajuan },
+      { no_aplikasi_los: lesResponse.noAplikasiLos, updated_by: req.user.nik },
+    );
     // update no aplikasi los ke db microsite
     await micrositeSvc.updateNoAplikasiLosMicrosite(lesResponse.noAplikasiLos, pkiPengajuan.no_pengajuan);
 
@@ -285,13 +293,18 @@ export const historyKreditLos = async (req: Request, res: Response, next: NextFu
     const mappingResponse = mappingLosResponse.mappingHistoryKredit(parseResponseHistoryKredit);
 
     if (mappingResponse && mappingResponse.length > 0) {
-      const lastIndex = mappingResponse[mappingResponse.length - 1];
-      await pkiPengajuanRepo.update(
-        { no_pengajuan: noPengajuan },
-        { status_pengajuan: lastIndex.status_microsite.id_status_microsite },
-      );
+      const newStatus = mappingResponse[0];
 
-      await micrositeSvc.updateStatusLosMicrosite(lastIndex.status_microsite.id_status_microsite, noPengajuan);
+      const statusLos = newStatus.status_microsite;
+
+      if (statusLos) {
+        await pkiPengajuanRepo.update(
+          { no_pengajuan: noPengajuan },
+          { status_pengajuan: newStatus.status_microsite.id_status_microsite, updated_by: req.user.nik },
+        );
+
+        await micrositeSvc.updateStatusLosMicrosite(newStatus.status_microsite.id_status_microsite, noPengajuan);
+      }
     }
 
     const dataRes = {
@@ -306,6 +319,8 @@ export const historyKreditLos = async (req: Request, res: Response, next: NextFu
 
 export const getReportPki = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const kodeOutlet = req.user.kode_unit_kerja;
+
     const filter = {
       start_date: (req.query.start_date as string) || '',
       end_date: (req.query.end_date as string) || '',
@@ -313,10 +328,11 @@ export const getReportPki = async (req: Request, res: Response, next: NextFuncti
       no_pengajuan: (req.query.no_pengajuan as string) || '',
       kode_produk: (req.query.kode_produk as string) || '',
       instansi_id: (req.query.instansi_id as string) || '',
-      status_pengajuan: (req.query.status_pengajuan as string) || '',
+      kode_status_pengajuan: (req.query.kode_status_pengajuan as string) || '',
       page: Number(req.query.page) || 1,
       limit: Number(req.query.limit) || 250,
       offset: null,
+      kode_outlet: kodeOutlet.startsWith('0000') ? null : kodeOutlet,
     };
 
     const paging = queryHelper.paging({ ...filter });
@@ -398,9 +414,9 @@ export const genExcelReportPki = async (req: Request, res: Response, next: NextF
     const judulKolom = [
       'NO',
       'NOMOR PENGAJUAN / KODE BOOKING',
-      'NAMA CHANNEL',
       'NAMA PRODUK',
       'NAMA NASABAH',
+      'NO HP',
       'INSTANSI',
       'UNIT KERJA INSTANSI',
       'TANGGAL PENGAJUAN',
@@ -422,9 +438,9 @@ export const genExcelReportPki = async (req: Request, res: Response, next: NextF
 
     const valueKolom = [
       { property: 'no_pengajuan', isMoney: false, isDate: false },
-      { property: 'kode_channel', isMoney: false, isDate: false },
       { property: 'nama_produk', isMoney: false, isDate: false },
       { property: 'nama_nasabah', isMoney: false, isDate: false },
+      { property: 'no_hp', isMoney: false, isDate: false },
       { property: 'nama_instansi', isMoney: false, isDate: false },
       { property: 'unit_kerja_instansi', isMoney: false, isDate: false },
       { property: 'tgl_pengajuan', isMoney: false, isDate: true },

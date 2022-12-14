@@ -1,12 +1,12 @@
 import { SelectQueryBuilder } from 'typeorm';
 import { dataSource } from '~/orm/dbCreateConnection';
 import { QueryResultClosingReport } from '~/types/reportTypes';
+import { getRecursiveOutletQuery } from './konsolidasiSvc';
 
 interface IFilter {
   start_date: string;
   end_date: string;
   outlet_id?: string[];
-  user_id?: any;
   created_by?: any;
   page?: number;
   limit?: number;
@@ -20,10 +20,11 @@ interface IFilterP2KI {
   end_date?: string;
   kode_produk?: string;
   instansi_id?: any;
-  status_pengajuan?: any;
+  kode_status_pengajuan?: any;
   page?: number;
   limit?: number;
   offset?: any;
+  kode_outlet?: string;
 }
 
 export const instansiReport = async (filter?: IFilter) => {
@@ -136,6 +137,10 @@ export const instansiReport = async (filter?: IFilter) => {
       q.andWhere('i.kode_unit_kerja IN (:...kodeUnitKerja)', { kodeUnitKerja: filter.outlet_id });
     }
 
+    if (filter.created_by) {
+      q.andWhere('i.created_by = :userId', { userId: filter.created_by });
+    }
+
     let count = null;
 
     if (filter.page && filter.limit && filter.offset !== null) {
@@ -219,6 +224,10 @@ export const eventReport = async (filter?: IFilter) => {
 
     if (filter.outlet_id && filter.outlet_id.length > 0) {
       q.andWhere('e.kode_unit_kerja IN (:...kodeUnitKerja)', { kodeUnitKerja: filter.outlet_id });
+    }
+
+    if (filter.created_by) {
+      q.andWhere('e.created_by = :userId', { userId: filter.created_by });
     }
 
     let count = null;
@@ -325,8 +334,8 @@ export const leadsReport = async (filter?: IFilter) => {
       q.andWhere('leads.kode_unit_kerja IN (:...kodeUnitKerja)', { kodeUnitKerja: filter.outlet_id });
     }
 
-    if (filter.user_id) {
-      q.andWhere('leads.created_by = :userId', { userId: filter.user_id });
+    if (filter.created_by) {
+      q.andWhere('leads.created_by = :userId', { userId: filter.created_by });
     }
 
     let count = null;
@@ -470,6 +479,7 @@ export const p2kiReport = async (filter?: IFilterP2KI) => {
     q.addSelect('pp.kode_instansi', 'kode_instansi');
     q.addSelect('produk.nama_produk', 'nama_produk');
     q.addSelect('pki_nasabah.nama', 'nama_nasabah');
+    q.addSelect('pki_nasabah.no_hp', 'no_hp');
     q.addSelect('instansi.nama_instansi', 'nama_instansi');
     q.addSelect('outlet_instansi.nama', 'unit_kerja_instansi');
     q.addSelect('pp.tgl_pengajuan', 'tgl_pengajuan');
@@ -512,12 +522,16 @@ export const p2kiReport = async (filter?: IFilterP2KI) => {
       q.andWhere('pp.kode_instansi = :kodeInstansi', { kodeInstansi: filter.instansi_id });
     }
 
-    if (filter.status_pengajuan) {
-      q.andWhere('pp.status_pengajuan = :statusPengajuan', { statusPengajuan: filter.status_pengajuan });
+    if (filter.kode_status_pengajuan) {
+      q.andWhere('pp.status_pengajuan = :statusPengajuan', { statusPengajuan: filter.kode_status_pengajuan });
     }
 
     if (filter.nama) {
-      q.andWhere('pki_nasabah.nama = :nama', { nama: filter.nama });
+      q.andWhere('pki_nasabah.nama ~* :nama', { nama: filter.nama });
+    }
+
+    if (filter.kode_outlet) {
+      q.andWhere(`pp.kode_outlet IN (${getRecursiveOutletQuery(filter.kode_outlet)})`);
     }
 
     let count = null;

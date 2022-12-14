@@ -118,22 +118,27 @@ const apiPegadaianConfig = (bearerToken: string): AxiosRequestConfig => {
 };
 
 export const getToken = async (): Promise<AxiosPromise> => {
-  console.log('START OF ===> HIT TO PEGADAIAN API GET TOKEN');
+  try {
+    console.log('START OF ===> HIT TO PEGADAIAN API GET TOKEN');
 
-  const getToken = await axios.post(
-    pegadaianApiEnv.authApi.url + '/oauth/token',
-    new URLSearchParams({
-      grant_type: pegadaianApiEnv.authApi.grantType,
-      username: pegadaianApiEnv.authApi.authUser,
-      password: pegadaianApiEnv.authApi.authPass,
-    }),
-    apiPegadaianAuthConfig,
-  );
+    const getToken = await axios.post(
+      pegadaianApiEnv.authApi.url + '/oauth/token',
+      new URLSearchParams({
+        grant_type: pegadaianApiEnv.authApi.grantType,
+        username: pegadaianApiEnv.authApi.authUser,
+        password: pegadaianApiEnv.authApi.authPass,
+      }),
+      apiPegadaianAuthConfig,
+    );
 
-  console.log(getToken);
-  console.log('END OF ===> HIT TO PEGADAIAN API GET TOKEN');
+    console.log(getToken);
+    console.log('END OF ===> HIT TO PEGADAIAN API GET TOKEN');
 
-  return getToken;
+    return getToken;
+  } catch (e) {
+    console.log('ERROR ===> HIT TO PEGADAIAN API GET TOKEN', e);
+    return e;
+  }
 };
 
 export const getTokenTScale = async (): Promise<AxiosPromise> => {

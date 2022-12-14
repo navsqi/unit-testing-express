@@ -27,6 +27,7 @@ const redisClient = redis.createClient({
 });
 
 export const redisCreateConnection = async (): Promise<void> => {
+  logger.info('REDIS', redisClient.connected ? 'Redis is connected' : 'Redis is not connected');
   redisClient.on('error', (err: redis.RedisError) => {
     logger.info('REDIS', err.message);
   });

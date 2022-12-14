@@ -30,5 +30,6 @@ router.post('/badan-usaha', protect(), cabangOnly, inputLeadsBadanUsahaVal, lead
 router.patch('/:id/approve', protect(), leadsController.checkKTPAndApprove);
 router.patch('/:id/reject', protect(), leadsController.rejectLeads);
 router.patch('/:id', protect(), leadsController.updateLeads);
+router.delete('/:id', protect(), leadsController.deleteLeads);
 
 export default router;
