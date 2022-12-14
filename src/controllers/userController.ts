@@ -82,9 +82,8 @@ export const editUser = async (req: Request, res: Response, next: NextFunction) 
     if (!user) return next(new CustomError(`User tidak ditemukan`, 404));
 
     const userPhoto = user.photo ? user.photo.valueOf() : null;
-
-    if (req.user.nik != user.nik && req.user.kode_role != 'SADM')
-      return next(new CustomError('User is not allowed to change password', 404));
+    if (req.user.nik != req.params.nik && !(req.user.kode_role == 'SADM' || req.user.kode_role == 'ADMN'))
+      return next(new CustomError('User is not allowed to edit this user', 404));
 
     if (req.files && req.files['photo']) {
       photo = req.files['photo'][0];
@@ -96,23 +95,26 @@ export const editUser = async (req: Request, res: Response, next: NextFunction) 
       });
     }
 
-    user.nama = bodies.nama;
-    user.email = bodies.email;
-    user.photo = fileName;
-    user.kode_role = bodies.kode_role;
-    user.kode_unit_kerja = bodies.kode_unit_kerja;
-    user.is_active = bodies.is_active;
-    await userRepo.update({ nik: req.user.nik }, user);
+    const updateBody = {};
+
+    if (bodies.nama) updateBody['nama'] = bodies.nama;
+    if (bodies.email) updateBody['email'] = bodies.email;
+    if (bodies.photo) updateBody['photo'] = fileName;
+    if (bodies.kode_role) updateBody['kode_role'] = bodies.kode_role;
+    if (bodies.kode_unit_kerja) updateBody['kode_unit_kerja'] = bodies.kode_unit_kerja;
+    if (bodies.is_active) updateBody['is_active'] = bodies.is_active;
+
+    const updateUser = await userRepo.update({ nik: req.params.nik }, updateBody);
 
     if (userPhoto) {
       await objectRemove(process.env.MINIO_BUCKET, userPhoto);
     }
 
     const dataRes = {
-      user,
+      user: updateUser,
     };
 
-    return res.customSuccess(200, 'New user created', dataRes);
+    return res.customSuccess(200, 'User updated', dataRes);
   } catch (e) {
     return next(e);
   }

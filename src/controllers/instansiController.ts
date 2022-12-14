@@ -290,10 +290,12 @@ export const getInstansi = async (req: Request, res: Response, next: NextFunctio
       end_date: req.query.end_date || '',
       is_approved: req.query.is_approved ? +req.query.is_approved : '',
       outlet_id: outletIds,
+      kode_outlet: outletId,
       kategori_instansi: req.query.kategori_instansi || '',
       jenis_instansi: req.query.jenis_instansi || '',
       status_potensial: req.query.status_potensial || '',
       user_nik: req.user.nik,
+      unit_assign: outletId,
     };
 
     const paging = queryHelper.paging(req.query);

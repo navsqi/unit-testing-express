@@ -8,7 +8,7 @@ import cors from 'cors';
 import globalError from './middlewares/globalError';
 import { dbCreateConnection } from './orm/dbCreateConnection';
 // P2KI DEV
-// import micrositeDb from './orm/micrositeDb/index';
+import micrositeDb from './orm/micrositeDb/index';
 import * as Sentry from '@sentry/node';
 import * as Tracing from '@sentry/tracing';
 // import { redisCreateConnection } from './config/redis';
@@ -19,13 +19,15 @@ import './utils/customSuccess';
 import logger from './utils/logger';
 import cronJob, { cronBigDataClosing } from './config/cron';
 import EventEmitter from 'events';
+import { minioInit } from './config/minio';
 
 export const eventHandler: any = new EventEmitter();
 
 (async () => {
   await dbCreateConnection();
-  // P2KI DEV
-  // await micrositeDb.dbCreateConnection();
+  await minioInit();
+  // await redisCreateConnection();
+  await micrositeDb.dbCreateConnection();
 
   if (!cronJob.running) {
     cronJob.start();

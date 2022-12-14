@@ -83,6 +83,7 @@ export interface QueryResultLeadsReport {
   omset: number;
   osl: number;
   saldo_tabemas: number;
+  nama_produk?: string;
 }
 
 export interface QueryResultClosingReport {
