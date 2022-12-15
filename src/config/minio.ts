@@ -35,7 +35,7 @@ export const minioInit = async () => {
   });
 };
 
-const isBucketExist = (bucketName) => {
+export const isBucketExist = (bucketName) => {
   return new Promise((resolve, reject) => {
     minioClient.bucketExists(bucketName, (err, exists) => {
       if (err) {
@@ -43,6 +43,9 @@ const isBucketExist = (bucketName) => {
 
         reject(err);
       }
+      const isExist = exists ? `${bucketName} bucket is exist` : `${bucketName} bucket is not exist`;
+      logger.info('MINIO_ISBUCKETEXIST', isExist);
+
       resolve(exists ? true : false);
     });
   });
