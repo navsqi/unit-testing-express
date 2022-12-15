@@ -19,13 +19,13 @@ import './utils/customSuccess';
 import logger from './utils/logger';
 import cronJob, { cronBigDataClosing } from './config/cron';
 import EventEmitter from 'events';
-import { minioInit } from './config/minio';
+import { isBucketExist } from './config/minio';
 
 export const eventHandler: any = new EventEmitter();
 
 (async () => {
   await dbCreateConnection();
-  await minioInit();
+  await isBucketExist(process.env.MINIO_BUCKET);
   // await redisCreateConnection();
   await micrositeDb.dbCreateConnection();
 
