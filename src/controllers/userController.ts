@@ -173,3 +173,27 @@ export const deleteUser = async (req: Request, res: Response, next: NextFunction
     return next(e);
   }
 };
+
+
+export const resetPassword = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const currentUser = await userRepo.findOne({where: {nik: req.params.nik}});
+
+    if(!currentUser) return next(new CustomError(`User tidak ditemukan`, 404));
+
+    currentUser.password = req.params.nik;
+    currentUser.hashPassword();
+
+    const user = await userRepo.update({ nik: req.params.nik }, {
+      password: currentUser.password
+    });
+
+    const dataRes = {
+      user: user,
+    };
+
+    return res.customSuccess(200, 'Reset User Password', dataRes);
+  } catch (e) {
+    return next(e);
+  }
+};

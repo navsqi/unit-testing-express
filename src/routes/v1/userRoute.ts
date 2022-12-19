@@ -18,6 +18,8 @@ router.put(
   userController.editUser,
 );
 
+router.put('/reset/:nik', protect(['ADMN', 'SADM']), userController.resetPassword);
+
 router.delete('/:id', protect(['ADMN', 'SADM']), userController.deleteUser);
 
 export default router;
