@@ -12,7 +12,7 @@ import {
   import Promo from './Promo';
   
   @Entity('promo_microsite_photo', { synchronize: false })
-  class PromoMicrositePhoto {
+  class BannerPromo {
     @PrimaryGeneratedColumn()
     id: number;
   
@@ -49,5 +49,5 @@ import {
     promo: Promo;
   }
   
-  export default PromoMicrositePhoto;
+  export default BannerPromo;
   

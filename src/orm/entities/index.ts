@@ -23,6 +23,11 @@ import MasterRubrikAgunan from './MasterRubrikAgunan';
 import PkiAgunan from './PkiAgunan';
 import PkiNasabah from './PkiNasabah';
 import PkiPengajuan from './PkiPengajuan';
+import PromoMicrosite from './PromoMicrosite';
+import Promo from './Promo';
+import Voucher from './Voucher';
+import BannerPromo from './BannerPromo';
+import PromoMicrositePhoto from './PromoMicrositePhoto';
 
 export default {
   User,
@@ -50,4 +55,9 @@ export default {
   PkiAgunan,
   PkiNasabah,
   PkiPengajuan,
+  Promo,
+  PromoMicrosite,
+  Voucher,
+  BannerPromo,
+  PromoMicrositePhoto
 };
