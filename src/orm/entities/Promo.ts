@@ -3,10 +3,10 @@ import {
     CreateDateColumn,
     Entity,
     OneToMany,
-    PrimaryGeneratedColumn,
+    PrimaryColumn,
     UpdateDateColumn,
   } from 'typeorm';
-import PromoProduk from './PromoProduk';
+  import BannerPromo from './BannerPromo';
   
   export enum JenisPromosi {
     TUNAI = 'TUNAI',
@@ -46,8 +46,13 @@ import PromoProduk from './PromoProduk';
   
   @Entity('promo', { synchronize: false })
   class Promo {
-  @PrimaryGeneratedColumn()
-  id: number;
+  // @PrimaryGeneratedColumn()
+  // id: varchar;
+  @PrimaryColumn()
+  @Column({
+    type: 'varchar',
+  })
+  id: string;
 
   @Column()
   nama_promosi: string;
@@ -147,9 +152,8 @@ import PromoProduk from './PromoProduk';
   @Column()
   updated_by: string;
 
-  @OneToMany(() => PromoProduk, (prm) => prm.promo)
-  produk: PromoProduk[];
-
+  @OneToMany(() => BannerPromo, (bannerPromo) => bannerPromo.promo_microsite)
+  promo_microsite: BannerPromo;
   }
   
   export default Promo;

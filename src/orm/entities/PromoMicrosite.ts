@@ -2,14 +2,12 @@ import {
     Column,
     CreateDateColumn,
     Entity,
-    JoinColumn,
-    OneToOne,
     OneToMany,
     PrimaryGeneratedColumn,
     UpdateDateColumn,
   } from 'typeorm';
-  import Promo from './Promo';
   import PromoMicrositeFoto from './PromoMicrositePhoto';
+  import BannerPromo from './BannerPromo';
   
   @Entity('promo_microsite', { synchronize: false })
   class PromoMicrosite {
@@ -63,13 +61,13 @@ import {
   @Column()
   updated_by: string;
 
-  
-  @OneToOne(() => Promo)
-  @JoinColumn([{ name: 'promo_id', referencedColumnName: 'id' }])
-  promo: Promo;
+
   
   @OneToMany(() => PromoMicrositeFoto, (promoFoto) => promoFoto.promo_microsite)
   photo: PromoMicrositeFoto[];
+
+  @OneToMany(() => BannerPromo, (bannerPromo) => bannerPromo.promo_microsite)
+  promo: BannerPromo[];
   }
 
   
