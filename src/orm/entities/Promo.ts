@@ -48,8 +48,7 @@ import {
   class Promo {
   // @PrimaryGeneratedColumn()
   // id: varchar;
-  @PrimaryColumn()
-  @Column({
+  @PrimaryColumn({
     type: 'varchar',
   })
   id: string;
