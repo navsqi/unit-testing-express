@@ -558,3 +558,13 @@ export const p2kiReport = async (filter?: IFilterP2KI) => {
     return { err: error.message, data: null };
   }
 };
+
+const reportSvc = {
+  instansiReport,
+  eventReport,
+  leadsReport,
+  closingReport,
+  p2kiReport,
+};
+
+export default reportSvc;
