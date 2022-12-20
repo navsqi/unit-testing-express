@@ -1,22 +1,15 @@
-import {
-    Column,
-    CreateDateColumn,
-    Entity,
-    OneToMany,
-    PrimaryGeneratedColumn,
-    UpdateDateColumn,
-  } from 'typeorm';
-  import PromoMicrositeFoto from './PromoMicrositePhoto';
-  import BannerPromo from './BannerPromo';
-  
-  @Entity('promo_microsite', { synchronize: false })
-  class PromoMicrosite {
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import PromoMicrositePhoto from './PromoMicrositePhoto';
+import PromoBanner from './PromoBanner';
+
+@Entity('promo_microsite', { synchronize: true })
+class PromoMicrosite {
   @PrimaryGeneratedColumn()
   id: number;
-  
+
   @Column()
   nama_promosi: string;
-  
+
   @Column({
     type: 'varchar',
   })
@@ -31,9 +24,9 @@ import {
     type: 'date',
   })
   start_date: string;
-    
- @Column({
-   type: 'date',
+
+  @Column({
+    type: 'date',
   })
   end_date: string;
 
@@ -61,15 +54,11 @@ import {
   @Column()
   updated_by: string;
 
+  @OneToMany(() => PromoMicrositePhoto, (promoFoto) => promoFoto.promo_microsite)
+  photo: PromoMicrositePhoto[];
 
-  
-  @OneToMany(() => PromoMicrositeFoto, (promoFoto) => promoFoto.promo_microsite)
-  photo: PromoMicrositeFoto[];
+  @OneToMany(() => PromoBanner, (bannerPromo) => bannerPromo.promo_microsite)
+  promo: PromoBanner[];
+}
 
-  @OneToMany(() => BannerPromo, (bannerPromo) => bannerPromo.promo_microsite)
-  promo: BannerPromo[];
-  }
-
-  
-  export default PromoMicrosite;
-  
+export default PromoMicrosite;

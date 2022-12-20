@@ -25,8 +25,8 @@ import PkiNasabah from './PkiNasabah';
 import PkiPengajuan from './PkiPengajuan';
 import PromoMicrosite from './PromoMicrosite';
 import Promo from './Promo';
-import Voucher from './Voucher';
-import BannerPromo from './BannerPromo';
+import PromoVoucher from './PromoVoucher';
+import PromoBanner from './PromoBanner';
 import PromoMicrositePhoto from './PromoMicrositePhoto';
 
 export default {
@@ -57,7 +57,7 @@ export default {
   PkiPengajuan,
   Promo,
   PromoMicrosite,
-  Voucher,
-  BannerPromo,
-  PromoMicrositePhoto
+  PromoVoucher,
+  PromoBanner,
+  PromoMicrositePhoto,
 };

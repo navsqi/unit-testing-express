@@ -1,53 +1,45 @@
-import {
-    Column,
-    CreateDateColumn,
-    Entity,
-    OneToMany,
-    PrimaryColumn,
-    UpdateDateColumn,
-  } from 'typeorm';
-  import BannerPromo from './BannerPromo';
-  
-  export enum JenisPromosi {
-    TUNAI = 'TUNAI',
-    CASHBACK = 'CASHBACK',
-    TRANSFER = 'TRANSFER',
-  }
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryColumn, UpdateDateColumn } from 'typeorm';
+import PromoBanner from './PromoBanner';
+import PromoVoucher from './PromoVoucher';
 
-  export enum TipeTransaksi {
-    FIXED = 'FIXED',
-    NON_FIXED = 'NON_FIXED',
-  }
+export enum JenisPromosi {
+  TUNAI = 'TUNAI',
+  CASHBACK = 'CASHBACK',
+  TRANSFER = 'TRANSFER',
+}
 
-  export enum JenisVoucher {
-    TANPA_VOUCHER = 'TANPA_VOUCHER',
-    SEKALI_PAKAI = 'SEKALI_PAKAI',
-    MULTI_PAKAI = 'MULTI_PAKAI'
-  }
+export enum TipeTransaksi {
+  FIXED = 'FIXED',
+  NON_FIXED = 'NON_FIXED',
+}
 
-  export enum JenisTransaksi {
-    BOOKING = 'BOOKING',
-    NON_BOOKING = 'NON_BOOKING',
-  }
+export enum JenisVoucher {
+  TANPA_VOUCHER = 'TANPA_VOUCHER',
+  SEKALI_PAKAI = 'SEKALI_PAKAI',
+  MULTI_PAKAI = 'MULTI_PAKAI',
+}
 
-  export enum TipeNasabah {
-    NASABAH_BARU = 'NASABAH_BARU',
-    SEMUA_NASABAH = 'SEMUA_NASABAH',
-  }
-  export enum TipePromosi {
-    UANG_PINJAMAN = 'UANG_PINJAMAN',
-    MINTA_TAMBAH = 'MINTA_TAMBAH',
-    TRANSAKSI_NON_OSL = 'TRANSAKSI_NON_OSL'
-  }
+export enum JenisTransaksi {
+  BOOKING = 'BOOKING',
+  NON_BOOKING = 'NON_BOOKING',
+}
 
-  export enum TipeAlokasi {
-    PUSAT = 'PUSAT',
-  }
-  
-  @Entity('promo', { synchronize: false })
-  class Promo {
-  // @PrimaryGeneratedColumn()
-  // id: varchar;
+export enum TipeNasabah {
+  NASABAH_BARU = 'NASABAH_BARU',
+  SEMUA_NASABAH = 'SEMUA_NASABAH',
+}
+export enum TipePromosi {
+  UANG_PINJAMAN = 'UANG_PINJAMAN',
+  MINTA_TAMBAH = 'MINTA_TAMBAH',
+  TRANSAKSI_NON_OSL = 'TRANSAKSI_NON_OSL',
+}
+
+export enum TipeAlokasi {
+  PUSAT = 'PUSAT',
+}
+
+@Entity('promo', { synchronize: true })
+class Promo {
   @PrimaryColumn({
     type: 'varchar',
   })
@@ -55,7 +47,7 @@ import {
 
   @Column()
   nama_promosi: string;
-  
+
   @Column({
     type: 'varchar',
     length: 11,
@@ -73,7 +65,7 @@ import {
     enum: TipeTransaksi,
   })
   tipe_transaksi: string;
-  
+
   @Column({
     type: 'enum',
     enum: JenisVoucher,
@@ -85,14 +77,14 @@ import {
     enum: JenisTransaksi,
   })
   jenis_transaksi: string;
-      
+
   @Column({
     type: 'enum',
     enum: TipeNasabah,
     nullable: true,
   })
   tipe_nasabah: string;
-   
+
   @Column({
     type: 'enum',
     enum: TipePromosi,
@@ -104,22 +96,22 @@ import {
     type: 'date',
   })
   start_date: string;
-    
- @Column({
-   type: 'date',
+
+  @Column({
+    type: 'date',
   })
   end_date: string;
 
   @Column({
-    type:"double precision",
+    type: 'double precision',
   })
-  total_promosi: number
+  total_promosi: number;
 
   @Column({
-    type:"double precision",
+    type: 'double precision',
     nullable: true,
   })
-  nilai_per_transaksi: number
+  nilai_per_transaksi: number;
 
   @Column({
     type: 'enum',
@@ -151,9 +143,11 @@ import {
   @Column()
   updated_by: string;
 
-  @OneToMany(() => BannerPromo, (bannerPromo) => bannerPromo.promo_microsite)
-  promo_microsite: BannerPromo;
-  }
-  
-  export default Promo;
-  
+  @OneToMany(() => PromoBanner, (bannerPromo) => bannerPromo.promo_microsite)
+  promo_microsite?: PromoBanner[];
+
+  @OneToMany(() => PromoVoucher, (pv) => pv.promo)
+  promo_voucher?: PromoVoucher[];
+}
+
+export default Promo;

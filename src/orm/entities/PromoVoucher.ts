@@ -1,16 +1,16 @@
-import { 
-  Column, 
+import {
+  Column,
   CreateDateColumn,
-  Entity, 
+  Entity,
   JoinColumn,
-  OneToOne, 
-  PrimaryGeneratedColumn, 
-  UpdateDateColumn 
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import Promo from './Promo';
 
-@Entity('voucher', { synchronize: false })
-class Voucher {
+@Entity('promo_voucher', { synchronize: true })
+class PromoVoucher {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -30,18 +30,18 @@ class Voucher {
   promo_id: string;
 
   @Column({
-    type:"double precision",
+    type: 'double precision',
     nullable: true,
   })
-  total_promosi:number
+  total_promosi: number;
 
   @Column({
     type: 'date',
   })
   start_date: string;
-    
- @Column({
-   type: 'date',
+
+  @Column({
+    type: 'date',
   })
   end_date: string;
 
@@ -51,30 +51,30 @@ class Voucher {
   jumlah_voucher: number;
 
   @Column({
-    type:"double precision",
+    type: 'double precision',
   })
-  potongan_rp: number
-  
+  potongan_rp: number;
+
   @Column({
     type: 'varchar',
   })
   tempat: string;
 
   @Column({
-    type:"double precision",
+    type: 'double precision',
   })
-  potongan_persentase: number
+  potongan_persentase: number;
 
   @Column({
-    type:"double precision",
+    type: 'double precision',
   })
-  minimal_rp: number
+  minimal_rp: number;
 
   @Column({
-    type:"double precision",
+    type: 'double precision',
   })
-  maksimal_rp: number
-  
+  maksimal_rp: number;
+
   @Column({
     type: 'varchar',
   })
@@ -89,7 +89,7 @@ class Voucher {
     default: false,
   })
   is_deleted: boolean;
-  
+
   @Column()
   @CreateDateColumn()
   created_at: Date;
@@ -104,9 +104,9 @@ class Voucher {
   @Column()
   updated_by: string;
 
-  @OneToOne(() => Promo)
+  @ManyToOne(() => Promo)
   @JoinColumn([{ name: 'promo_id', referencedColumnName: 'id' }])
-  promo: Promo;
+  promo?: Promo;
 }
 
-export default Voucher;
+export default PromoVoucher;
