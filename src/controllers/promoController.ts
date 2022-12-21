@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { dataSource } from '~/orm/dbCreateConnection';
-import { Between, FindOptionsWhere, ILike, In } from 'typeorm';
+import { Between, FindOptionsWhere, ILike, In, LessThanOrEqual, MoreThan, MoreThanOrEqual } from 'typeorm';
 import CustomError from '~/utils/customError';
 import queryHelper from '~/utils/queryHelper';
 import MasterMenu from '~/orm/entities/MasterMenu';
@@ -23,13 +23,14 @@ const promoRepo = dataSource.getRepository(Promo);
         where['id'] = filter.id;
       }
 
-      if (filter.start_date && filter.end_date) {
-        where['tgl_pengajuan'] = Between(
-          new Date(`${filter.start_date} 00:00:00`),
-          new Date(`${filter.end_date} 23:59:59`),
-        );
+      if (filter.start_date) {
+        where['start_date'] = MoreThanOrEqual(filter.start_date)
       }
-  
+
+      if (filter.start_date) {
+        where['end_date'] = LessThanOrEqual(filter.end_date)
+      }
+
       const paging = queryHelper.paging(req.query);
   
       const [promo, count] = await promoRepo.findAndCount({
@@ -76,6 +77,7 @@ const promoRepo = dataSource.getRepository(Promo);
         // },
         take: paging.limit,
         skip: paging.offset,
+        where,
         order: {
           created_at: 'desc',
         },
@@ -102,7 +104,6 @@ export const createNewPromo = async (req: Request, res: Response, next: NextFunc
       const bodies = req.body as Promo;
       const promo = new Promo();
 
-      
       promo.id = bodies.id;
       promo.nama_promosi = bodies.nama_promosi;
       promo.kode_produk = bodies.kode_produk;
@@ -123,14 +124,55 @@ export const createNewPromo = async (req: Request, res: Response, next: NextFunc
       promo.updated_by = req.user.nik;
 
       await promoRepo.save(promo);
-    
-  
   
       const dataRes = {
         promo,
       };
   
       return res.customSuccess(200, 'Create promo success', dataRes);
+    } catch (e) {
+      return next(e);
+    }
+  };
+
+  export const updatePromo = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      
+      const currentPromo = await promoRepo.findOne({where: {id: req.params.id}})
+
+      if (!currentPromo) return next(new CustomError('Data promo tidak ditemukan', 404))
+      const promo = await promoRepo.update(req.params.id, {
+        ...req.body,
+        updated_by: req.user.nik,
+      });
+  
+      const dataRes = {
+        promo,
+      };
+  
+      return res.customSuccess(200, 'Update promo success', dataRes);
+    } catch (e) {
+      return next(e);
+    }
+  };
+
+  export const deletePromo = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+
+      const currentPromo = await promoRepo.findOne({where: {id: req.params.id}})
+
+      if (!currentPromo) return next(new CustomError('Data promo tidak ditemukan', 404))
+      const promo = await promoRepo.update(req.params.id, {
+        updated_by: req.user.nik,
+        is_deleted: true,
+        is_active: false,
+      });
+
+      const dataRes = {
+        promo
+      };
+  
+      return res.customSuccess(200, 'Delete promo success', dataRes);
     } catch (e) {
       return next(e);
     }
