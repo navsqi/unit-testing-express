@@ -1,6 +1,8 @@
-import { Column, CreateDateColumn, Entity, OneToMany, PrimaryColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, OneToMany, OneToOne, PrimaryColumn, UpdateDateColumn, JoinColumn} from 'typeorm';
 import PromoBanner from './PromoBanner';
 import PromoVoucher from './PromoVoucher';
+import Produk from './Produk';
+import PromoMicrosite from './PromoMicrosite';
 
 export enum JenisPromosi {
   TUNAI = 'TUNAI',
@@ -143,8 +145,13 @@ class Promo {
   @Column()
   updated_by: string;
 
-  @OneToMany(() => PromoBanner, (bannerPromo) => bannerPromo.promo_microsite)
-  promo_microsite?: PromoBanner[];
+  
+  @OneToOne(() => Produk)
+  @JoinColumn([{ name: 'kode_produk', referencedColumnName: 'kode_produk' }])
+  produk: Produk;
+
+  @OneToMany(() => PromoMicrosite, (micro) => micro.promo_id)
+  promo_microsite?: PromoMicrosite[];
 
   @OneToMany(() => PromoVoucher, (pv) => pv.promo)
   promo_voucher?: PromoVoucher[];

@@ -16,6 +16,8 @@ import reportRoute from './reportRoute';
 import testingRoute from './testingRoute';
 import dashboardRoute from './dashboardRoute';
 import pkiRoute from './pkiRoute';
+import promoRoute from './promoRoute';
+
 
 const router = Router();
 
@@ -35,5 +37,6 @@ router.use('/report', reportRoute);
 router.use('/dashboard', dashboardRoute);
 router.use('/testing', testingRoute);
 router.use('/pki', pkiRoute);
+router.use('/promo', promoRoute);
 
 export default router;
