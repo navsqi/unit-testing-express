@@ -17,11 +17,6 @@ class PromoVoucher {
   @Column({
     type: 'varchar',
   })
-  id_promosi: string;
-
-  @Column({
-    type: 'varchar',
-  })
   kode_voucher: string;
 
   @Column({

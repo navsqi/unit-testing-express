@@ -19,6 +19,9 @@ import pkiRoute from './pkiRoute';
 import promoRoute from './promoRoute';
 
 
+import promoVoucherRoute from './promoVoucherRoute';
+import promoMicrositeRoute from './promoMicrositeRoute';
+
 const router = Router();
 
 router.use('/auth', authRoute);
@@ -38,5 +41,8 @@ router.use('/dashboard', dashboardRoute);
 router.use('/testing', testingRoute);
 router.use('/pki', pkiRoute);
 router.use('/promo', promoRoute);
+
+router.use('/promovoucher', promoVoucherRoute);
+router.use('/promomicrosite', promoMicrositeRoute);
 
 export default router;
