@@ -5,6 +5,8 @@ import CustomError from '~/utils/customError';
 import queryHelper from '~/utils/queryHelper';
 import MasterMenu from '~/orm/entities/MasterMenu';
 import Promo from '~/orm/entities/Promo';
+import { getPromoDropdown } from '~/services/promoSvc';
+
 
 const promoRepo = dataSource.getRepository(Promo);
 
@@ -173,6 +175,23 @@ export const createNewPromo = async (req: Request, res: Response, next: NextFunc
       };
   
       return res.customSuccess(200, 'Delete promo success', dataRes);
+    } catch (e) {
+      return next(e);
+    }
+  };
+
+  export const getPromoVoucher = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const promo = await getPromoDropdown()
+  
+      const dataRes = {
+        meta: {
+          count: promo.length,
+        },
+        promo,
+      };
+  
+      return res.customSuccess(200, 'Get promo list', dataRes);
     } catch (e) {
       return next(e);
     }
