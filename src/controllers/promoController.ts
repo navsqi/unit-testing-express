@@ -121,7 +121,7 @@ export const createNewPromo = async (req: Request, res: Response, next: NextFunc
       promo.nilai_per_transaksi = promo.tipe_transaksi === 'FIXED' ? bodies.nilai_per_transaksi : 0;
       promo.tipe_alokasi = bodies.tipe_alokasi;
       promo.is_active = true;
-      promo.is_deleted = bodies.is_deleted;
+      promo.is_deleted = false;
       promo.created_by = req.user.nik;
       promo.updated_by = req.user.nik;
 
