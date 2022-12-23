@@ -18,9 +18,9 @@ import dashboardRoute from './dashboardRoute';
 import pkiRoute from './pkiRoute';
 import promoRoute from './promoRoute';
 
-
 import promoVoucherRoute from './promoVoucherRoute';
 import promoMicrositeRoute from './promoMicrositeRoute';
+import klaimMoRoute from './klaimMoRoute';
 
 const router = Router();
 
@@ -44,5 +44,6 @@ router.use('/promo', promoRoute);
 
 router.use('/promovoucher', promoVoucherRoute);
 router.use('/promomicrosite', promoMicrositeRoute);
+router.use('/klaimmo', klaimMoRoute);
 
 export default router;

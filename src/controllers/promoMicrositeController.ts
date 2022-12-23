@@ -131,6 +131,7 @@ export const uploadPromoBanner = async (req: Request, res: Response, next: NextF
     promoMicrosite.start_date = bodies.start_date;
     promoMicrosite.end_date = bodies.end_date;
     promoMicrosite.is_klaim_mo = bodies.is_klaim_mo == 'true' ? true : false;
+    promoMicrosite.kelompok_produk = bodies.kelompok_produk;
 
     const promosId = bodies.promo_id;
     promoMicrosite.promo_id = promosId;

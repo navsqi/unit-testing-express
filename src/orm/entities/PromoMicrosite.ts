@@ -3,6 +3,12 @@ import PromoMicrositePhoto from './PromoMicrositePhoto';
 import PromoBanner from './PromoBanner';
 import Promo from './Promo';
 
+export enum KelompokProduk {
+  CICIL_KENDARAAN = 'CICIL_KENDARAAN',
+  PINJAMAN_SERBAGUNA = 'PINJAMAN_SERBAGUNA',
+  NON_LOS = 'NON_LOS',
+}
+
 @Entity('promo_microsite', { synchronize: true })
 class PromoMicrosite {
   @PrimaryGeneratedColumn()
@@ -30,6 +36,12 @@ class PromoMicrosite {
     type: 'date',
   })
   end_date: string;
+
+  @Column({
+    type: 'enum',
+    enum: KelompokProduk,
+  })
+  kelompok_produk: string;
 
   @Column({
     default: true,

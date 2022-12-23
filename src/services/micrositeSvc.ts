@@ -4,6 +4,7 @@ interface IKlaimMO {
   noPengajuan: string;
   promoId: string;
   kodeVoucher: string;
+  isPromo: boolean;
 }
 
 export const updateNoAplikasiLosMicrosite = async (noAplikasiLos: string, noPengajuan: string): Promise<string[]> => {
@@ -35,8 +36,8 @@ export const updateStatusLosMicrosite = async (statusLos: string, noPengajuan: s
 export const klaimMo = async (params: IKlaimMO): Promise<string[]> => {
   try {
     const updateNoAplikasiLos = await micrositeDb.dataSource.query(
-      `UPDATE hbl_pengajuan SET is_promo = TRUE, promo_id = $1, kode_voucher = $2 WHERE no_pengajuan = $3`,
-      [params.promoId, params.kodeVoucher, params.noPengajuan],
+      `UPDATE hbl_pengajuan SET is_promo = TRUE, promo_id = $1, kode_voucher = $2, is_promo = $3 WHERE no_pengajuan = $3`,
+      [params.promoId, params.kodeVoucher, params.isPromo, params.noPengajuan],
     );
 
     return updateNoAplikasiLos;
@@ -48,4 +49,5 @@ export const klaimMo = async (params: IKlaimMO): Promise<string[]> => {
 export default {
   updateNoAplikasiLosMicrosite,
   updateStatusLosMicrosite,
+  klaimMo,
 };

@@ -24,31 +24,44 @@ const promoRepo = dataSource.getRepository(Promo);
 const promoVoucherRepo = dataSource.getRepository(PromoVoucher);
 const promoMicrositeRepo = dataSource.getRepository(PromoMicrosite);
 const promoMicrositePhotoRepo = dataSource.getRepository(PromoMicrositePhoto);
+const pkiPengajuanRepo = dataSource.getRepository(PkiPengajuan);
+const statusLosRepo = dataSource.getRepository(MasterStatusLos);
 
 export const klaimMo = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const [promoMicrosite, count] = await promoMicrositeRepo.findAndCount({
+    const bodies = req.body;
+
+    const getVoucher = await promoVoucherRepo.findOne({
       where: {
-        start_date: Raw((alias) => `CURRENT_DATE >= ${alias}`),
-        end_date: Raw((alias) => `CURRENT_DATE <= ${alias}`),
+        promo_id: bodies.promo_id,
         is_active: true,
         is_deleted: false,
       },
     });
 
-    for (const promo of promoMicrosite) {
-      const photos = await promoMicrositePhotoRepo.findOne({
-        where: { promo_microsite_id: promo.id },
-        order: { id: 'asc' },
-      });
-      promo.thumbnail = photos.photo;
-    }
+    if (!getVoucher) return next(new CustomError('Voucher tidak ditemukan atau habis', 404));
+
+    // update no aplikasi los ke db kamila
+    const updatePengajuan = await pkiPengajuanRepo.update(
+      { no_pengajuan: bodies.no_pengajuan },
+      { kode_voucher: getVoucher.kode_voucher, promo_id: bodies.promo_id, is_promo: true },
+    );
+
+    // update no aplikasi los ke db microsite
+    await micrositeSvc.klaimMo({
+      kodeVoucher: getVoucher.kode_voucher,
+      noPengajuan: bodies.no_pengajuan,
+      promoId: bodies.promo_id,
+      isPromo: true,
+    });
+
+    await promoVoucherRepo.update({ kode_voucher: getVoucher.kode_voucher }, { is_active: false });
 
     const dataRes = {
-      promoMicrosite,
+      klaimMo: updatePengajuan,
     };
 
-    return res.customSuccess(200, 'Get promo voucher success', dataRes, { count: count });
+    return res.customSuccess(200, 'Update pengajuan success', dataRes);
   } catch (e) {
     return next(e);
   }
