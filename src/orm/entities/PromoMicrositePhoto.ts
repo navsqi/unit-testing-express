@@ -20,6 +20,12 @@ class PromoMicrositePhoto {
   @Column({})
   photo: string;
 
+  @Column({
+    type: 'bool',
+    default: false,
+  })
+  is_thumbnail: boolean;
+
   @Column()
   @CreateDateColumn()
   created_at: Date;
@@ -31,7 +37,7 @@ class PromoMicrositePhoto {
   @Column({ nullable: true })
   created_by: string;
 
-  @Column()
+  @Column({ nullable: true })
   updated_by: string;
 
   @ManyToOne(() => PromoMicrosite)

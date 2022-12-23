@@ -72,6 +72,7 @@ class PromoVoucher {
 
   @Column({
     type: 'varchar',
+    nullable: true,
   })
   kode_booking: string;
 
@@ -96,7 +97,7 @@ class PromoVoucher {
   @Column({ nullable: true })
   created_by: string;
 
-  @Column()
+  @Column({ nullable: true })
   updated_by: string;
 
   @ManyToOne(() => Promo)

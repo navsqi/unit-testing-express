@@ -15,13 +15,12 @@ class PromoBanner {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({
-    type: 'varchar',
-  })
-  promo_microsite_id: string;
+  @Column({})
+  promo_microsite_id: number;
 
   @Column({
     type: 'varchar',
+    length: 255,
   })
   promo_id: string;
 
@@ -36,7 +35,7 @@ class PromoBanner {
   @Column({ nullable: true })
   created_by: string;
 
-  @Column()
+  @Column({ nullable: true })
   updated_by: string;
 
   @ManyToOne(() => PromoMicrosite)

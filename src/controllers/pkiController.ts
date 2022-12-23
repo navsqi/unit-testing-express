@@ -183,6 +183,10 @@ export const createNewPki = async (req: Request, res: Response, next: NextFuncti
     pkiPengajuan.response_los = bodyPkiPengajuan?.response_los;
     pkiPengajuan.body_los = bodyPkiPengajuan?.body_los;
 
+    pkiPengajuan.is_promo = bodyPkiPengajuan?.is_promo ? true : false;
+    pkiPengajuan.promo_id = bodyPkiPengajuan?.promo_id ? bodyPkiPengajuan.promo_id : null;
+    pkiPengajuan.kode_voucher = bodyPkiPengajuan?.kode_voucher ? bodyPkiPengajuan.kode_voucher : null;
+
     const cekIdPengajuan = await queryRunner.manager.findOne(PkiPengajuan, {
       where: { no_pengajuan: pkiPengajuan.no_pengajuan },
     });
