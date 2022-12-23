@@ -16,6 +16,8 @@ import reportRoute from './reportRoute';
 import testingRoute from './testingRoute';
 import dashboardRoute from './dashboardRoute';
 import pkiRoute from './pkiRoute';
+import promoRoute from './promoRoute';
+
 
 import promoVoucherRoute from './promoVoucherRoute';
 import promoMicrositeRoute from './promoMicrositeRoute';
@@ -38,6 +40,7 @@ router.use('/report', reportRoute);
 router.use('/dashboard', dashboardRoute);
 router.use('/testing', testingRoute);
 router.use('/pki', pkiRoute);
+router.use('/promo', promoRoute);
 
 router.use('/promovoucher', promoVoucherRoute);
 router.use('/promomicrosite', promoMicrositeRoute);
