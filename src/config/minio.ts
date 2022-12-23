@@ -26,7 +26,6 @@ minioClient.setRequestOptions({ rejectUnauthorized: false });
 
 export const minioInit = async () => {
   minioClient.getBucketPolicy(process.env.MINIO_BUCKET, (err, res) => {
-    console.log(err);
     if (err) {
       logger.error('Error when connecting to minio service', 'MINIO_INIT');
       process.exit(1);
@@ -81,6 +80,7 @@ export const objectUpload = async (
 ) => {
   try {
     const isUploaded = await minioClient.putObject(bucketName, objectName, filePath, metaData);
+
     return isUploaded;
   } catch (err) {
     logger.error(err.message, 'MINIO_OBJECTUPLOAD');

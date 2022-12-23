@@ -153,6 +153,26 @@ class PkiPengajuan {
   })
   updated_by: string;
 
+  @Column({
+    type: 'bool',
+    default: false,
+  })
+  is_promo: boolean;
+
+  @Column({
+    type: 'varchar',
+    length: 200,
+    nullable: true,
+  })
+  promo_id: string;
+
+  @Column({
+    type: 'varchar',
+    length: 50,
+    nullable: true,
+  })
+  kode_voucher: string;
+
   @Column()
   @CreateDateColumn()
   created_at: Date;

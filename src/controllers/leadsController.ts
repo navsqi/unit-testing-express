@@ -617,7 +617,10 @@ export const createNewLeadsByCsv = async (req: Request, res: Response, next: Nex
 
         return res.customSuccess(200, 'Create leads success', dataRes);
       })
-      .on('error', (error) => {
+      .on('error', async (error) => {
+        await queryRunner.rollbackTransaction();
+        await queryRunner.release();
+
         return next(error);
       });
   } catch (e) {
