@@ -81,8 +81,16 @@ export const getDetailPromoMicrosite = async (req: Request, res: Response, next:
 
     const promosId = promoMicrosite.promo.map((el) => el.promo_id);
     const promo = await promoRepo.find({
+      select: {
+        produk: {
+          nama_produk: true,
+        },
+      },
       where: { id: In(promosId) },
       order: { id: 'asc' },
+      relations: {
+        produk: true,
+      },
     });
     promoMicrosite.promos = promo;
 
