@@ -9,7 +9,7 @@ export enum KelompokProduk {
   NON_LOS = 'NON_LOS',
 }
 
-@Entity('promo_microsite', { synchronize: true })
+@Entity('promo_microsite', { synchronize: false })
 class PromoMicrosite {
   @PrimaryGeneratedColumn()
   id?: number;
@@ -40,6 +40,7 @@ class PromoMicrosite {
   @Column({
     type: 'enum',
     enum: KelompokProduk,
+    nullable: true,
   })
   kelompok_produk: string;
 
@@ -72,10 +73,16 @@ class PromoMicrosite {
   @Column({ nullable: true })
   updated_by?: string;
 
-  @OneToMany(() => PromoMicrositePhoto, (promoFoto) => promoFoto.promo_microsite)
+  @OneToMany(() => PromoMicrositePhoto, (promoFoto) => promoFoto.promo_microsite, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   photos?: PromoMicrositePhoto[];
 
-  @OneToMany(() => PromoBanner, (bannerPromo) => bannerPromo.promo_microsite)
+  @OneToMany(() => PromoBanner, (bannerPromo) => bannerPromo.promo_microsite, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   promo?: PromoBanner[];
 
   thumbnail?: string;

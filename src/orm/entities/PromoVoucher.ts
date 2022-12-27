@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import Promo from './Promo';
 
-@Entity('promo_voucher', { synchronize: true })
+@Entity('promo_voucher', { synchronize: false })
 class PromoVoucher {
   @PrimaryGeneratedColumn()
   id: number;
