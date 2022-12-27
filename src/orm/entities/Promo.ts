@@ -1,8 +1,16 @@
-import { Column, CreateDateColumn, Entity, OneToMany, OneToOne, PrimaryColumn, UpdateDateColumn, JoinColumn} from 'typeorm';
-import PromoBanner from './PromoBanner';
-import PromoVoucher from './PromoVoucher';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  OneToMany,
+  OneToOne,
+  PrimaryColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import Produk from './Produk';
 import PromoMicrosite from './PromoMicrosite';
+import PromoVoucher from './PromoVoucher';
 
 export enum JenisPromosi {
   TUNAI = 'TUNAI',
@@ -40,7 +48,7 @@ export enum TipeAlokasi {
   PUSAT = 'PUSAT',
 }
 
-@Entity('promo', { synchronize: true })
+@Entity('promo', { synchronize: false })
 class Promo {
   @PrimaryColumn({
     type: 'varchar',
@@ -145,7 +153,6 @@ class Promo {
   @Column()
   updated_by: string;
 
-  
   @OneToOne(() => Produk)
   @JoinColumn([{ name: 'kode_produk', referencedColumnName: 'kode_produk' }])
   produk: Produk;

@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import PromoMicrosite from './PromoMicrosite';
 
-@Entity('promo_microsite_photo', { synchronize: true })
+@Entity('promo_microsite_photo', { synchronize: false })
 class PromoMicrositePhoto {
   @PrimaryGeneratedColumn()
   id: number;

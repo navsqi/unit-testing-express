@@ -10,7 +10,7 @@ import {
 import PromoMicrosite from './PromoMicrosite';
 import Promo from './Promo';
 
-@Entity('promo_banner', { synchronize: true })
+@Entity('promo_banner', { synchronize: false })
 class PromoBanner {
   @PrimaryGeneratedColumn()
   id: number;

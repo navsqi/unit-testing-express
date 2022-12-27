@@ -186,8 +186,33 @@ export const updatePromoBanner = async (req: Request, res: Response, next: NextF
   }
 };
 
-export const deletePromoBanner = async (req: Request, res: Response, next: NextFunction) => {
+export const deletePromoMicrosite = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    console.log(req.params);
+    const promoMicrositeId = Number(req.params.id) as number;
+    const promoMicrosite = await promoMicrositeRepo.findOne({
+      where: {
+        id: promoMicrositeId,
+      },
+      relations: {
+        promo: true,
+      },
+    });
+
+    if (!promoMicrosite) return next(new CustomError('Data promo microsite tidak ditemukan', 404));
+
+    const photos = await promoMicrositePhotoRepo.find({
+      where: { promo_microsite_id: promoMicrosite.id },
+      order: { id: 'asc' },
+    });
+
+    for (const photo of photos) {
+      await objectRemove(process.env.MINIO_BUCKET, photo.photo);
+    }
+
+    await promoMicrositeRepo.delete({ id: promoMicrositeId });
+    await promoMicrositePhotoRepo.delete({ promo_microsite_id: promoMicrositeId });
+
     const dataRes = {};
 
     return res.customSuccess(200, 'Delete Voucher Success', dataRes);
