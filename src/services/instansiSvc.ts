@@ -2,6 +2,7 @@ import { Between, ILike, Raw } from 'typeorm';
 import { dataSource } from '~/orm/dbCreateConnection';
 import Instansi from '~/orm/entities/Instansi';
 import MasterInstansi from '~/orm/entities/MasterInstansi';
+import { getRecursiveOutletQuery } from './konsolidasiSvc';
 
 const masterInsRepo = dataSource.getRepository(MasterInstansi);
 const instansiRepo = dataSource.getRepository(Instansi);
@@ -61,8 +62,9 @@ export const listInstansi = async (filter: any, paging: any): Promise<[Instansi[
   //   f['kode_unit_kerja'] = In(filter.outlet_id);
   // }
 
-  if (filter.kode_outlet) {
-    f['kode_unit_kerja'] = filter.kode_outlet;
+  console.log(filter);
+  if (filter.kode_outlet && !filter.kode_outlet.startsWith('000')) {
+    f['kode_unit_kerja'] = Raw((alias) => `${alias} IN (${getRecursiveOutletQuery(filter.kode_outlet)})`);
   }
 
   if (filter.kategori_instansi) {
@@ -82,6 +84,9 @@ export const listInstansi = async (filter: any, paging: any): Promise<[Instansi[
   };
 
   delete f2['kode_unit_kerja'];
+
+  console.log(f);
+  console.log(f2);
 
   // ...f, created_by: filter.user_nik
   const fWithOr =
