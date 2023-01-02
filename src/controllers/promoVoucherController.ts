@@ -22,9 +22,25 @@ const promoVoucherRepo = dataSource.getRepository(PromoVoucher);
 
 export const getPromoVoucher = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const dataRes = {};
+    const paging = queryHelper.paging(req.query);
+    const [promoVoucher, count] = await promoVoucherRepo.findAndCount({
+      take: paging.limit,
+      skip: paging.offset,
+      order: {
+        created_at: 'DESC',
+      },
+    });
+    const dataRes = {
+      promoVoucher,
+    };
 
-    return res.customSuccess(200, 'Get promo voucher success', dataRes);
+    return res.customSuccess(200, 'Get promo voucher success', dataRes, {
+      count: count,
+      rowCount: paging.limit,
+      limit: paging.limit,
+      offset: paging.offset,
+      page: Number(req.query.page),
+    });
   } catch (e) {
     return next(e);
   }
