@@ -161,10 +161,17 @@ class PkiPengajuan {
 
   @Column({
     type: 'varchar',
-    length: 200,
+    length: 250,
     nullable: true,
   })
   promo_id: string;
+
+  @Column({
+    type: 'varchar',
+    length: 220,
+    nullable: true,
+  })
+  promomicrosite_id: string;
 
   @Column({
     type: 'varchar',
