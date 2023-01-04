@@ -95,7 +95,7 @@ export const genExcelReportInstansi = async (req: Request, res: Response, next: 
 
     const data = mapInstansiReport(report.data);
 
-    const { workbook, worksheet, headingStyle, outlineHeadingStyle, outlineStyle } = xls();
+    const { workbook, worksheet, headingStyle, outlineHeadingStyle, outlineStyle } = xls('Report Instansi');
 
     const col = 18;
 
@@ -295,7 +295,7 @@ export const genExcelReportEvent = async (req: Request, res: Response, next: Nex
 
     const data = mapEventReport(report.data);
 
-    const { workbook, worksheet, headingStyle, outlineHeadingStyle, outlineStyle } = xls();
+    const { workbook, worksheet, headingStyle, outlineHeadingStyle, outlineStyle } = xls('Report Event');
 
     const col = 16;
 
@@ -489,7 +489,7 @@ export const genExcelReportLeads = async (req: Request, res: Response, next: Nex
 
     const data = mapLeadsReport(report.data);
 
-    const { workbook, worksheet, headingStyle, outlineHeadingStyle, outlineStyle } = xls();
+    const { workbook, worksheet, headingStyle, outlineHeadingStyle, outlineStyle } = xls('Report Leads');
 
     const col = 21;
 
@@ -515,7 +515,7 @@ export const genExcelReportLeads = async (req: Request, res: Response, next: Nex
     const judulKolom = [
       'NO',
       'NOMOR KTP NASABAH',
-      'NAMA NASABAH',
+      'NAMA',
       'NOMOR HP NASABAH',
       'STATUS KARYAWAN',
       'PRODUK',
@@ -695,7 +695,7 @@ export const genExcelReportClosing = async (req: Request, res: Response, next: N
 
     const data = mapClosingReport(report.data);
 
-    const { workbook, worksheet, headingStyle, outlineHeadingStyle, outlineStyle } = xls();
+    const { workbook, worksheet, headingStyle, outlineHeadingStyle, outlineStyle } = xls('Report Closing');
 
     const col = 16;
 
@@ -726,7 +726,7 @@ export const genExcelReportClosing = async (req: Request, res: Response, next: N
       'CHANNEL',
       'CIF',
       'NIK KTP NASABAH',
-      'NAMA NASABAH',
+      'NAMA',
       'PRODUK',
       'NO KONTRAK',
       'OMSET',
