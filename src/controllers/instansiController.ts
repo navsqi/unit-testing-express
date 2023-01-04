@@ -277,19 +277,13 @@ export const deleteMasterInstansi = async (req: Request, res: Response, next: Ne
 
 export const getInstansi = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    let outletIds = [];
     const outletId = (req.query.kode_unit_kerja || req.user.kode_unit_kerja) as string;
-
-    if (!outletId.startsWith('000')) {
-      outletIds = await konsolidasiTopBottom(outletId as string);
-    }
 
     const filter = {
       nama_instansi: req.query.nama_instansi || '',
       start_date: req.query.start_date || '',
       end_date: req.query.end_date || '',
       is_approved: req.query.is_approved ? +req.query.is_approved : '',
-      outlet_id: outletIds,
       kode_outlet: outletId,
       kategori_instansi: req.query.kategori_instansi || '',
       jenis_instansi: req.query.jenis_instansi || '',
