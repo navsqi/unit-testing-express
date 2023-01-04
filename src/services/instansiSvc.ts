@@ -62,7 +62,6 @@ export const listInstansi = async (filter: any, paging: any): Promise<[Instansi[
   //   f['kode_unit_kerja'] = In(filter.outlet_id);
   // }
 
-  console.log(filter);
   if (filter.kode_outlet && !filter.kode_outlet.startsWith('000')) {
     f['kode_unit_kerja'] = Raw((alias) => `${alias} IN (${getRecursiveOutletQuery(filter.kode_outlet)})`);
   }
@@ -84,9 +83,6 @@ export const listInstansi = async (filter: any, paging: any): Promise<[Instansi[
   };
 
   delete f2['kode_unit_kerja'];
-
-  console.log(f);
-  console.log(f2);
 
   // ...f, created_by: filter.user_nik
   const fWithOr =
