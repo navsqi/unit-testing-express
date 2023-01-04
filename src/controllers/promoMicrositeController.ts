@@ -41,7 +41,7 @@ export const getPromoMicrosite = async (req: Request, res: Response, next: NextF
         where: { promo_microsite_id: promo.id },
         order: { id: 'asc' },
       });
-      promo.thumbnail = photos.photo;
+      promo.thumbnail = photos?.photo;
     }
 
     const dataRes = {
@@ -76,8 +76,14 @@ export const getDetailPromoMicrosite = async (req: Request, res: Response, next:
       where: { promo_microsite_id: promoMicrosite.id },
       order: { id: 'asc' },
     });
-    promoMicrosite.thumbnail = photos[0].photo;
-    promoMicrosite.photos = photos;
+
+    if (photos && photos.length > 1) {
+      promoMicrosite.thumbnail = photos[0].photo;
+      promoMicrosite.photos = photos;
+    } else {
+      promoMicrosite.thumbnail = null;
+      promoMicrosite.photos = null;
+    }
 
     const promosId = promoMicrosite.promo.map((el) => el.promo_id);
     const promo = await promoRepo.find({
