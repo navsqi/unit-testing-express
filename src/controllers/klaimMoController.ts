@@ -170,6 +170,7 @@ export const uploadPromoBanner = async (req: Request, res: Response, next: NextF
     }
 
     await queryRunner.commitTransaction();
+    await queryRunner.release();
 
     const dataRes = {
       promoMicrosite: promoMicrositeRes,
@@ -179,6 +180,7 @@ export const uploadPromoBanner = async (req: Request, res: Response, next: NextF
     return res.customSuccess(200, 'Upload voucher success', dataRes);
   } catch (e) {
     await queryRunner.rollbackTransaction();
+    await queryRunner.release();
 
     for (const fn of filesName) {
       await objectRemove(process.env.MINIO_BUCKET, fn);
