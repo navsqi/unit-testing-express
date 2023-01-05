@@ -22,6 +22,8 @@ export const listMasterInstansi = async (filter: any, paging: any): Promise<[Mas
     f['created_at'] = Between(new Date(`${filter.start_date} 00:00:00`), new Date(`${filter.end_date} 23:59:59`));
   }
 
+  f['is_deleted'] = filter.is_deleted;
+
   const [masterInstansi, count] = await masterInsRepo.findAndCount({
     select: {
       cakupan_instansi: {
@@ -77,6 +79,8 @@ export const listInstansi = async (filter: any, paging: any): Promise<[Instansi[
   if (filter.status_potensial) {
     f['status_potensial'] = filter.status_potensial;
   }
+
+  f['is_deleted'] = filter.is_deleted;
 
   const f2 = {
     ...f,
