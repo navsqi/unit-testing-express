@@ -20,9 +20,14 @@ export const getPromoMicrosite = async (req: Request, res: Response, next: NextF
   try {
     const filter = {
       active: Number(req.query.active) ?? 1,
+      nama: req.query.nama ?? null,
     };
 
     const where: FindOptionsWhere<PromoMicrosite> = {};
+
+    if (filter.nama) {
+      where.nama_promosi = Raw((alias) => `${alias} ILIKE '%${filter.nama}%'`);
+    }
 
     if (filter.active === 1) {
       where.start_date = Raw((alias) => `CURRENT_DATE >= ${alias}`);
