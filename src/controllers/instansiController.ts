@@ -59,6 +59,7 @@ export const getMasterInstansi = async (req: Request, res: Response, next: NextF
       start_date: req.query.start_date || '',
       end_date: req.query.end_date || '',
       jenis_instansi: req.query.jenis_instansi || '',
+      is_deleted: false,
     };
 
     const paging = queryHelper.paging(req.query);
@@ -263,7 +264,10 @@ export const updateMasterInstansi = async (req: Request, res: Response, next: Ne
 
 export const deleteMasterInstansi = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const instansi = await masterInsRepo.delete({ id: +req.params.id });
+    const instansi = await masterInsRepo.update(req.params.id, {
+      ...req.body,
+      is_deleted: true,
+    });
 
     const dataRes = {
       instansi: instansi,
@@ -290,6 +294,7 @@ export const getInstansi = async (req: Request, res: Response, next: NextFunctio
       status_potensial: req.query.status_potensial || '',
       user_nik: req.user.nik,
       unit_assign: outletId,
+      is_deleted: false,
     };
 
     const paging = queryHelper.paging(req.query);
@@ -531,7 +536,10 @@ export const updateInstansi = async (req: Request, res: Response, next: NextFunc
 
 export const deleteInstansi = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const instansi = await instansiRepo.delete({ id: +req.params.id });
+    const instansi = await instansiRepo.update(req.params.id, {
+      ...req.body,
+      is_deleted: true,
+    });
 
     const dataRes = {
       instansi: instansi,
