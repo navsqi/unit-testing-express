@@ -1,24 +1,15 @@
 import { NextFunction, Request, Response } from 'express';
-import { Between, FindOptionsWhere, ILike, In, LessThanOrEqual, MoreThanOrEqual, Raw } from 'typeorm';
-import APIPegadaian from '~/apis/pegadaianApi';
+import { FindOptionsWhere, In, Raw } from 'typeorm';
+import { WhereClauseCondition } from 'typeorm/query-builder/WhereClause';
+import { objectRemove, objectUpload } from '~/config/minio';
 import { dataSource } from '~/orm/dbCreateConnection';
-import MasterStatusLos from '~/orm/entities/MasterStatusLos';
-import PkiAgunan from '~/orm/entities/PkiAgunan';
 import Promo from '~/orm/entities/Promo';
-import PromoVoucher from '~/orm/entities/PromoVoucher';
+import PromoBanner from '~/orm/entities/PromoBanner';
 import PromoMicrosite from '~/orm/entities/PromoMicrosite';
-import PkiNasabah from '~/orm/entities/PkiNasabah';
-import PkiPengajuan from '~/orm/entities/PkiPengajuan';
-import micrositeSvc from '~/services/micrositeSvc';
-import reportSvc from '~/services/reportSvc';
+import PromoMicrositePhoto from '~/orm/entities/PromoMicrositePhoto';
+import PromoVoucher from '~/orm/entities/PromoVoucher';
 import * as common from '~/utils/common';
 import CustomError from '~/utils/customError';
-import queryHelper from '~/utils/queryHelper';
-import xls from '~/utils/xls';
-import { objectRemove, objectUpload } from '~/config/minio';
-import PromoBanner from '~/orm/entities/PromoBanner';
-import PromoMicrositePhoto from '~/orm/entities/PromoMicrositePhoto';
-import dayjs from 'dayjs';
 
 const promoRepo = dataSource.getRepository(Promo);
 const promoVoucherRepo = dataSource.getRepository(PromoVoucher);
@@ -27,13 +18,21 @@ const promoMicrositePhotoRepo = dataSource.getRepository(PromoMicrositePhoto);
 
 export const getPromoMicrosite = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const filter = {
+      active: Number(req.query.active) ?? 1,
+    };
+
+    const where: FindOptionsWhere<PromoMicrosite> = {};
+
+    if (filter.active === 1) {
+      where.start_date = Raw((alias) => `CURRENT_DATE >= ${alias}`);
+      where.end_date = Raw((alias) => `CURRENT_DATE <= ${alias}`);
+      where.is_active = true;
+      where.is_deleted = false;
+    }
+
     const [promoMicrosite, count] = await promoMicrositeRepo.findAndCount({
-      where: {
-        start_date: Raw((alias) => `CURRENT_DATE >= ${alias}`),
-        end_date: Raw((alias) => `CURRENT_DATE <= ${alias}`),
-        is_active: true,
-        is_deleted: false,
-      },
+      where,
     });
 
     for (const promo of promoMicrosite) {
