@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
 import { FindOptionsWhere, In, Raw } from 'typeorm';
-import { WhereClauseCondition } from 'typeorm/query-builder/WhereClause';
 import { objectRemove, objectUpload } from '~/config/minio';
 import { dataSource } from '~/orm/dbCreateConnection';
 import Promo from '~/orm/entities/Promo';
@@ -38,7 +37,7 @@ export const getPromoMicrosite = async (req: Request, res: Response, next: NextF
     for (const promo of promoMicrosite) {
       const photos = await promoMicrositePhotoRepo.findOne({
         where: { promo_microsite_id: promo.id },
-        order: { id: 'asc' },
+        order: { created_at: 'desc' },
       });
       promo.thumbnail = photos?.photo;
     }
