@@ -188,6 +188,11 @@ class PkiPengajuan {
   @UpdateDateColumn()
   updated_at: Date;
 
+  @Column({
+    nullable: true,
+  })
+  klaim_at: Date;
+
   @OneToOne(() => PkiNasabah)
   @JoinColumn([{ name: 'no_ktp', referencedColumnName: 'no_ktp' }])
   pki_nasabah: PkiNasabah;
