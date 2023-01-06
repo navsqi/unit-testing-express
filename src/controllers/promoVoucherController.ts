@@ -27,11 +27,11 @@ export const getPromoVoucher = async (req: Request, res: Response, next: NextFun
     const filter = {
       start_date: (req.query.start_date as string) || '',
       end_date: (req.query.end_date as string) || '',
-      is_active: Number(req.query.is_active) ?? null,
+      is_active: req.query.is_active as string,
     };
 
-    if (filter.is_active !== null) {
-      where['is_active'] = Boolean(filter.is_active);
+    if (filter.is_active !== '') {
+      where['is_active'] = Boolean(Number(filter.is_active));
     }
 
     if (filter.start_date) {
@@ -41,7 +41,7 @@ export const getPromoVoucher = async (req: Request, res: Response, next: NextFun
     if (filter.end_date) {
       where['end_date'] = filter.end_date;
     }
-  
+
     const paging = queryHelper.paging(req.query);
     const [promoVoucher, count] = await promoVoucherRepo.findAndCount({
       take: paging.limit,
