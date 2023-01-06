@@ -324,6 +324,7 @@ export const checkKTPAndApprove = async (req: Request, res: Response, next: Next
       status: 1,
       is_ktp_valid: 1,
       updated_by: req.user.nik,
+      approved_at: new Date(),
     });
 
     const dataRes = {

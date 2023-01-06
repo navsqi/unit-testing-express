@@ -556,6 +556,7 @@ export const approveInstansi = async (req: Request, res: Response, next: NextFun
     const instansi = await instansiRepo.update(req.params.id, {
       is_approved: 1,
       updated_by: req.user.nik,
+      approved_at: new Date(),
     });
 
     const dataRes = {

@@ -164,6 +164,11 @@ class Instansi {
   @UpdateDateColumn()
   updated_at: Date;
 
+  @Column({
+    nullable: true,
+  })
+  approved_at: Date;
+
   @Column({ nullable: true })
   created_by: string;
 
