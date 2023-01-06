@@ -49,7 +49,12 @@ export const getPki = async (req: Request, res: Response, next: NextFunction) =>
       limit: Number(req.query.limit) || 250,
       offset: null,
       kode_outlet: kodeOutlet.startsWith('0000') ? null : kodeOutlet,
+      is_promo: Number(req.query.is_promo) || '',
     };
+
+    if (filter.is_promo === 1) {
+      where['is_promo'] = true;
+    }
 
     if (filter.no_pengajuan) {
       where['no_pengajuan'] = ILike(`%${filter.no_pengajuan}%`);
@@ -110,8 +115,11 @@ export const getPki = async (req: Request, res: Response, next: NextFunction) =>
           kode_produk: true,
           nama_produk: true,
         },
+        outlet: {
+          nama: true,
+        },
       },
-      relations: ['pki_agunan', 'pki_nasabah', 'instansi', 'produk'],
+      relations: ['pki_agunan', 'pki_nasabah', 'instansi', 'produk', 'outlet'],
       take: paging.limit,
       skip: paging.offset,
       where,
