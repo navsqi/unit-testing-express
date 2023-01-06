@@ -44,7 +44,7 @@ export const klaimMo = async (req: Request, res: Response, next: NextFunction) =
     // update no aplikasi los ke db kamila
     const updatePengajuan = await pkiPengajuanRepo.update(
       { no_pengajuan: bodies.no_pengajuan },
-      { kode_voucher: getVoucher.kode_voucher, promo_id: bodies.promo_id, is_promo: true },
+      { kode_voucher: getVoucher.kode_voucher, promo_id: bodies.promo_id, is_promo: true, klaim_at: new Date() },
     );
 
     // update no aplikasi los ke db microsite
@@ -53,6 +53,7 @@ export const klaimMo = async (req: Request, res: Response, next: NextFunction) =
       noPengajuan: bodies.no_pengajuan,
       promoId: bodies.promo_id,
       isPromo: true,
+      klaimAt: new Date(),
     });
 
     await promoVoucherRepo.update({ kode_voucher: getVoucher.kode_voucher }, { is_active: false });

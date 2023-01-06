@@ -1,9 +1,19 @@
-import { Column, CreateDateColumn, Entity, PrimaryColumn, UpdateDateColumn, OneToOne, JoinColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryColumn,
+  UpdateDateColumn,
+  OneToOne,
+  JoinColumn,
+  ManyToOne,
+} from 'typeorm';
 import Instansi from './Instansi';
 import PkiAgunan from './PkiAgunan';
 import PkiNasabah from './PkiNasabah';
 import Produk from './Produk';
 import MasterStatusLos from './MasterStatusLos';
+import Outlet from './Outlet';
 
 @Entity('pki_pengajuan', { synchronize: false })
 class PkiPengajuan {
@@ -188,6 +198,11 @@ class PkiPengajuan {
   @UpdateDateColumn()
   updated_at: Date;
 
+  @Column({
+    nullable: true,
+  })
+  klaim_at: Date;
+
   @OneToOne(() => PkiNasabah)
   @JoinColumn([{ name: 'no_ktp', referencedColumnName: 'no_ktp' }])
   pki_nasabah: PkiNasabah;
@@ -207,6 +222,10 @@ class PkiPengajuan {
   @OneToOne(() => MasterStatusLos)
   @JoinColumn([{ name: 'status_pengajuan', referencedColumnName: 'id_status_microsite' }])
   master_status_los: MasterStatusLos;
+
+  @ManyToOne(() => Outlet)
+  @JoinColumn([{ name: 'kode_outlet', referencedColumnName: 'kode' }])
+  outlet: Outlet;
 }
 
 export default PkiPengajuan;
