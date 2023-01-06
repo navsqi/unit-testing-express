@@ -27,10 +27,10 @@ export const getPromoVoucher = async (req: Request, res: Response, next: NextFun
     const filter = {
       start_date: (req.query.start_date as string) || '',
       end_date: (req.query.end_date as string) || '',
-      is_active: req.query.is_active as string,
+      is_active: req.query.is_active as string || null,
     };
 
-    if (filter.is_active !== '') {
+    if (filter.is_active !== '' && filter.is_active !== null) {
       where['is_active'] = Boolean(Number(filter.is_active));
     }
 
