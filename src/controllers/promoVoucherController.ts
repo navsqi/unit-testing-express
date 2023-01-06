@@ -22,10 +22,29 @@ const promoVoucherRepo = dataSource.getRepository(PromoVoucher);
 
 export const getPromoVoucher = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const where: FindOptionsWhere<PromoVoucher> = {};
+
+    const filter = {
+      start_date: (req.query.start_date as string) || '',
+      end_date: (req.query.end_date as string) || '',
+      is_active: Number(req.query.is_active) ?? null,
+    };
+
+    if (filter.start_date) {
+      where['start_date'] = filter.start_date;
+    }
+
+    if (filter.end_date) {
+      where['end_date'] = filter.end_date;
+    }
+
+    filter.is_active === 1 ? (where['is_active'] = true) : (where['is_active'] = false);
+
     const paging = queryHelper.paging(req.query);
     const [promoVoucher, count] = await promoVoucherRepo.findAndCount({
       take: paging.limit,
       skip: paging.offset,
+      where,
       order: {
         created_at: 'DESC',
       },
