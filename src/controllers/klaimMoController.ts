@@ -41,10 +41,12 @@ export const klaimMo = async (req: Request, res: Response, next: NextFunction) =
 
     if (!getVoucher) return next(new CustomError('Voucher tidak ditemukan atau habis', 404));
 
+    const promo = await promoRepo.findOne({where: {id: getVoucher.promo_id}});
+
     // update no aplikasi los ke db kamila
     const updatePengajuan = await pkiPengajuanRepo.update(
       { no_pengajuan: bodies.no_pengajuan },
-      { kode_voucher: getVoucher.kode_voucher, promo_id: bodies.promo_id, is_promo: true, klaim_at: new Date() },
+      { kode_voucher: getVoucher.kode_voucher, promo_id: bodies.promo_id, kode_produk: promo.kode_produk, is_promo: true, klaim_at: new Date() },
     );
 
     // update no aplikasi los ke db microsite
