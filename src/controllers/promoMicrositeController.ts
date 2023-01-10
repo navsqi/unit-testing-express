@@ -6,19 +6,19 @@ import Promo from '~/orm/entities/Promo';
 import PromoBanner from '~/orm/entities/PromoBanner';
 import PromoMicrosite from '~/orm/entities/PromoMicrosite';
 import PromoMicrositePhoto from '~/orm/entities/PromoMicrositePhoto';
-import PromoVoucher from '~/orm/entities/PromoVoucher';
+// import PromoVoucher from '~/orm/entities/PromoVoucher';
 import * as common from '~/utils/common';
 import CustomError from '~/utils/customError';
 
 const promoRepo = dataSource.getRepository(Promo);
-const promoVoucherRepo = dataSource.getRepository(PromoVoucher);
+// const promoVoucherRepo = dataSource.getRepository(PromoVoucher);
 const promoMicrositeRepo = dataSource.getRepository(PromoMicrosite);
 const promoMicrositePhotoRepo = dataSource.getRepository(PromoMicrositePhoto);
 
 export const getPromoMicrosite = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const filter = {
-      active: Number(req.query.active) ?? 1,
+      active: Number(req.query.active),
       nama: req.query.nama ?? null,
     };
 
