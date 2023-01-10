@@ -219,6 +219,14 @@ export const createNewPki = async (req: Request, res: Response, next: NextFuncti
     pkiNasabah.file_path_ektp = bodyPkiNasabah?.file_path_ektp;
     pkiNasabah.data_consent = bodyPkiNasabah?.data_consent;
 
+    pkiNasabah.jenis_pekerjaan = bodyPkiNasabah?.jenis_pekerjaan;
+    pkiNasabah.status_pekerjaan = bodyPkiNasabah?.status_pekerjaan;
+    pkiNasabah.masa_kerja = bodyPkiNasabah?.masa_kerja;
+    pkiNasabah.jumlah_tanggungan = bodyPkiNasabah?.jumlah_tanggungan;
+    pkiNasabah.penghasilan = bodyPkiNasabah?.penghasilan;
+    pkiNasabah.pengeluaran = bodyPkiNasabah?.pengeluaran;
+    pkiNasabah.status_perkawinan = bodyPkiNasabah?.status_perkawinan;
+
     const cekNoKtp = await queryRunner.manager.findOne(PkiNasabah, {
       where: { no_ktp: pkiNasabah.no_ktp },
     });
