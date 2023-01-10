@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from 'express';
-import { dataSource } from '~/orm/dbCreateConnection';
 import { konsolidasiTopBottom } from '~/services/konsolidasiSvc';
 import { closingReport, eventReport, instansiReport, leadsReport, promosiReport } from '~/services/reportSvc';
 import * as common from '~/utils/common';
