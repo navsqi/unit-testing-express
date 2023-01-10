@@ -603,6 +603,95 @@ export const promosiReport = async (filter?: IFilter) => {
   }
 };
 
+// report closing: minus nilai promosi
+export const promosiClosingReport = async (filter?: IFilter) => {
+  const queryRunner = dataSource.createQueryRunner();
+  await queryRunner.connect();
+  const manager = queryRunner.manager;
+
+  try {
+    const q = manager.createQueryBuilder();
+    q.from('leads', 'leads');
+    q.select('leads.nik_ktp', 'nik_ktp_nasabah');
+    q.addSelect('lcs.tgl_kredit', 'tgl_kredit');
+    q.addSelect('lcs.tgl_fpk', 'tgl_fpk');
+    q.addSelect('leads.nama', 'nama_nasabah');
+    q.addSelect('lcs.cif', 'cif');
+    q.addSelect('leads.no_hp', 'no_hp_nasabah');
+    q.addSelect('leads.is_karyawan', 'is_karyawan');
+    q.addSelect('leads.kode_produk', 'kode_produk');
+    q.addSelect('leads.instansi_id', 'instansi_id');
+    q.addSelect('instansi.jenis_instansi', 'jenis_instansi');
+    q.addSelect('instansi.nama_instansi', 'nama_instansi');
+    q.addSelect('outlet_instansi.nama', 'unit_kerja_instansi');
+    q.addSelect('outlet_transaksi.nama', 'outlet_transaksi');
+    q.addSelect('leads.event_id', 'event_id');
+    q.addSelect('leads.created_by', 'created_by');
+    q.addSelect('leads.created_at', 'created_at');
+    q.addSelect('leads.step', 'step');
+    q.addSelect('leads.is_ktp_valid', 'is_ktp_valid');
+    q.addSelect('leads.flag_app', 'flag_app');
+    q.addSelect('leads.kode_unit_kerja', 'kode_unit_kerja');
+    q.addSelect('outlet.nama', 'nama_unit_kerja');
+    q.addSelect('outlet.unit_kerja', 'unit');
+    q.addSelect('produk.nama_produk', 'nama_produk');
+    q.addSelect('lcs.no_kontrak', 'no_kontrak');
+    q.addSelect('lcs.channel', 'channel');
+    q.addSelect('lcs.kode_unit_kerja_pencairan', 'kode_unit_kerja_pencairan'); // promo
+    q.addSelect('lcs.up', 'uang_pinjaman'); // promo
+    q.addSelect('pki_pengajuan.promo_id', 'promo_id'); //promo
+    q.addSelect('promo.nama_promosi', 'nama_promosi'); //promo
+    q.addSelect('coalesce(0)', 'nilai_promosi'); // promosi
+
+    q.leftJoin('instansi', 'instansi', 'instansi.id = leads.instansi_id');
+    q.leftJoin('outlet', 'outlet_instansi', 'outlet_instansi.kode = instansi.kode_unit_kerja');
+    q.leftJoin('outlet', 'outlet', 'outlet.kode = leads.kode_unit_kerja');
+    q.innerJoin('leads_closing', 'lcs', 'lcs.leads_id = leads.id');
+    q.leftJoin('produk', 'produk', 'produk.kode_produk = lcs.kode_produk');
+    q.innerJoin(
+      'pki_pengajuan',
+      'pki_pengajuan',
+      'pki_pengajuan.no_ktp = lcs.nik_ktp and pki_pengajuan.kode_produk = lcs.kode_produk',
+    );
+    q.leftJoin('promo', 'promo', 'promo.id = pki_pengajuan.promo_id');
+    q.leftJoin('outlet', 'outlet_transaksi', 'outlet_transaksi.kode = lcs.kode_unit_kerja_pencairan');
+
+    q.where('CAST(lcs.tgl_kredit AS date) >= :startDate', { startDate: filter.start_date });
+    q.andWhere('CAST(lcs.tgl_kredit AS date) <= :endDate', { endDate: filter.end_date });
+    q.andWhere('CAST(lcs.tgl_kredit AS date) >= pki_pengajuan.tgl_pengajuan');
+
+    if (filter.outlet_id && filter.outlet_id.length > 0) {
+      q.andWhere('leads.kode_unit_kerja IN (:...kodeUnitKerja)', { kodeUnitKerja: filter.outlet_id });
+    }
+
+    if (filter.created_by) {
+      q.andWhere('leads.created_by = :userId', { userId: filter.created_by });
+    }
+
+    let count = null;
+
+    if (filter.page && filter.limit && filter.offset !== null) {
+      count = await q.getCount();
+
+      q.limit(filter.limit);
+      q.offset(filter.offset);
+    }
+
+    q.orderBy('lcs.tgl_kredit');
+    const data: QueryResultClosingReport[] = await q.getRawMany();
+    await queryRunner.release();
+
+    return {
+      err: false,
+      data,
+      count: count ?? data.length,
+    };
+  } catch (error) {
+    await queryRunner.release();
+    return { err: error.message, data: null };
+  }
+};
+
 const reportSvc = {
   instansiReport,
   eventReport,

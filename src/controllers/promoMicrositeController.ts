@@ -207,7 +207,6 @@ export const updatePromoBanner = async (req: Request, res: Response, next: NextF
 
 export const deletePromoMicrosite = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    console.log(req.params);
     const promoMicrositeId = Number(req.params.id) as number;
     const promoMicrosite = await promoMicrositeRepo.findOne({
       where: {

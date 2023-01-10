@@ -46,7 +46,6 @@ export const klaimMo = async (params: IKlaimMO): Promise<string[]> => {
 
     return updateNoAplikasiLos;
   } catch (error) {
-    console.log(error);
     return error;
   }
 };
