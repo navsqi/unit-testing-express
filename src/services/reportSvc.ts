@@ -559,12 +559,57 @@ export const p2kiReport = async (filter?: IFilterP2KI) => {
   }
 };
 
+// minus nilai persen per transaksi dan nilai penyerapan
+export const promosiReport = async (filter?: IFilter) => {
+  const queryRunner = dataSource.createQueryRunner();
+  await queryRunner.connect();
+  const manager = queryRunner.manager;
+  try {
+    const q = manager.createQueryBuilder();
+    q.from('promo', 'p');
+    q.select('p.id', 'id');
+    q.addSelect('p.nama_promosi', 'nama_promosi');
+    q.addSelect('produk.nama_produk', 'nama_produk');
+    q.addSelect('p.jenis_promosi', 'jenis_promosi');
+    q.addSelect('p.start_date', 'start_date');
+    q.addSelect('p.end_date', 'end_date');
+    q.addSelect('p.total_promosi', 'total_promosi');
+    q.addSelect('p.nilai_per_transaksi', 'nilai_per_transaksi');
+    q.addSelect(`coalesce('')`, 'nilai_persen_per_transaksi');
+    q.addSelect(`coalesce('')`, 'nilai_penyerapan');
+
+    q.leftJoin('produk', 'produk', 'produk.kode_produk = p.kode_produk');
+
+    let count = null;
+
+    if (filter.page && filter.limit && filter.offset !== null) {
+      count = await q.getCount();
+
+      q.limit(filter.limit);
+      q.offset(filter.offset);
+    }
+
+    const data = await q.getRawMany();
+    await queryRunner.release();
+
+    return {
+      err: false,
+      data,
+      count: count ?? data.length,
+    };
+  } catch (error) {
+    await queryRunner.release();
+    return { err: error.message, data: null };
+  }
+};
+
 const reportSvc = {
   instansiReport,
   eventReport,
   leadsReport,
   closingReport,
   p2kiReport,
+  promosiReport,
 };
 
 export default reportSvc;
