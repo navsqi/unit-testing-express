@@ -1,21 +1,11 @@
+import { parse } from 'csv-parse';
 import { NextFunction, Request, Response } from 'express';
-import { Between, FindOptionsWhere, ILike } from 'typeorm';
-import APIPegadaian from '~/apis/pegadaianApi';
+import { FindOptionsWhere } from 'typeorm';
 import { dataSource } from '~/orm/dbCreateConnection';
-import MasterStatusLos from '~/orm/entities/MasterStatusLos';
-import PkiAgunan from '~/orm/entities/PkiAgunan';
 import Promo from '~/orm/entities/Promo';
 import PromoVoucher from '~/orm/entities/PromoVoucher';
-import PkiNasabah from '~/orm/entities/PkiNasabah';
-import PkiPengajuan from '~/orm/entities/PkiPengajuan';
-import micrositeSvc from '~/services/micrositeSvc';
-import reportSvc from '~/services/reportSvc';
 import * as common from '~/utils/common';
-import CustomError from '~/utils/customError';
 import queryHelper from '~/utils/queryHelper';
-import xls from '~/utils/xls';
-import { parse } from 'csv-parse';
-import validationCsv from '~/utils/validationCsv';
 
 const promoRepo = dataSource.getRepository(Promo);
 const promoVoucherRepo = dataSource.getRepository(PromoVoucher);
@@ -27,7 +17,7 @@ export const getPromoVoucher = async (req: Request, res: Response, next: NextFun
     const filter = {
       start_date: (req.query.start_date as string) || '',
       end_date: (req.query.end_date as string) || '',
-      is_active: req.query.is_active as string || null,
+      is_active: (req.query.is_active as string) || null,
     };
 
     if (filter.is_active !== '' && filter.is_active !== null) {
@@ -44,9 +34,17 @@ export const getPromoVoucher = async (req: Request, res: Response, next: NextFun
 
     const paging = queryHelper.paging(req.query);
     const [promoVoucher, count] = await promoVoucherRepo.findAndCount({
+      select: {
+        promo: {
+          nama_promosi: true,
+        },
+      },
       take: paging.limit,
       skip: paging.offset,
       where,
+      relations: {
+        promo: true,
+      },
       order: {
         created_at: 'DESC',
       },

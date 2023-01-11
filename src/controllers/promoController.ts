@@ -36,47 +36,15 @@ export const getPromo = async (req: Request, res: Response, next: NextFunction) 
     const paging = queryHelper.paging(req.query);
 
     const [promo, count] = await promoRepo.findAndCount({
-      // select: {
-      //   produk: {
-      //     kode_produk: true,
-      //     nama_produk: true,
-      //   },
-      //   promo_voucher: {
-      //     id_promosi: true,
-      //     kode_voucher: true,
-      //     promo_id: true,
-      //     total_promosi: true,
-      //     start_date: true,
-      //     end_date: true,
-      //     jumlah_voucher: true,
-      //     potongan_rp: true,
-      //     tempat: true,
-      //     potongan_persentase: true,
-      //     minimal_rp: true,
-      //     maksimal_rp: true,
-      //     kode_booking: true,
-      //     is_active: true,
-      //     is_deleted: true,
-      // },
-      // promo_microsite: {
-      //     promo_microsite_id: true,
-      //     promo_id: true,
-      //     promo_microsite: {
-      //         nama_promosi:true,
-      //         keterangan_promosi:true,
-      //         promo_id: true,
-      //         start_date: true,
-      //         end_date: true,
-      //         is_active: true,
-      //         is_deleted: true,
-      //     },
-      // }
-      //  },
-      //  relations: {
-      //    promo_microsite: true,
-      //    promo_voucher: true,
-      //    produk:true,
-      // },
+      select: {
+        produk: {
+          kode_produk: true,
+          nama_produk: true,
+        },
+      },
+      relations: {
+        produk: true,
+      },
       take: paging.limit,
       skip: paging.offset,
       where,
