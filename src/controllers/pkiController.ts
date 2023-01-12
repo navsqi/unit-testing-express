@@ -56,6 +56,10 @@ export const getPki = async (req: Request, res: Response, next: NextFunction) =>
       where['is_promo'] = true;
     }
 
+    if (filter.is_promo === 0) {
+      where['is_promo'] = false;
+    }
+
     if (filter.no_pengajuan) {
       where['no_pengajuan'] = ILike(`%${filter.no_pengajuan}%`);
     }
