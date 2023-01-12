@@ -92,6 +92,9 @@ export const getPki = async (req: Request, res: Response, next: NextFunction) =>
           modified_date: true,
           file_path_ektp: true,
           data_consent: true,
+          jenis_pekerjaan: true,
+          pengeluaran: true,
+          penghasilan: true,
         },
         pki_agunan: {
           no_pengajuan: true,

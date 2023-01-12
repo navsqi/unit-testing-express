@@ -9,6 +9,7 @@ import PromoMicrositePhoto from '~/orm/entities/PromoMicrositePhoto';
 // import PromoVoucher from '~/orm/entities/PromoVoucher';
 import * as common from '~/utils/common';
 import CustomError from '~/utils/customError';
+import queryHelper from '~/utils/queryHelper';
 
 const promoRepo = dataSource.getRepository(Promo);
 // const promoVoucherRepo = dataSource.getRepository(PromoVoucher);
@@ -20,6 +21,8 @@ export const getPromoMicrosite = async (req: Request, res: Response, next: NextF
     const filter = {
       active: Number(req.query.active),
       nama: req.query.nama ?? null,
+      page: req.query.page ?? 1,
+      limit: req.query.limit ?? 10000,
     };
 
     const where: FindOptionsWhere<PromoMicrosite> = {};
@@ -35,8 +38,11 @@ export const getPromoMicrosite = async (req: Request, res: Response, next: NextF
       where.is_deleted = false;
     }
 
+    const paging = queryHelper.paging(filter);
     const [promoMicrosite, count] = await promoMicrositeRepo.findAndCount({
       where,
+      take: paging.limit,
+      skip: paging.offset,
     });
 
     for (const promo of promoMicrosite) {
@@ -51,7 +57,13 @@ export const getPromoMicrosite = async (req: Request, res: Response, next: NextF
       promoMicrosite,
     };
 
-    return res.customSuccess(200, 'Get promo voucher success', dataRes, { count: count });
+    return res.customSuccess(200, 'Get promo voucher success', dataRes, {
+      count: count,
+      rowCount: paging.limit,
+      limit: paging.limit,
+      offset: paging.offset,
+      page: Number(req.query.page),
+    });
   } catch (e) {
     return next(e);
   }
