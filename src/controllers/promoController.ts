@@ -19,6 +19,7 @@ export const getPromo = async (req: Request, res: Response, next: NextFunction) 
       id: (qs.id as string) || '',
       start_date: (qs.start_date as string) || '',
       end_date: (qs.end_date as string) || '',
+      active: Number(req.query.active),
     };
 
     if (filter.id) {
@@ -31,6 +32,13 @@ export const getPromo = async (req: Request, res: Response, next: NextFunction) 
 
     if (filter.start_date) {
       where['end_date'] = LessThanOrEqual(filter.end_date);
+    }
+
+    if (filter.active === 1) {
+      where.start_date = Raw((alias) => `CURRENT_DATE >= ${alias}`);
+      where.end_date = Raw((alias) => `CURRENT_DATE <= ${alias}`);
+      where.is_active = true;
+      where.is_deleted = false;
     }
 
     const paging = queryHelper.paging(req.query);
