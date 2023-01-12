@@ -92,7 +92,7 @@ export const getDetailPromoMicrosite = async (req: Request, res: Response, next:
       order: { id: 'asc' },
     });
 
-    if (photos && photos.length > 1) {
+    if (photos && photos.length > 0) {
       promoMicrosite.thumbnail = photos[0].photo;
       promoMicrosite.photos = photos;
     } else {

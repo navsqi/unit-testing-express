@@ -35,7 +35,7 @@ export const getPromo = async (req: Request, res: Response, next: NextFunction) 
     }
 
     if (filter.active === 1) {
-      where.start_date = Raw((alias) => `CURRENT_DATE >= ${alias}`);
+      // where.start_date = Raw((alias) => `CURRENT_DATE >= ${alias}`);
       where.end_date = Raw((alias) => `CURRENT_DATE <= ${alias}`);
       where.is_active = true;
       where.is_deleted = false;

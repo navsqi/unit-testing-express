@@ -99,6 +99,7 @@ export const getPki = async (req: Request, res: Response, next: NextFunction) =>
           jenis_pekerjaan: true,
           pengeluaran: true,
           penghasilan: true,
+          status_perkawinan: true,
         },
         pki_agunan: {
           no_pengajuan: true,
