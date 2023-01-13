@@ -23,6 +23,8 @@ export const getPromoMicrosite = async (req: Request, res: Response, next: NextF
       nama: req.query.nama ?? null,
       page: req.query.page ?? 1,
       limit: req.query.limit ?? 10000,
+      start_date: req.query.start_date as string,
+      end_date: req.query.end_date as string,
     };
 
     const where: FindOptionsWhere<PromoMicrosite> = {};
@@ -36,6 +38,14 @@ export const getPromoMicrosite = async (req: Request, res: Response, next: NextF
       where.end_date = Raw((alias) => `CURRENT_DATE <= ${alias}`);
       where.is_active = true;
       where.is_deleted = false;
+    }
+
+    if (filter.start_date) {
+      where.start_date = filter.start_date;
+    }
+
+    if (filter.end_date) {
+      where.end_date = filter.end_date;
     }
 
     const paging = queryHelper.paging(filter);

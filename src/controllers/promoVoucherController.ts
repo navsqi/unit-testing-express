@@ -1,6 +1,6 @@
 import { parse } from 'csv-parse';
 import { NextFunction, Request, Response } from 'express';
-import { FindOptionsWhere } from 'typeorm';
+import { FindOptionsWhere, ILike } from 'typeorm';
 import { dataSource } from '~/orm/dbCreateConnection';
 import Promo from '~/orm/entities/Promo';
 import PromoVoucher from '~/orm/entities/PromoVoucher';
@@ -18,10 +18,20 @@ export const getPromoVoucher = async (req: Request, res: Response, next: NextFun
       start_date: (req.query.start_date as string) || '',
       end_date: (req.query.end_date as string) || '',
       is_active: (req.query.is_active as string) || null,
+      promo_id: req.query.promo_id as string,
+      kode_voucher: req.query.kode_voucher,
     };
 
     if (filter.is_active !== '' && filter.is_active !== null) {
       where['is_active'] = Boolean(Number(filter.is_active));
+    }
+
+    if (filter.promo_id) {
+      where['promo_id'] = ILike(`%${filter.promo_id}%`);
+    }
+
+    if (filter.kode_voucher) {
+      where['kode_voucher'] = ILike(`%${filter.kode_voucher}%`);
     }
 
     if (filter.start_date) {
