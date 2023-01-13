@@ -130,7 +130,7 @@ class Promo {
   tipe_alokasi: string;
 
   @Column({
-    default: false,
+    default: true,
   })
   is_active: boolean;
 

@@ -74,10 +74,10 @@ export const getDetailPromoMicrosite = async (req: Request, res: Response, next:
     const promoMicrositeId = Number(req.params.id) as number;
     const promoMicrosite = await promoMicrositeRepo.findOne({
       where: {
-        start_date: Raw((alias) => `CURRENT_DATE >= ${alias}`),
-        end_date: Raw((alias) => `CURRENT_DATE <= ${alias}`),
-        is_active: true,
-        is_deleted: false,
+        // start_date: Raw((alias) => `CURRENT_DATE >= ${alias}`),
+        // end_date: Raw((alias) => `CURRENT_DATE <= ${alias}`),
+        // is_active: true,
+        // is_deleted: false,
         id: promoMicrositeId,
       },
       relations: {
