@@ -49,7 +49,16 @@ export const getPki = async (req: Request, res: Response, next: NextFunction) =>
       limit: Number(req.query.limit) || 250,
       offset: null,
       kode_outlet: kodeOutlet.startsWith('0000') ? null : kodeOutlet,
+      is_promo: Number(req.query.is_promo) || '',
     };
+
+    if (filter.is_promo === 1) {
+      where['is_promo'] = true;
+    }
+
+    if (filter.is_promo === 0) {
+      where['is_promo'] = false;
+    }
 
     if (filter.no_pengajuan) {
       where['no_pengajuan'] = ILike(`%${filter.no_pengajuan}%`);
@@ -87,6 +96,10 @@ export const getPki = async (req: Request, res: Response, next: NextFunction) =>
           modified_date: true,
           file_path_ektp: true,
           data_consent: true,
+          jenis_pekerjaan: true,
+          pengeluaran: true,
+          penghasilan: true,
+          status_perkawinan: true,
         },
         pki_agunan: {
           no_pengajuan: true,
@@ -110,8 +123,11 @@ export const getPki = async (req: Request, res: Response, next: NextFunction) =>
           kode_produk: true,
           nama_produk: true,
         },
+        outlet: {
+          nama: true,
+        },
       },
-      relations: ['pki_agunan', 'pki_nasabah', 'instansi', 'produk'],
+      relations: ['pki_agunan', 'pki_nasabah', 'instansi', 'produk', 'outlet'],
       take: paging.limit,
       skip: paging.offset,
       where,
@@ -183,6 +199,11 @@ export const createNewPki = async (req: Request, res: Response, next: NextFuncti
     pkiPengajuan.response_los = bodyPkiPengajuan?.response_los;
     pkiPengajuan.body_los = bodyPkiPengajuan?.body_los;
 
+    pkiPengajuan.is_promo = bodyPkiPengajuan?.is_promo ? true : false;
+    pkiPengajuan.promo_id = bodyPkiPengajuan?.promo_id ? bodyPkiPengajuan.promo_id : null;
+    pkiPengajuan.promomicrosite_id = bodyPkiPengajuan?.promomicrosite_id ? bodyPkiPengajuan.promomicrosite_id : null;
+    pkiPengajuan.kode_voucher = bodyPkiPengajuan?.kode_voucher ? bodyPkiPengajuan.kode_voucher : null;
+
     const cekIdPengajuan = await queryRunner.manager.findOne(PkiPengajuan, {
       where: { no_pengajuan: pkiPengajuan.no_pengajuan },
     });
@@ -205,6 +226,14 @@ export const createNewPki = async (req: Request, res: Response, next: NextFuncti
     pkiNasabah.modified_date = bodyPkiNasabah?.modified_date;
     pkiNasabah.file_path_ektp = bodyPkiNasabah?.file_path_ektp;
     pkiNasabah.data_consent = bodyPkiNasabah?.data_consent;
+
+    pkiNasabah.jenis_pekerjaan = bodyPkiNasabah?.jenis_pekerjaan;
+    pkiNasabah.status_pekerjaan = bodyPkiNasabah?.status_pekerjaan;
+    pkiNasabah.masa_kerja = bodyPkiNasabah?.masa_kerja;
+    pkiNasabah.jumlah_tanggungan = bodyPkiNasabah?.jumlah_tanggungan;
+    pkiNasabah.penghasilan = bodyPkiNasabah?.penghasilan;
+    pkiNasabah.pengeluaran = bodyPkiNasabah?.pengeluaran;
+    pkiNasabah.status_perkawinan = bodyPkiNasabah?.status_perkawinan;
 
     const cekNoKtp = await queryRunner.manager.findOne(PkiNasabah, {
       where: { no_ktp: pkiNasabah.no_ktp },

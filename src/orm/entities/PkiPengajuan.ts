@@ -1,9 +1,19 @@
-import { Column, CreateDateColumn, Entity, PrimaryColumn, UpdateDateColumn, OneToOne, JoinColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryColumn,
+  UpdateDateColumn,
+  OneToOne,
+  JoinColumn,
+  ManyToOne,
+} from 'typeorm';
 import Instansi from './Instansi';
 import PkiAgunan from './PkiAgunan';
 import PkiNasabah from './PkiNasabah';
 import Produk from './Produk';
 import MasterStatusLos from './MasterStatusLos';
+import Outlet from './Outlet';
 
 @Entity('pki_pengajuan', { synchronize: false })
 class PkiPengajuan {
@@ -153,6 +163,33 @@ class PkiPengajuan {
   })
   updated_by: string;
 
+  @Column({
+    type: 'bool',
+    default: false,
+  })
+  is_promo: boolean;
+
+  @Column({
+    type: 'varchar',
+    length: 250,
+    nullable: true,
+  })
+  promo_id: string;
+
+  @Column({
+    type: 'varchar',
+    length: 220,
+    nullable: true,
+  })
+  promomicrosite_id: string;
+
+  @Column({
+    type: 'varchar',
+    length: 50,
+    nullable: true,
+  })
+  kode_voucher: string;
+
   @Column()
   @CreateDateColumn()
   created_at: Date;
@@ -160,6 +197,11 @@ class PkiPengajuan {
   @Column()
   @UpdateDateColumn()
   updated_at: Date;
+
+  @Column({
+    nullable: true,
+  })
+  klaim_at: Date;
 
   @OneToOne(() => PkiNasabah)
   @JoinColumn([{ name: 'no_ktp', referencedColumnName: 'no_ktp' }])
@@ -180,6 +222,10 @@ class PkiPengajuan {
   @OneToOne(() => MasterStatusLos)
   @JoinColumn([{ name: 'status_pengajuan', referencedColumnName: 'id_status_microsite' }])
   master_status_los: MasterStatusLos;
+
+  @ManyToOne(() => Outlet)
+  @JoinColumn([{ name: 'kode_outlet', referencedColumnName: 'kode' }])
+  outlet: Outlet;
 }
 
 export default PkiPengajuan;

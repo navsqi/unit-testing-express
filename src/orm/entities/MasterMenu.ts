@@ -27,6 +27,9 @@ class MasterMenu {
   unit_kerja: string;
 
   @Column()
+  icons: string;
+
+  @Column()
   orders: number;
 
   @Column({ default: false })

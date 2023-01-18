@@ -146,6 +146,8 @@ class Leads {
   })
   is_new_cif: number;
 
+  // status 1 = approved
+  // status 0 = not approved
   @Column({
     type: 'smallint',
     default: 0,
@@ -184,6 +186,11 @@ class Leads {
   @Column()
   @UpdateDateColumn()
   updated_at: Date;
+
+  @Column({
+    nullable: true,
+  })
+  approved_at: Date;
 
   @Column({
     type: 'varchar',

@@ -18,7 +18,6 @@ export const createEvent = async (req: Request, res: Response, next: NextFunctio
   let fileName: string = null;
 
   try {
-    let photo: Express.Multer.File = null;
     const bodies = req.body as Event;
 
     const dateDiff = Math.abs(common.getDiffDateCount(dayjs().format('YYYY-MM-DD'), bodies.tanggal_event));
@@ -34,6 +33,7 @@ export const createEvent = async (req: Request, res: Response, next: NextFunctio
 
     if (!getKodeUnitKerjaInstansi) return next(new CustomError('Instansi tidak ditemukan', 400));
 
+    let photo: Express.Multer.File = null;
     if (req.files && req.files['file']) {
       photo = req.files['file'][0];
       fileName = 'hblevent/' + generateFileName(photo.originalname);

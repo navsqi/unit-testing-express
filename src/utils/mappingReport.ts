@@ -104,6 +104,9 @@ export const mapLeadsReport = (data: QueryResultLeadsReport[]) => {
 
     el.nama_produk = el.nama_produk || '—';
 
+    const nik = el.nik_ktp_nasabah ? `**********${el.nik_ktp_nasabah.substring(10)}` : '—';
+    el.nik_ktp_nasabah = nik;
+
     return {
       ...el,
       ...o,
@@ -125,6 +128,9 @@ export const mapClosingReport = (data: QueryResultClosingReport[]) => {
 
     const channel = el.channel ? el.channel : 'Outlet';
     el.channel = channel;
+
+    const nik = el.nik_ktp_nasabah ? `**********${el.nik_ktp_nasabah.substring(10)}` : '—';
+    el.nik_ktp_nasabah = nik;
 
     if (el.nama_unit_kerja && el.unit) {
       o[`outlet_${el.unit}`] = el.nama_unit_kerja;

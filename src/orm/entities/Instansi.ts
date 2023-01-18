@@ -150,6 +150,12 @@ class Instansi {
   })
   is_approved: number;
 
+  @Column({
+    type: 'boolean',
+    default: false,
+  })
+  is_deleted: boolean;
+
   @Column()
   @CreateDateColumn()
   created_at: Date;
@@ -157,6 +163,11 @@ class Instansi {
   @Column()
   @UpdateDateColumn()
   updated_at: Date;
+
+  @Column({
+    nullable: true,
+  })
+  approved_at: Date;
 
   @Column({ nullable: true })
   created_by: string;

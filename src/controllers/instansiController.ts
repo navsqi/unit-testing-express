@@ -59,6 +59,7 @@ export const getMasterInstansi = async (req: Request, res: Response, next: NextF
       start_date: req.query.start_date || '',
       end_date: req.query.end_date || '',
       jenis_instansi: req.query.jenis_instansi || '',
+      is_deleted: false,
     };
 
     const paging = queryHelper.paging(req.query);
@@ -263,7 +264,10 @@ export const updateMasterInstansi = async (req: Request, res: Response, next: Ne
 
 export const deleteMasterInstansi = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const instansi = await masterInsRepo.delete({ id: +req.params.id });
+    const instansi = await masterInsRepo.update(req.params.id, {
+      ...req.body,
+      is_deleted: true,
+    });
 
     const dataRes = {
       instansi: instansi,
@@ -277,25 +281,20 @@ export const deleteMasterInstansi = async (req: Request, res: Response, next: Ne
 
 export const getInstansi = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    let outletIds = [];
     const outletId = (req.query.kode_unit_kerja || req.user.kode_unit_kerja) as string;
-
-    if (!outletId.startsWith('000')) {
-      outletIds = await konsolidasiTopBottom(outletId as string);
-    }
 
     const filter = {
       nama_instansi: req.query.nama_instansi || '',
       start_date: req.query.start_date || '',
       end_date: req.query.end_date || '',
       is_approved: req.query.is_approved ? +req.query.is_approved : '',
-      outlet_id: outletIds,
       kode_outlet: outletId,
       kategori_instansi: req.query.kategori_instansi || '',
       jenis_instansi: req.query.jenis_instansi || '',
       status_potensial: req.query.status_potensial || '',
       user_nik: req.user.nik,
       unit_assign: outletId,
+      is_deleted: false,
     };
 
     const paging = queryHelper.paging(req.query);
@@ -537,7 +536,10 @@ export const updateInstansi = async (req: Request, res: Response, next: NextFunc
 
 export const deleteInstansi = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const instansi = await instansiRepo.delete({ id: +req.params.id });
+    const instansi = await instansiRepo.update(req.params.id, {
+      ...req.body,
+      is_deleted: true,
+    });
 
     const dataRes = {
       instansi: instansi,
@@ -554,6 +556,7 @@ export const approveInstansi = async (req: Request, res: Response, next: NextFun
     const instansi = await instansiRepo.update(req.params.id, {
       is_approved: 1,
       updated_by: req.user.nik,
+      approved_at: new Date(),
     });
 
     const dataRes = {

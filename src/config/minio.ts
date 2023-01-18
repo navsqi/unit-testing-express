@@ -44,6 +44,7 @@ export const isBucketExist = (bucketName) => {
       }
       const isExist = exists ? `${bucketName} bucket is exist` : `${bucketName} bucket is not exist`;
       logger.info('MINIO_ISBUCKETEXIST', isExist);
+
       resolve(exists ? true : false);
     });
   });
@@ -79,6 +80,7 @@ export const objectUpload = async (
 ) => {
   try {
     const isUploaded = await minioClient.putObject(bucketName, objectName, filePath, metaData);
+
     return isUploaded;
   } catch (err) {
     logger.error(err.message, 'MINIO_OBJECTUPLOAD');

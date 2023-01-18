@@ -13,7 +13,7 @@ export const generateRandomStr = (length: number) => {
 
 export const generateFileName = (originalname: string) => {
   const splitname = originalname.split('.');
-  const type = splitname[1];
+  const type = splitname[splitname.length - 1];
 
   return `HBL${generateRandomStr(8)}${Date.now()}.${type}`;
 };
