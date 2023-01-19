@@ -137,6 +137,7 @@ export const exchangeTokenSso = async (req: Request, res: Response, next: NextFu
         kode_unit_kerja: kodeOutlet,
         photo: ssoRes.path_foto,
         last_login: new Date(),
+        is_active: 1,
       });
     } else {
       await userRepo.update(user.id, {
@@ -147,6 +148,7 @@ export const exchangeTokenSso = async (req: Request, res: Response, next: NextFu
         kode_unit_kerja: kodeOutlet,
         photo: ssoRes.path_foto,
         last_login: new Date(),
+        is_active: 1,
       });
 
       user = await userRepo.findOne({ select: { password: false }, where: { nik: ssoRes.nik } });

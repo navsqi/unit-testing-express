@@ -324,6 +324,7 @@ export const checkKTPAndApprove = async (req: Request, res: Response, next: Next
       status: 1,
       is_ktp_valid: 1,
       updated_by: req.user.nik,
+      approved_at: new Date(),
     });
 
     const dataRes = {
@@ -332,6 +333,70 @@ export const checkKTPAndApprove = async (req: Request, res: Response, next: Next
 
     return res.customSuccess(200, 'Update leads success', dataRes);
   } catch (e) {
+    return next(e);
+  }
+};
+
+export const bulkCheckKTPAndApprove = async (req: Request, res: Response, next: NextFunction) => {
+  const queryRunner = dataSource.createQueryRunner();
+
+  await queryRunner.connect();
+  await queryRunner.startTransaction();
+
+  try {
+    const idLeads: string[] = req.body.leads_id;
+
+    for (const id of idLeads) {
+      const currentLeads = await leadsRepo.findOne({ where: { id: Number(id) } });
+
+      const getIp = parseIp(req);
+
+      if (currentLeads.is_ktp_valid == 0) {
+        const checkKTP = await APIPegadaian.checkEktpDukcapil({
+          nama: currentLeads.nama,
+          nik: currentLeads.nik_ktp,
+          ipUser: getIp,
+        });
+
+        if (checkKTP.status !== 200) throw new Error(checkKTP.data.toString());
+
+        const ktpData = checkKTP?.data?.data;
+
+        if (!ktpData) {
+          await queryRunner.rollbackTransaction();
+          await queryRunner.release();
+
+          return next(new CustomError('Data NIK EKTP tidak ditemukan', 404));
+        }
+
+        if (ktpData.namaLengkap.toUpperCase().includes('TIDAK')) {
+          await queryRunner.rollbackTransaction();
+          await queryRunner.release();
+
+          return next(new CustomError('Data NIK EKTP Tidak Valid', 400));
+        }
+      }
+
+      await queryRunner.manager.update(Leads, Number(id), {
+        status: 1,
+        is_ktp_valid: 1,
+        updated_by: req.user.nik,
+        approved_at: new Date(),
+      });
+    }
+
+    await queryRunner.commitTransaction();
+    await queryRunner.release();
+
+    const dataRes = {
+      leads: true,
+    };
+
+    return res.customSuccess(200, 'Update leads success', dataRes);
+  } catch (e) {
+    await queryRunner.rollbackTransaction();
+    await queryRunner.release();
+
     return next(e);
   }
 };
@@ -617,7 +682,10 @@ export const createNewLeadsByCsv = async (req: Request, res: Response, next: Nex
 
         return res.customSuccess(200, 'Create leads success', dataRes);
       })
-      .on('error', (error) => {
+      .on('error', async (error) => {
+        await queryRunner.rollbackTransaction();
+        await queryRunner.release();
+
         return next(error);
       });
   } catch (e) {
