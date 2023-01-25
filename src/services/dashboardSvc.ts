@@ -4,6 +4,7 @@ import { getRecursiveOutletQuery } from './konsolidasiSvc';
 interface IFilter {
   outlet_id?: string[] | string;
   created_by?: any;
+  is_mo?: boolean;
 }
 
 export const approvedInstansi = async (filter?: IFilter) => {
@@ -148,6 +149,14 @@ export const omsetPerKategoriProduk = async (filter?: IFilter) => {
   await queryRunner.startTransaction();
   const manager = queryRunner.manager;
 
+  const whereIsMo = filter.is_mo
+    ? `(lc.kode_unit_kerja IN (
+          ${getRecursiveOutletQuery(filter.outlet_id as string)}
+      )  OR lc.kode_unit_kerja_pencairan = '${filter.outlet_id as string}') AND l.kode_unit_kerja = lc.kode_unit_kerja`
+    : `(lc.kode_unit_kerja IN (
+          ${getRecursiveOutletQuery(filter.outlet_id as string)}
+      )  OR lc.kode_unit_kerja_pencairan = '${filter.outlet_id as string}') `;
+
   try {
     const omset_pembiayaan = await manager.query(
       `
@@ -158,9 +167,7 @@ export const omsetPerKategoriProduk = async (filter?: IFilter) => {
       INNER JOIN leads l ON
         l.id = lc.leads_id
       WHERE
-        lc.kode_unit_kerja IN (
-          ${getRecursiveOutletQuery(filter.outlet_id as string)}
-      ) AND lc.kode_produk <> '62' 
+        ${whereIsMo} AND lc.kode_produk <> '62' 
       AND date_part('year', CAST(lc.tgl_kredit AS date)) = date_part('year', CURRENT_DATE)
       `,
     );
@@ -174,9 +181,7 @@ export const omsetPerKategoriProduk = async (filter?: IFilter) => {
       INNER JOIN leads l ON
         l.id = lc.leads_id
       WHERE
-        lc.kode_unit_kerja IN (
-      ${getRecursiveOutletQuery(filter.outlet_id as string)}
-      ) AND lc.kode_produk = '62' 
+        ${whereIsMo} AND lc.kode_produk = '62' 
       AND date_part('year', CAST(lc.tgl_kredit AS date)) = date_part('year', CURRENT_DATE) 
       `,
     );
