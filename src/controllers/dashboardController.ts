@@ -16,12 +16,13 @@ export const dashboard = async (req: Request, res: Response, next: NextFunction)
     const filter = {
       outlet_id: outletIds,
       created_by: common.isSalesRole(req.user.kode_role) ? req.user.nik : req.query.created_by,
+      is_mo: common.isSalesRole(req.user.kode_role),
     };
 
     const approvedInstansiData = await approvedInstansi(filter);
     const approvedLeadsData = await approvedLeads(filter);
     const approvedMouData = await approvedMou(filter);
-    const omset = await omsetPerKategoriProduk({ outlet_id: outletId });
+    const omset = await omsetPerKategoriProduk({ outlet_id: outletId, is_mo: filter.is_mo });
 
     if (approvedInstansiData.err || approvedLeadsData.err || approvedMouData.err || omset.err)
       return next(new CustomError('Terjadi kesalahan', 400));
