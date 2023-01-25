@@ -10,7 +10,7 @@ export interface ITmpKreditQuery {
   kode_outlet: string;
   kode_outlet_pencairan: string;
   up: number;
-  outlet_syariah?: any;
+  channeling_syariah?: any;
   cif: string;
   channel_id?: any;
   nama_channel?: any;
@@ -26,6 +26,7 @@ export interface ITmpKreditTabemasQuery {
   tgl_fpk?: string;
   tgl_kredit?: string;
   tgl_cif?: any;
+  channeling_syariah?: string;
   kode_outlet?: string;
   kode_outlet_pencairan?: string;
   omset_te?: number;
