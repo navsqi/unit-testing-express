@@ -90,18 +90,6 @@ class LeadsClosing {
   kode_produk: string;
 
   @Column({
-    type: 'double precision',
-    nullable: true,
-  })
-  osl: number;
-
-  @Column({
-    type: 'double precision',
-    nullable: true,
-  })
-  saldo_tabemas: number;
-
-  @Column({
     length: 10,
     nullable: true,
   })

@@ -1,8 +1,6 @@
 import dayjs from 'dayjs';
-import { objectUpload } from '~/config/minio';
 import { dataSource } from '~/orm/dbCreateConnection';
 import { ITmpKreditQuery, ITmpKreditTabemasQuery } from '~/types/queryClosingTypes';
-import { convertToCSV } from '~/utils/common';
 import logger from '~/utils/logger';
 import queryClosing from '~/utils/queryClosing';
 
@@ -25,6 +23,14 @@ export const schedulerClosing = async () => {
       const checkNoKredit = await manager.query(
         `SELECT * FROM leads_closing lc WHERE lc.no_kontrak = '${tmpKredit.no_kontrak}'`,
       );
+
+      let kode_unit_kerja = tmpKredit.kode_outlet;
+      let kode_unit_kerja_pencairan = tmpKredit.kode_outlet_pencairan;
+
+      if (kode_unit_kerja.startsWith('000')) {
+        kode_unit_kerja = tmpKredit.cabang_leads;
+        kode_unit_kerja_pencairan = tmpKredit.cabang_leads;
+      }
 
       // jika tidak duplikat no kredit/kontrak insert ke tb leads_closing
       if (checkNoKredit.length < 1 || !checkNoKredit) {
@@ -57,8 +63,8 @@ export const schedulerClosing = async () => {
             tmpKredit.tgl_fpk,
             tmpKredit.tgl_cif, // tgl cif
             tmpKredit.tgl_kredit,
-            tmpKredit.kode_outlet,
-            tmpKredit.kode_outlet_pencairan,
+            kode_unit_kerja,
+            kode_unit_kerja_pencairan,
             tmpKredit.up,
             tmpKredit.channeling_syariah,
             0,
