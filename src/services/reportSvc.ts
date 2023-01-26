@@ -407,7 +407,7 @@ export const closingReport = async (filter?: IFilter) => {
     q.addSelect('lcs.no_kontrak', 'no_kontrak');
     q.addSelect('lcs.channel', 'channel');
     q.addSelect('lcs.up', 'omset');
-    q.addSelect('lcs.outlet_syariah', 'channel_syariah');
+    q.addSelect('outlet_channel_syariah.nama', 'channel_syariah');
     // q.addSelect('coalesce(lcs.osl, 0)', 'osl_original');
     // q.addSelect('coalesce(lcs.saldo_tabemas, 0)', 'saldo_tabemas');
     // q.addSelect((subQuery) => {
@@ -440,6 +440,7 @@ export const closingReport = async (filter?: IFilter) => {
     q.leftJoin('outlet', 'outlet_cabang', 'outlet_cabang.kode = lcs.kode_unit_kerja_pencairan');
     q.leftJoin('outlet', 'outlet_p3', 'outlet_p3.kode = outlet.parent');
     q.leftJoin('outlet', 'outlet_p2', 'outlet_p2.kode = outlet_p3.parent');
+    q.leftJoin('outlet', 'outlet_channel_syariah', 'lcs.channeling_syariah = outlet_channel_syariah.kode');
     q.leftJoin('produk', 'produk', 'produk.kode_produk = lcs.kode_produk');
 
     q.where('CAST(lcs.tgl_kredit AS date) >= :startDate', { startDate: filter.start_date });
