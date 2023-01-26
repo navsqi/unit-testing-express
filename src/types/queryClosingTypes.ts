@@ -15,6 +15,7 @@ export interface ITmpKreditQuery {
   channel_id?: any;
   nama_channel?: any;
   osl: number;
+  cabang_leads: string;
 }
 
 export interface ITmpKreditTabemasQuery {
@@ -36,4 +37,5 @@ export interface ITmpKreditTabemasQuery {
   nama_channel?: string;
   saldo?: number;
   jenis_transaksi?: 'OPEN' | 'SALE' | 'BUY' | 'PYMNTAIN' | 'ORDER';
+  cabang_leads: string;
 }

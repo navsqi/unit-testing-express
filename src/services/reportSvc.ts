@@ -69,8 +69,8 @@ export const instansiReport = async (filter?: IFilter) => {
     q.leftJoin('users', 'user_update', 'user_update.nik = i.updated_by');
 
     q.addSelect('COALESCE(leads.omset, 0)', 'omset');
-    q.addSelect('COALESCE(leads.osl, 0)', 'osl');
-    q.addSelect('COALESCE(leads.saldo_tabemas, 0)', 'saldo_tabemas');
+    q.addSelect('COALESCE(0)', 'osl');
+    q.addSelect('COALESCE(0)', 'saldo_tabemas');
 
     q.innerJoin('master_instansi', 'mi', 'mi.id = i.master_instansi_id');
     q.leftJoin('outlet', 'outlet', 'outlet.kode = i.kode_unit_kerja');
@@ -119,8 +119,8 @@ export const instansiReport = async (filter?: IFilter) => {
           .from('leads', 'l')
           .addSelect('l.instansi_id', 'instansi_id')
           .addSelect('sum(lcs.up)', 'omset')
-          .addSelect('sum(lcs.osl)', 'osl')
-          .addSelect('sum(lcs.saldo_tabemas)', 'saldo_tabemas')
+          // .addSelect('sum(lcs.osl)', 'osl')
+          // .addSelect('sum(lcs.saldo_tabemas)', 'saldo_tabemas')
           .innerJoin('leads_closing', 'lcs', 'lcs.leads_id = l.id')
           .groupBy('l.instansi_id');
 
@@ -293,8 +293,8 @@ export const leadsReport = async (filter?: IFilter) => {
     q.addSelect('leadsclosing.kode_produk', 'kode_produk');
     q.addSelect('produk.nama_produk', 'nama_produk');
     q.addSelect('COALESCE(leadsclosing.omset, 0)', 'omset');
-    q.addSelect('COALESCE(leadsclosing.osl, 0)', 'osl');
-    q.addSelect('COALESCE(leadsclosing.saldo_tabemas, 0)', 'saldo_tabemas');
+    q.addSelect('COALESCE(0)', 'osl');
+    q.addSelect('COALESCE(0)', 'saldo_tabemas');
 
     q.leftJoin('event', 'event', 'event.id = leads.event_id');
     q.leftJoin('instansi', 'instansi', 'instansi.id = leads.instansi_id');
@@ -314,8 +314,8 @@ export const leadsReport = async (filter?: IFilter) => {
           .addSelect('lcs.cif', 'cif')
           .addSelect('lcs.kode_produk', 'kode_produk')
           .addSelect('SUM(lcs.up)', 'omset')
-          .addSelect('SUM(lcs.osl)', 'osl')
-          .addSelect('SUM(lcs.saldo_tabemas)', 'saldo_tabemas')
+          // .addSelect('SUM(lcs.osl)', 'osl')
+          // .addSelect('SUM(lcs.saldo_tabemas)', 'saldo_tabemas')
           .groupBy('lcs.nik_ktp')
           .addGroupBy('lcs.kode_produk')
           .addGroupBy('lcs.cif');

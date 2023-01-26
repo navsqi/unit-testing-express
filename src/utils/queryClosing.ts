@@ -19,7 +19,8 @@ SELECT
 	tmpk.channel_id,
 	tmpk.nama_channel,
 	tmpk.osl,
-	tmpk.channeling_syariah
+	tmpk.channeling_syariah,
+	l.kode_unit_kerja AS cabang_leads
 FROM
 	(
 	SELECT
@@ -58,7 +59,8 @@ SELECT
 	tmpk.nama_channel,
 	tmpk.saldo,
 	tmpk.jenis_transaksi,
-	tmpk.channeling_syariah
+	tmpk.channeling_syariah,
+	l.kode_unit_kerja AS cabang_leads
 FROM
 	(
 	SELECT
