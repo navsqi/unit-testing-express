@@ -152,7 +152,9 @@ export const omsetPerKategoriProduk = async (filter?: IFilter) => {
   const whereIsMo = filter.is_mo
     ? `(lc.kode_unit_kerja IN (
           ${getRecursiveOutletQuery(filter.outlet_id as string)}
-      )  OR lc.kode_unit_kerja_pencairan = '${filter.outlet_id as string}') AND l.kode_unit_kerja = lc.kode_unit_kerja`
+      )  OR lc.kode_unit_kerja_pencairan = '${
+        filter.outlet_id as string
+      }') AND l.kode_unit_kerja = lc.kode_unit_kerja_pencairan`
     : `(lc.kode_unit_kerja IN (
           ${getRecursiveOutletQuery(filter.outlet_id as string)}
       )  OR lc.kode_unit_kerja_pencairan = '${filter.outlet_id as string}') `;

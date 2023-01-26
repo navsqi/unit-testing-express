@@ -131,112 +131,49 @@ export const schedulerClosingTabemas = async () => {
     for (const tmpKredit of tmpKredits) {
       const up = tmpKredit.jenis_transaksi === 'OPEN' ? tmpKredit.amount : tmpKredit.omset_te;
 
-      // Check no kredit duplikat
-      const checkNoKredit = await manager.query(
-        `SELECT * FROM leads_closing lc WHERE lc.no_kontrak = '${tmpKredit.no_kontrak}'`,
+      // jika tidak duplikat insert ke tb leads_closing
+      await manager.query(
+        `INSERT INTO leads_closing 
+        (leads_id, 
+          nik_ktp, 
+          cif, 
+          no_kontrak, 
+          marketing_code, 
+          tgl_fpk, 
+          tgl_kredit, 
+          kode_unit_kerja, 
+          kode_unit_kerja_pencairan, 
+          up, 
+          status_new_cif, 
+          channel_id,
+          channel, 
+          kode_produk,
+          channeling_syariah) VALUES 
+        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15);
+        `,
+        [
+          tmpKredit.leads_id,
+          tmpKredit.nik_ktp,
+          tmpKredit.cif,
+          tmpKredit.no_kontrak,
+          tmpKredit.marketing_code,
+          tmpKredit.tgl_fpk,
+          tmpKredit.tgl_kredit,
+          tmpKredit.kode_outlet,
+          tmpKredit.kode_outlet_pencairan,
+          up,
+          0,
+          tmpKredit.channel_id,
+          tmpKredit.nama_channel,
+          tmpKredit.product_code,
+          tmpKredit.channeling_syariah,
+        ],
       );
 
-      if (checkNoKredit && checkNoKredit.length > 0) {
-        // jika duplikat no_rekening update saldo te & osl ke 0
-        // AND CAST(created_at AS DATE) < CAST(now() AS date)
-        await manager.query(
-          `UPDATE leads_closing SET saldo_tabemas = NULL, osl = NULL WHERE no_kontrak = '${tmpKredit.no_kontrak}'`,
-        );
-
-        // insert ke leads closing
-        await manager.query(
-          `INSERT INTO leads_closing 
-        (leads_id, 
-          nik_ktp, 
-          cif, 
-          no_kontrak, 
-          marketing_code, 
-          tgl_fpk, 
-          tgl_kredit, 
-          kode_unit_kerja, 
-          kode_unit_kerja_pencairan, 
-          up, 
-          status_new_cif, 
-          channel_id,
-          channel, 
-          kode_produk,
-          channeling_syariah) VALUES 
-        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15);
-        `,
-          [
-            tmpKredit.leads_id,
-            tmpKredit.nik_ktp,
-            tmpKredit.cif,
-            tmpKredit.no_kontrak,
-            tmpKredit.marketing_code,
-            tmpKredit.tgl_fpk,
-            tmpKredit.tgl_kredit,
-            tmpKredit.kode_outlet,
-            tmpKredit.kode_outlet_pencairan,
-            up,
-            0,
-            tmpKredit.channel_id,
-            tmpKredit.nama_channel,
-            tmpKredit.product_code,
-            tmpKredit.channeling_syariah,
-          ],
-        );
-
-        // update status leads ke CLS
-        await manager.query(
-          `UPDATE leads SET step = $1, cif = $2, updated_at = now() WHERE id = '${tmpKredit.leads_id}' AND step = 'CLP'`,
-          ['CLS', tmpKredit.cif],
-        );
-      } else {
-        // jika tidak duplikat insert ke tb leads_closing
-        await manager.query(
-          `INSERT INTO leads_closing 
-        (leads_id, 
-          nik_ktp, 
-          cif, 
-          no_kontrak, 
-          marketing_code, 
-          tgl_fpk, 
-          tgl_kredit, 
-          kode_unit_kerja, 
-          kode_unit_kerja_pencairan, 
-          up, 
-          status_new_cif, 
-          channel_id,
-          channel, 
-          kode_produk,
-          channeling_syariah) VALUES 
-        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15);
-        `,
-          [
-            tmpKredit.leads_id,
-            tmpKredit.nik_ktp,
-            tmpKredit.cif,
-            tmpKredit.no_kontrak,
-            tmpKredit.marketing_code,
-            tmpKredit.tgl_fpk,
-            tmpKredit.tgl_kredit,
-            tmpKredit.kode_outlet,
-            tmpKredit.kode_outlet_pencairan,
-            up,
-            0,
-            tmpKredit.channel_id,
-            tmpKredit.nama_channel,
-            tmpKredit.product_code,
-            tmpKredit.channeling_syariah,
-          ],
-        );
-
-        // update status leads ke CLS
-        await manager.query(
-          `UPDATE leads SET step = $1, cif = $2, updated_at = now() WHERE id = '${tmpKredit.leads_id}' AND step = 'CLP'`,
-          ['CLS', tmpKredit.cif],
-        );
-      }
-
+      // update status leads ke CLS
       await manager.query(
-        `UPDATE leads SET cif = $1, cif_created_at = $2 WHERE nik_ktp = $3 AND id = '${tmpKredit.leads_id}' AND cif IS NULL`,
-        [tmpKredit.cif, tmpKredit.tgl_cif, tmpKredit.nik_ktp],
+        `UPDATE leads SET step = $1, cif = $2, updated_at = now() WHERE id = '${tmpKredit.leads_id}' AND step = 'CLP'`,
+        ['CLS', tmpKredit.cif],
       );
     }
 
