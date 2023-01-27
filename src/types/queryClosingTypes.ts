@@ -10,11 +10,12 @@ export interface ITmpKreditQuery {
   kode_outlet: string;
   kode_outlet_pencairan: string;
   up: number;
-  outlet_syariah?: any;
+  channeling_syariah?: any;
   cif: string;
   channel_id?: any;
   nama_channel?: any;
   osl: number;
+  cabang_leads: string;
 }
 
 export interface ITmpKreditTabemasQuery {
@@ -26,6 +27,7 @@ export interface ITmpKreditTabemasQuery {
   tgl_fpk?: string;
   tgl_kredit?: string;
   tgl_cif?: any;
+  channeling_syariah?: string;
   kode_outlet?: string;
   kode_outlet_pencairan?: string;
   omset_te?: number;
@@ -35,4 +37,5 @@ export interface ITmpKreditTabemasQuery {
   nama_channel?: string;
   saldo?: number;
   jenis_transaksi?: 'OPEN' | 'SALE' | 'BUY' | 'PYMNTAIN' | 'ORDER';
+  cabang_leads: string;
 }

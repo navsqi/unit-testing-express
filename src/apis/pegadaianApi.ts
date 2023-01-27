@@ -131,7 +131,6 @@ export const getToken = async (): Promise<AxiosPromise> => {
       apiPegadaianAuthConfig,
     );
 
-    console.log(getToken);
     console.log('END OF ===> HIT TO PEGADAIAN API GET TOKEN');
 
     return getToken;

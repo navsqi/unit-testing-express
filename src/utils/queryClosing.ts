@@ -1,3 +1,6 @@
+// AND (tmpk.kode_outlet = l.kode_unit_kerja OR tmpk.kode_cabang = l.kode_unit_kerja)
+// kode outlet => upc, kode_cabang => cp
+// channel_syariah => cps
 export const selectTmpKredit = `
 SELECT
 	l.id AS leads_id,
@@ -15,7 +18,9 @@ SELECT
 	tmpk.cif,
 	tmpk.channel_id,
 	tmpk.nama_channel,
-	tmpk.osl
+	tmpk.osl,
+	tmpk.channeling_syariah,
+	l.kode_unit_kerja AS cabang_leads
 FROM
 	(
 	SELECT
@@ -29,10 +34,12 @@ WHERE
 	AND CAST (l.created_at AS DATE) <= CAST ( tmpk.tgl_fpk AS DATE )
 	AND tmpk.tgl_kredit IS NOT NULL
 	AND (tmpk.no_kontrak IS NOT NULL OR tmpk.no_kontrak <> '')
-	AND (tmpk.kode_outlet = l.kode_unit_kerja OR tmpk.kode_cabang = l.kode_unit_kerja)
 	AND tmpk.up IS NOT NULL
 `;
 
+// AND (tmpk.kode_outlet = l.kode_unit_kerja OR tmpk.kode_cabang = l.kode_unit_kerja)
+// kode outlet => upc, kode_cabang => cp
+// channel_syariah => cps
 export const selectTmpKreditTabemas = `
 SELECT
 	l.id AS leads_id,
@@ -51,7 +58,9 @@ SELECT
 	tmpk.channel_id,
 	tmpk.nama_channel,
 	tmpk.saldo,
-	tmpk.jenis_transaksi
+	tmpk.jenis_transaksi,
+	tmpk.channeling_syariah,
+	l.kode_unit_kerja AS cabang_leads
 FROM
 	(
 	SELECT
@@ -65,7 +74,6 @@ WHERE
 	AND tmpk.tgl_transaksi IS NOT NULL
 	AND (tmpk.no_rek IS NOT NULL OR tmpk.no_rek <> '')
 	AND CAST (l.created_at AS DATE) <= CAST ( tmpk.tgl_transaksi AS DATE )
-	AND (tmpk.kode_outlet = l.kode_unit_kerja OR tmpk.kode_cabang = l.kode_unit_kerja)
 	AND tmpk.jenis_transaksi IN ('SALE', 'OPEN')
 	AND tmpk.omset_te IS NOT NULL
 `;
