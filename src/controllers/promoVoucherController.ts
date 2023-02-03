@@ -7,7 +7,6 @@ import PromoVoucher from '~/orm/entities/PromoVoucher';
 import * as common from '~/utils/common';
 import queryHelper from '~/utils/queryHelper';
 
-const promoRepo = dataSource.getRepository(Promo);
 const promoVoucherRepo = dataSource.getRepository(PromoVoucher);
 
 export const getPromoVoucher = async (req: Request, res: Response, next: NextFunction) => {
@@ -121,6 +120,8 @@ export const uploadVoucher = async (req: Request, res: Response, next: NextFunct
         const voucherEntities = queryRunner.manager.create(PromoVoucher, dataInput);
         await queryRunner.manager.save(voucherEntities);
 
+        await queryRunner.manager.update<Promo>(Promo, bodies.promo_id, { total_promosi: bodies.total_promosi });
+
         dataRes = {
           voucher: true,
         };
@@ -146,7 +147,12 @@ export const uploadVoucher = async (req: Request, res: Response, next: NextFunct
 
 export const updateVoucher = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const dataRes = {};
+    const params = req.params;
+    const bodies = req.body;
+
+    const voucher = await promoVoucherRepo.update(params.id, { kode_voucher: bodies.kode_voucher });
+
+    const dataRes = { voucher };
 
     return res.customSuccess(200, 'Update voucher Success', dataRes);
   } catch (e) {
@@ -156,7 +162,27 @@ export const updateVoucher = async (req: Request, res: Response, next: NextFunct
 
 export const deleteVoucher = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const dataRes = {};
+    const params = req.params;
+
+    const voucher = await promoVoucherRepo.delete({ id: +params.id });
+
+    const dataRes = { voucher };
+
+    return res.customSuccess(200, 'Delete Voucher Success', dataRes);
+  } catch (e) {
+    return next(e);
+  }
+};
+
+export const deleteVoucherBulk = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const ids: number[] = req.body.voucher_id;
+
+    for (const id of ids) {
+      await promoVoucherRepo.delete({ id: +id });
+    }
+
+    const dataRes = { voucher: true };
 
     return res.customSuccess(200, 'Delete Voucher Success', dataRes);
   } catch (e) {

@@ -135,6 +135,7 @@ export const createNewPromo = async (req: Request, res: Response, next: NextFunc
     promo.tipe_alokasi = bodies.tipe_alokasi;
     promo.is_active = true;
     promo.is_deleted = false;
+    promo.total_promosi = 0;
     promo.created_by = req.user.nik;
     promo.updated_by = req.user.nik;
 

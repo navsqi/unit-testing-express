@@ -463,24 +463,21 @@ export const closingReport = async (filter?: IFilter) => {
       );
     }
 
-    // if (filter.created_by) {
-    //   q.andWhere('leads.created_by = :userId', { userId: filter.created_by });
-    // }
-
     let count = null;
 
     if (filter.page && filter.limit && filter.offset !== null) {
       count = 0;
       const queryAndParams = await q.getQueryAndParameters();
 
-      const getCount = await manager.query(`SELECT COUNT(*) FROM (${queryAndParams[0]}) abc`, queryAndParams[1]);
-      count = getCount[0].count;
+      const getCount = await manager.query(`SELECT COUNT(*) FROM (${queryAndParams[0]}) count_data`, queryAndParams[1]);
+      count = Number(getCount[0].count);
 
       q.limit(filter.limit);
       q.offset(filter.offset);
     }
 
     q.orderBy('lcs.tgl_kredit');
+
     const data: QueryResultClosingReport[] = await q.getRawMany();
     await queryRunner.release();
 

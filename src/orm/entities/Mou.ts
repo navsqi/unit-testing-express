@@ -14,6 +14,7 @@ import User from './User';
 export enum JenisKerjasama {
   MOU = 'MOU',
   PKS = 'PKS',
+  BAK = 'BAK',
 }
 
 export enum StatusMou {
@@ -50,7 +51,7 @@ class Mou {
   })
   jenis_kerjasama: string;
 
-  @Column()
+  @Column({ nullable: true })
   nomor_kerjasama: string;
 
   @Column()

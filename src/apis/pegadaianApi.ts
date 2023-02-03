@@ -132,6 +132,7 @@ export const getToken = async (): Promise<AxiosPromise> => {
     );
 
     console.log('END OF ===> HIT TO PEGADAIAN API GET TOKEN');
+    console.log(JSON.stringify(getToken.data));
 
     return getToken;
   } catch (e) {
@@ -141,17 +142,25 @@ export const getToken = async (): Promise<AxiosPromise> => {
 };
 
 export const getTokenTScale = async (): Promise<AxiosPromise> => {
-  const getToken = await axios.post(
-    pegadaianApiEnv.tscale.urlAuth,
-    new URLSearchParams({
-      grant_type: pegadaianApiEnv.tscale.grantType,
-      username: pegadaianApiEnv.tscale.authUser,
-      password: pegadaianApiEnv.tscale.authPass,
-    }),
-    tscaleAuthConfig,
-  );
+  try {
+    const getToken = await axios.post(
+      pegadaianApiEnv.tscale.urlAuth,
+      new URLSearchParams({
+        grant_type: pegadaianApiEnv.tscale.grantType,
+        username: pegadaianApiEnv.tscale.authUser,
+        password: pegadaianApiEnv.tscale.authPass,
+      }),
+      tscaleAuthConfig,
+    );
 
-  return getToken;
+    console.log('END OF ===> HIT TO PEGADAIAN API GET TOKEN 3SCALE');
+    console.log(JSON.stringify(getToken.data));
+
+    return getToken;
+  } catch (e) {
+    console.log('ERROR ===> HIT TO PEGADAIAN API GET TOKEN 3SCALE', e);
+    return e;
+  }
 };
 
 export const checkEktpDukcapil = async (body: IKTPDukcapil): Promise<AxiosPromise> => {

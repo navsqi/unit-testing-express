@@ -1,9 +1,7 @@
 import { Router } from 'express';
-import { eventHandler } from '~/index';
-import { basicAuth } from '~/middlewares/basicAuth';
+import * as promoVoucherController from '~/controllers/promoVoucherController';
 import protect from '~/middlewares/protect';
 import { uploadBuffer } from '~/utils/uploadFile';
-import * as promoVoucherController from '~/controllers/promoVoucherController';
 
 const router = Router();
 
@@ -14,5 +12,9 @@ router.post(
   uploadBuffer([{ name: 'csv', maxCount: 1 }], false),
   promoVoucherController.uploadVoucher,
 );
+
+router.patch('/:id', protect(), promoVoucherController.updateVoucher);
+router.delete('/bulk', protect(), promoVoucherController.deleteVoucherBulk);
+router.delete('/:id', protect(), promoVoucherController.deleteVoucher);
 
 export default router;
