@@ -24,6 +24,7 @@ export const schedulerClosing = async () => {
         `SELECT * FROM leads_closing lc WHERE lc.no_kontrak = '${tmpKredit.no_kontrak}'`,
       );
 
+      // handle unit kerja untuk produk Gadai Efek & PMP (karena unit kerjanya di pusat)
       let kode_unit_kerja = tmpKredit.kode_outlet;
       let kode_unit_kerja_pencairan = tmpKredit.kode_outlet_pencairan;
 
@@ -32,7 +33,7 @@ export const schedulerClosing = async () => {
         kode_unit_kerja_pencairan = tmpKredit.cabang_leads;
       }
 
-      // jika tidak duplikat no kredit/kontrak insert ke tb leads_closing
+      // jika tidak duplikat no kredit/kontrak insert ke tb leads_closing & up != 0
       if (checkNoKredit.length < 1 || !checkNoKredit) {
         await manager.query(
           `INSERT INTO leads_closing 
@@ -75,8 +76,9 @@ export const schedulerClosing = async () => {
         );
       }
 
+      // update cif jika nomor cif null
       await manager.query(
-        `UPDATE leads SET cif = $1, cif_created_at = $2 WHERE nik_ktp = $3 AND id = '${tmpKredit.leads_id}' AND cif IS NULL`,
+        `UPDATE leads SET cif = $1, cif_created_at = $2, step = 'CLS' WHERE nik_ktp = $3 AND id = '${tmpKredit.leads_id}' AND cif IS NULL AND step = 'CLP'`,
         [tmpKredit.cif, tmpKredit.tgl_cif, tmpKredit.nik_ktp],
       );
     }
@@ -87,23 +89,7 @@ export const schedulerClosing = async () => {
     );
 
     // insert data yang dikirim bigdata ke table history
-    // INSERT INTO history_tmp_kredit SELECT * FROM tmp_kredit
-    // insert data yang dikirim bigdata ke table history
     await manager.query(`INSERT INTO history_tmp_kredit SELECT * FROM tmp_kredit`);
-
-    // insert data yang dikirim bigdata ke table history ke minio
-    // const bigDataRaw = await manager.query(`SELECT * FROM tmp_kredit`);
-
-    // const csvFormat = convertToCSV(bigDataRaw);
-    // const buffer = Buffer.from(csvFormat);
-    // const fileName = 'hblkreditbigdata/' + dayjs().format(`DD-MM-YYYY`) + `_TMP_KRED_BIGDATA_${Date.now()}.csv`;
-
-    // const uploadCsv = await objectUpload(process.env.MINIO_BUCKET, fileName, buffer, {
-    //   'Content-Type': 'text/csv',
-    //   'Content-Disposision': 'inline',
-    // });
-
-    // logger.info('IS_MINIO_UPLOADED', uploadCsv);
 
     await manager.query(`TRUNCATE tmp_kredit RESTART IDENTITY`);
 
@@ -137,9 +123,20 @@ export const schedulerClosingTabemas = async () => {
     for (const tmpKredit of tmpKredits) {
       const up = tmpKredit.jenis_transaksi === 'OPEN' ? tmpKredit.amount : tmpKredit.omset_te;
 
-      // jika tidak duplikat insert ke tb leads_closing
-      await manager.query(
-        `INSERT INTO leads_closing 
+      // handle unit kerja untuk produk Gadai Efek & PMP (karena unit kerjanya di pusat)
+      let kode_unit_kerja = tmpKredit.kode_outlet;
+      let kode_unit_kerja_pencairan = tmpKredit.kode_outlet_pencairan;
+
+      if (kode_unit_kerja.startsWith('000')) {
+        kode_unit_kerja = tmpKredit.cabang_leads;
+        kode_unit_kerja_pencairan = tmpKredit.cabang_leads;
+      }
+
+      // jika omset tabemas != 0 insert ke leads closing
+      if (up == 0) {
+        // jika tidak duplikat insert ke tb leads_closing
+        await manager.query(
+          `INSERT INTO leads_closing 
         (leads_id, 
           nik_ktp, 
           cif, 
@@ -157,30 +154,31 @@ export const schedulerClosingTabemas = async () => {
           channeling_syariah) VALUES 
         ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15);
         `,
-        [
-          tmpKredit.leads_id,
-          tmpKredit.nik_ktp,
-          tmpKredit.cif,
-          tmpKredit.no_kontrak,
-          tmpKredit.marketing_code,
-          tmpKredit.tgl_fpk,
-          tmpKredit.tgl_kredit,
-          tmpKredit.kode_outlet,
-          tmpKredit.kode_outlet_pencairan,
-          up,
-          0,
-          tmpKredit.channel_id,
-          tmpKredit.nama_channel,
-          tmpKredit.product_code,
-          tmpKredit.channeling_syariah,
-        ],
-      );
+          [
+            tmpKredit.leads_id,
+            tmpKredit.nik_ktp,
+            tmpKredit.cif,
+            tmpKredit.no_kontrak,
+            tmpKredit.marketing_code,
+            tmpKredit.tgl_fpk,
+            tmpKredit.tgl_kredit,
+            kode_unit_kerja,
+            kode_unit_kerja_pencairan,
+            up,
+            0,
+            tmpKredit.channel_id,
+            tmpKredit.nama_channel,
+            tmpKredit.product_code,
+            tmpKredit.channeling_syariah,
+          ],
+        );
 
-      // update status leads ke CLS
-      await manager.query(
-        `UPDATE leads SET step = $1, cif = $2, updated_at = now() WHERE id = '${tmpKredit.leads_id}' AND step = 'CLP'`,
-        ['CLS', tmpKredit.cif],
-      );
+        // update status leads ke CLS
+        await manager.query(
+          `UPDATE leads SET step = $1, cif = $2, updated_at = now() WHERE id = '${tmpKredit.leads_id}' AND step = 'CLP'`,
+          ['CLS', tmpKredit.cif],
+        );
+      }
     }
 
     // menghapus data history bigdata
@@ -190,20 +188,6 @@ export const schedulerClosingTabemas = async () => {
 
     // insert data yang dikirim bigdata ke table history
     await manager.query(`INSERT INTO history_tmp_kredit_tabemas SELECT * FROM tmp_kredit_tabemas`);
-
-    // insert data yang dikirim bigdata ke minio
-    // const bigDataRaw = await manager.query(`SELECT * FROM tmp_kredit_tabemas`);
-
-    // const csvFormat = convertToCSV(bigDataRaw);
-    // const buffer = Buffer.from(csvFormat);
-    // const fileName = 'hblkreditbigdata/' + dayjs().format(`DD-MM-YYYY`) + `_TMP_KRED_TABEMAS_BIGDATA_${Date.now()}.csv`;
-
-    // const uploadCsv = await objectUpload(process.env.MINIO_BUCKET, fileName, buffer, {
-    //   'Content-Type': 'text/csv',
-    //   'Content-Disposision': 'inline',
-    // });
-
-    // logger.info('IS_MINIO_UPLOADED', uploadCsv);
 
     await manager.query(`TRUNCATE tmp_kredit_tabemas RESTART IDENTITY`);
 

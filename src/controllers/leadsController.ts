@@ -578,7 +578,7 @@ export const createNewLeadsBadanUsaha = async (req: Request, res: Response, next
       updated_by: req.user.nik,
       source_data: 'FORM INPUT DATA',
       expired_referral: addDays(30),
-      status: 1,
+      status: 0,
     });
 
     const dataRes = {

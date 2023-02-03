@@ -1,24 +1,17 @@
 import { NextFunction, Request, Response } from 'express';
-import { Between, FindOptionsWhere, ILike, In, LessThanOrEqual, MoreThanOrEqual, Raw } from 'typeorm';
-import APIPegadaian from '~/apis/pegadaianApi';
+import { In, Raw } from 'typeorm';
+import { objectRemove, objectUpload } from '~/config/minio';
 import { dataSource } from '~/orm/dbCreateConnection';
 import MasterStatusLos from '~/orm/entities/MasterStatusLos';
-import PkiAgunan from '~/orm/entities/PkiAgunan';
-import Promo from '~/orm/entities/Promo';
-import PromoVoucher from '~/orm/entities/PromoVoucher';
-import PromoMicrosite from '~/orm/entities/PromoMicrosite';
-import PkiNasabah from '~/orm/entities/PkiNasabah';
 import PkiPengajuan from '~/orm/entities/PkiPengajuan';
+import Promo from '~/orm/entities/Promo';
+import PromoBanner from '~/orm/entities/PromoBanner';
+import PromoMicrosite from '~/orm/entities/PromoMicrosite';
+import PromoMicrositePhoto from '~/orm/entities/PromoMicrositePhoto';
+import PromoVoucher from '~/orm/entities/PromoVoucher';
 import micrositeSvc from '~/services/micrositeSvc';
-import reportSvc from '~/services/reportSvc';
 import * as common from '~/utils/common';
 import CustomError from '~/utils/customError';
-import queryHelper from '~/utils/queryHelper';
-import xls from '~/utils/xls';
-import { objectRemove, objectUpload } from '~/config/minio';
-import PromoBanner from '~/orm/entities/PromoBanner';
-import PromoMicrositePhoto from '~/orm/entities/PromoMicrositePhoto';
-import dayjs from 'dayjs';
 
 const promoRepo = dataSource.getRepository(Promo);
 const promoVoucherRepo = dataSource.getRepository(PromoVoucher);
@@ -41,12 +34,24 @@ export const klaimMo = async (req: Request, res: Response, next: NextFunction) =
 
     if (!getVoucher) return next(new CustomError('Voucher tidak ditemukan atau habis', 404));
 
-    const promo = await promoRepo.findOne({where: {id: getVoucher.promo_id}});
+    const validasiUp = Number(bodies.up) >= getVoucher.minimal_rp && Number(bodies.up) <= getVoucher.maksimal_rp;
+
+    if (!validasiUp) return next(new CustomError('Up harus diantara nilai minimal dan maksimal voucher', 404));
+
+    const promo = await promoRepo.findOne({ where: { id: getVoucher.promo_id } });
 
     // update no aplikasi los ke db kamila
     const updatePengajuan = await pkiPengajuanRepo.update(
       { no_pengajuan: bodies.no_pengajuan },
-      { kode_voucher: getVoucher.kode_voucher, promo_id: bodies.promo_id, kode_produk: promo.kode_produk, is_promo: true, klaim_at: new Date() },
+      {
+        kode_voucher: getVoucher.kode_voucher,
+        promo_id: bodies.promo_id,
+        kode_produk: promo.kode_produk,
+        is_promo: true,
+        klaim_at: new Date(),
+        up: bodies.up,
+        klaim_by: req.user.nik,
+      },
     );
 
     // update no aplikasi los ke db microsite
@@ -56,6 +61,8 @@ export const klaimMo = async (req: Request, res: Response, next: NextFunction) =
       promoId: bodies.promo_id,
       isPromo: true,
       klaimAt: new Date(),
+      up: bodies.up,
+      klaimBy: req.user.nik,
     });
 
     await promoVoucherRepo.update({ kode_voucher: getVoucher.kode_voucher }, { is_active: false });

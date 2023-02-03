@@ -6,6 +6,8 @@ interface IKlaimMO {
   kodeVoucher: string;
   isPromo: boolean;
   klaimAt?: Date;
+  up?: number;
+  klaimBy?: string;
 }
 
 export const updateNoAplikasiLosMicrosite = async (noAplikasiLos: string, noPengajuan: string): Promise<string[]> => {
@@ -38,14 +40,17 @@ export const klaimMo = async (params: IKlaimMO): Promise<string[]> => {
   try {
     const klaimAtWhere = params.klaimAt ? `, klaim_at = CURRENT_TIMESTAMP` : '';
     const isPromoWhere = params.klaimAt ? `, is_promo = 't'` : '';
+    const up = params.up ? `, up = '${params.up}' ` : '';
+    const klaimBy = params.klaimBy ? `, klaim_by = '${params.klaimBy}' ` : '';
 
     const updateNoAplikasiLos = await micrositeDb.dataSource.query(
-      `UPDATE hbl_pengajuan SET promo_id = $1, kode_voucher = $2 ${klaimAtWhere} ${isPromoWhere} WHERE no_pengajuan = $3`,
+      `UPDATE hbl_pengajuan SET promo_id = $1, kode_voucher = $2 ${up} ${klaimBy} ${klaimAtWhere} ${isPromoWhere} WHERE no_pengajuan = $3`,
       [params.promoId, params.kodeVoucher, params.noPengajuan],
     );
 
     return updateNoAplikasiLos;
   } catch (error) {
+    console.log('ERROR QUERY DB MICROSITE ==> ', error);
     return error;
   }
 };
