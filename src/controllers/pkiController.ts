@@ -132,6 +132,12 @@ export const getPki = async (req: Request, res: Response, next: NextFunction) =>
         promo: {
           nama_promosi: true,
         },
+        klaim_by_user: {
+          nama: true,
+          nik: true,
+          kode_role: true,
+          kode_unit_kerja: true,
+        },
       },
       relations: {
         pki_agunan: true,
@@ -141,6 +147,7 @@ export const getPki = async (req: Request, res: Response, next: NextFunction) =>
         outlet: true,
         promo_microsite: true,
         promo: true,
+        klaim_by_user: true,
       },
       take: paging.limit,
       skip: paging.offset,

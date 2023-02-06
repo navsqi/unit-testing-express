@@ -16,6 +16,7 @@ import MasterStatusLos from './MasterStatusLos';
 import Outlet from './Outlet';
 import PromoMicrosite from './PromoMicrosite';
 import Promo from './Promo';
+import User from './User';
 
 @Entity('pki_pengajuan', { synchronize: false })
 class PkiPengajuan {
@@ -248,6 +249,10 @@ class PkiPengajuan {
   @ManyToOne(() => Outlet)
   @JoinColumn([{ name: 'kode_outlet', referencedColumnName: 'kode' }])
   outlet: Outlet;
+
+  @ManyToOne(() => User)
+  @JoinColumn([{ name: 'klaim_by', referencedColumnName: 'nik' }])
+  klaim_by_user: User;
 }
 
 export default PkiPengajuan;
