@@ -603,10 +603,32 @@ export const promosiReport = async (filter?: IFilter) => {
     q.addSelect('p.end_date', 'end_date');
     q.addSelect('p.total_promosi', 'total_promosi');
     q.addSelect('p.nilai_per_transaksi', 'nilai_per_transaksi');
+    q.addSelect('lcs.up', 'nilai_penyerapan'); // promo
+
+    q.addSelect((subQuery) => {
+      return subQuery
+        .select('pv2.potongan_persentase')
+        .from('promo_voucher', 'pv2')
+        .where('pv2.promo_id =  p.id')
+        .limit(1);
+    }, 'potongan_persentase');
+
     q.addSelect(`coalesce('')`, 'nilai_persen_per_transaksi');
     q.addSelect(`coalesce('')`, 'nilai_penyerapan');
 
     q.leftJoin('produk', 'produk', 'produk.kode_produk = p.kode_produk');
+    q.leftJoin('promo_voucher', 'pv', 'pv.promo_id = p.id');
+    q.leftJoin('pki_pengajuan', 'pp', 'pp.kode_voucher = pv.kode_voucher');
+    q.leftJoin(
+      'leads_closing',
+      'lcs',
+      'lcs.nik_ktp = pp.no_ktp and lcs.tgl_kredit > cast(pp.created_at as date) and lcs.kode_produk = pp.kode_produk',
+    );
+
+    if (filter.start_date && filter.end_date) {
+      q.where('CAST(p.start_date AS date) >= :startDate', { startDate: filter.start_date });
+      q.orWhere('CAST(p.end_date AS date) <= :endDate', { endDate: filter.end_date });
+    }
 
     let count = null;
 
@@ -669,7 +691,18 @@ export const promosiClosingReport = async (filter?: IFilter) => {
     q.addSelect('lcs.up', 'uang_pinjaman'); // promo
     q.addSelect('pki_pengajuan.promo_id', 'promo_id'); //promo
     q.addSelect('promo.nama_promosi', 'nama_promosi'); //promo
-    q.addSelect('coalesce(0)', 'nilai_promosi'); // promosi
+    q.addSelect(
+      'CASE WHEN pv.potongan_persentase <> 0 THEN pv.potongan_persentase * pki_pengajuan.up / 100 ELSE pv.potongan_rp END',
+      'nilai_promosi',
+    ); // promosi
+
+    // q.addSelect((subQuery) => {
+    //   return subQuery
+    //     .select('sum()')
+    //     .from('leads_closing', 'lc2')
+    //     .where('lc2.no_kontrak = lcs.no_kontrak AND osl IS NOT NULL')
+    //     .limit(1);
+    // }, 'osl');
 
     q.leftJoin('instansi', 'instansi', 'instansi.id = leads.instansi_id');
     q.leftJoin('outlet', 'outlet_instansi', 'outlet_instansi.kode = instansi.kode_unit_kerja');
@@ -683,6 +716,7 @@ export const promosiClosingReport = async (filter?: IFilter) => {
     );
     q.leftJoin('promo', 'promo', 'promo.id = pki_pengajuan.promo_id');
     q.leftJoin('outlet', 'outlet_transaksi', 'outlet_transaksi.kode = lcs.kode_unit_kerja_pencairan');
+    q.leftJoin('promo_voucher', 'pv', 'pv.kode_voucher = pki_pengajuan.kode_voucher');
 
     q.where('CAST(lcs.tgl_kredit AS date) >= :startDate', { startDate: filter.start_date });
     q.andWhere('CAST(lcs.tgl_kredit AS date) <= :endDate', { endDate: filter.end_date });
@@ -715,6 +749,75 @@ export const promosiClosingReport = async (filter?: IFilter) => {
       count: count ?? data.length,
     };
   } catch (error) {
+    await queryRunner.release();
+    return { err: error.message, data: null };
+  }
+};
+
+// report closing: minus nilai promosi
+export const promosiClosingReportV2 = async (filter?: IFilter) => {
+  const queryRunner = dataSource.createQueryRunner();
+  await queryRunner.connect();
+  const manager = queryRunner.manager;
+
+  try {
+    const q = manager.createQueryBuilder();
+    q.from('pki_pengajuan', 'pp');
+    q.select('pp.up', 'up');
+    q.addSelect('outlet.nama', 'nama_putlet');
+    q.addSelect('promo.id', 'id_promosi'); //promo
+    q.addSelect('promo.nama_promosi', 'nama_promosi'); //promo
+    q.addSelect('leads.nama', 'nama');
+    q.addSelect('lc.cif', 'cif');
+    q.addSelect('lc.no_kontrak', 'no_kontrak');
+    q.addSelect('lc.tgl_kredit', 'tgl_kredit');
+    q.addSelect('produk.nama_produk', 'nama_produk');
+    q.addSelect('pp.kode_voucher', 'kode_voucher');
+    q.addSelect('pv.potongan_rp', 'potongan_rp');
+    q.addSelect(
+      'CASE WHEN pv.potongan_persentase <> 0 THEN pv.potongan_persentase * pp.up / 100 ELSE pv.potongan_rp END',
+      'nilai_penyerapan',
+    );
+
+    q.leftJoin('outlet', 'outlet', 'outlet.kode = pp.kode_outlet');
+    q.leftJoin('promo', 'promo', 'promo.id = pp.promo_id');
+    q.leftJoin('produk', 'produk', 'produk.kode_produk = pp.kode_produk');
+    q.leftJoin('leads', 'leads', 'leads.nik_ktp = pp.no_ktp');
+    q.leftJoin('leads_closing', 'lc', 'leads.nik_ktp = lc.nik_ktp and lc.kode_produk = pp.kode_produk');
+    q.leftJoin('promo_voucher', 'pv', 'pv.kode_voucher = pp.kode_voucher');
+
+    q.where('CAST(lc.tgl_kredit AS date) >= :startDate', { startDate: filter.start_date });
+    q.andWhere('CAST(lc.tgl_kredit AS date) <= :endDate', { endDate: filter.end_date });
+    q.andWhere('CAST(lc.tgl_kredit AS date) >= pp.tgl_pengajuan');
+
+    if (filter.outlet_id && filter.outlet_id.length > 0) {
+      q.andWhere('leads.kode_unit_kerja IN (:...kodeUnitKerja)', { kodeUnitKerja: filter.outlet_id });
+    }
+
+    if (filter.created_by) {
+      q.andWhere('leads.created_by = :userId', { userId: filter.created_by });
+    }
+
+    let count = null;
+
+    if (filter.page && filter.limit && filter.offset !== null) {
+      count = await q.getCount();
+
+      q.limit(filter.limit);
+      q.offset(filter.offset);
+    }
+
+    q.orderBy('lc.tgl_kredit');
+    const data: QueryResultClosingReport[] = await q.getRawMany();
+    await queryRunner.release();
+
+    return {
+      err: false,
+      data,
+      count: count ?? data.length,
+    };
+  } catch (error) {
+    console.log(error);
     await queryRunner.release();
     return { err: error.message, data: null };
   }
