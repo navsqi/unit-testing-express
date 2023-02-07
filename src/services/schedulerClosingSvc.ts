@@ -123,7 +123,7 @@ export const schedulerClosingTabemas = async () => {
     for (const tmpKredit of tmpKredits) {
       const up = tmpKredit.jenis_transaksi === 'OPEN' ? tmpKredit.amount : tmpKredit.omset_te;
 
-      // handle unit kerja untuk produk Gadai Efek & PMP (karena unit kerjanya di pusat)
+      // handle unit kerja untuk produk TE Korporasi
       let kode_unit_kerja = tmpKredit.kode_outlet;
       let kode_unit_kerja_pencairan = tmpKredit.kode_outlet_pencairan;
 
