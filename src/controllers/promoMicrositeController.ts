@@ -41,11 +41,11 @@ export const getPromoMicrosite = async (req: Request, res: Response, next: NextF
     }
 
     if (filter.start_date) {
-      where.start_date = filter.start_date;
+      where.start_date = Raw((alias) => `${alias} >= '${filter.start_date}'`);
     }
 
     if (filter.end_date) {
-      where.end_date = filter.end_date;
+      where.end_date = Raw((alias) => `${alias} <= '${filter.end_date}'`);
     }
 
     const paging = queryHelper.paging(filter);
