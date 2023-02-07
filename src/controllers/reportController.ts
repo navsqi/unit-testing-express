@@ -6,6 +6,7 @@ import {
   instansiReport,
   leadsReport,
   promosiClosingReport,
+  promosiClosingReportV2,
   promosiReport,
 } from '~/services/reportSvc';
 import * as common from '~/utils/common';
@@ -1019,6 +1020,160 @@ export const genExcelReportPromoClosing = async (req: Request, res: Response, ne
     if (!filter.start_date || !filter.end_date) return next(new CustomError('Pilih tanggal awal dan akhir', 400));
 
     const report = await promosiClosingReport(filter);
+
+    if (report.err) return next(new CustomError(report.err, 400));
+
+    const data = report.data;
+
+    const { workbook, worksheet, headingStyle, outlineHeadingStyle, outlineStyle } = xls('Report Promo');
+
+    const col = 11;
+
+    worksheet.column(1).setWidth(5);
+    for (let i = 2; i <= col; i++) {
+      const exclude = [];
+      worksheet.column(i).setWidth(exclude.includes(i) ? 10 : 27);
+    }
+
+    worksheet.cell(1, 1, 1, 9, true).string('REPORT PROMO').style(headingStyle);
+    worksheet
+      .cell(2, 1, 2, 9, true)
+      .string(
+        `TANGGAL ${common.tanggal(req.query.start_date as string)} S.D. ${common.tanggal(
+          req.query.end_date as string,
+        )}`,
+      )
+      .style(headingStyle);
+
+    const barisHeading = 5;
+    let noHeading = 0;
+
+    const judulKolom = [
+      'NO',
+      'ID PROMOSI',
+      'NAMA PROMOSI',
+      'NASABAH',
+      'CIF',
+      'NAMA PRODUK',
+      'NO KREDIT',
+      'OUTLET TRANSAKSI',
+      'TGL TRANSAKSI',
+      'UANG PINJAMAN',
+      'NILAI PROMOSI',
+    ];
+
+    for (const header of judulKolom) {
+      worksheet
+        .cell(barisHeading, ++noHeading)
+        .string(header)
+        .style(outlineHeadingStyle);
+    }
+
+    let rows = 6;
+
+    const valueKolom = [
+      { property: 'promo_id', isDate: false, isMoney: false },
+      { property: 'nama_promosi', isDate: false, isMoney: false },
+      { property: 'nama_nasabah', isDate: false, isMoney: false },
+      { property: 'cif', isDate: false, isMoney: false },
+      { property: 'nama_produk', isDate: false, isMoney: false },
+      { property: 'no_kontrak', isDate: false, isMoney: false },
+      { property: 'outlet_transaksi', isDate: false, isMoney: false },
+      { property: 'tgl_kredit', isDate: true, isMoney: false },
+      { property: 'uang_pinjaman', isDate: false, isMoney: true },
+      { property: 'nilai_promosi', isDate: false, isMoney: true },
+    ];
+
+    for (const [index, val] of data.entries()) {
+      let bodyLineNum = 1;
+      worksheet
+        .cell(rows, 1)
+        .string(`${index + 1}`)
+        .style(outlineStyle);
+
+      for (const col of valueKolom) {
+        let data = String(val[col.property]);
+
+        if (col.isDate) {
+          data = common.tanggal(val[col.property]);
+        }
+
+        if (col.isMoney) {
+          data = common.rupiah(+val[col.property], false);
+        }
+
+        worksheet
+          .cell(rows, ++bodyLineNum)
+          .string(data && data != 'null' ? data : '-')
+          .style(outlineStyle);
+      }
+
+      rows++;
+    }
+
+    const fileBuffer = await workbook.writeToBuffer();
+
+    res.set({
+      'Content-Disposition': `attachment; filename="REPORTPROMOCLOSING-${Date.now()}.xlsx"`,
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+    return res.end(fileBuffer);
+  } catch (e) {
+    next(e);
+  }
+};
+
+export const getReportPromoClosingV2 = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const filter = {
+      start_date: (req.query.start_date as string) || '',
+      end_date: (req.query.end_date as string) || '',
+      page: Number(req.query.page) || 1,
+      limit: Number(req.query.limit) || 250,
+      offset: null,
+    };
+
+    const paging = queryHelper.paging({ ...filter });
+    filter.offset = paging.offset;
+    filter.limit = paging.limit;
+
+    if (!filter.start_date || !filter.end_date) return next(new CustomError('Pilih tanggal awal dan akhir', 400));
+
+    const report = await promosiClosingReportV2(filter);
+
+    if (report.err) return next(new CustomError(report.err, 400));
+
+    const dataRes = {
+      meta: {
+        count: report.count,
+        rowCount: report.data.length,
+        page: filter.page,
+        limit: filter.limit,
+        offset: filter.offset,
+      },
+      report: report.data,
+    };
+    return res.customSuccess(200, 'Get report promo', dataRes, {
+      count: report.count,
+      rowCount: report.data.length,
+      limit: filter.limit,
+      offset: filter.offset,
+    });
+  } catch (e) {
+    return next(e);
+  }
+};
+
+export const genExcelReportPromoClosingV2 = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const filter = {
+      start_date: (req.query.start_date as string) || '',
+      end_date: (req.query.end_date as string) || '',
+    };
+
+    if (!filter.start_date || !filter.end_date) return next(new CustomError('Pilih tanggal awal dan akhir', 400));
+
+    const report = await promosiClosingReportV2(filter);
 
     if (report.err) return next(new CustomError(report.err, 400));
 
