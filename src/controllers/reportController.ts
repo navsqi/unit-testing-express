@@ -871,7 +871,7 @@ export const genExcelReportPromoSummary = async (req: Request, res: Response, ne
 
     const data = report.data;
 
-    const { workbook, worksheet, headingStyle, outlineHeadingStyle, outlineStyle } = xls('Report Promo');
+    const { workbook, worksheet, headingStyle, outlineHeadingStyle, outlineStyle } = xls('Report Penyerapan Promo');
 
     const col = 11;
 
@@ -881,7 +881,7 @@ export const genExcelReportPromoSummary = async (req: Request, res: Response, ne
       worksheet.column(i).setWidth(exclude.includes(i) ? 10 : 27);
     }
 
-    worksheet.cell(1, 1, 1, 9, true).string('REPORT PROMO').style(headingStyle);
+    worksheet.cell(1, 1, 1, 9, true).string('REPORT PENYERAPAN PROMO').style(headingStyle);
     worksheet
       .cell(2, 1, 2, 9, true)
       .string(
@@ -1025,7 +1025,7 @@ export const genExcelReportPromoClosing = async (req: Request, res: Response, ne
 
     const data = report.data;
 
-    const { workbook, worksheet, headingStyle, outlineHeadingStyle, outlineStyle } = xls('Report Promo');
+    const { workbook, worksheet, headingStyle, outlineHeadingStyle, outlineStyle } = xls('Report Promo Closing');
 
     const col = 11;
 
@@ -1035,7 +1035,7 @@ export const genExcelReportPromoClosing = async (req: Request, res: Response, ne
       worksheet.column(i).setWidth(exclude.includes(i) ? 10 : 27);
     }
 
-    worksheet.cell(1, 1, 1, 9, true).string('REPORT PROMO').style(headingStyle);
+    worksheet.cell(1, 1, 1, 9, true).string('REPORT PROMO CLOSING').style(headingStyle);
     worksheet
       .cell(2, 1, 2, 9, true)
       .string(
