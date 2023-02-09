@@ -601,9 +601,8 @@ export const promosiReport = async (filter?: IFilter) => {
     q.addSelect('p.jenis_promosi', 'jenis_promosi');
     q.addSelect('p.start_date', 'start_date');
     q.addSelect('p.end_date', 'end_date');
-    q.addSelect('p.total_promosi', 'total_promosi');
+    q.addSelect('coalesce(p.total_promosi,0)', 'total_promosi');
     q.addSelect('p.nilai_per_transaksi', 'nilai_per_transaksi');
-    q.addSelect('lcs.up', 'nilai_penyerapan'); // promo
 
     q.addSelect((subQuery) => {
       return subQuery
@@ -611,10 +610,9 @@ export const promosiReport = async (filter?: IFilter) => {
         .from('promo_voucher', 'pv2')
         .where('pv2.promo_id =  p.id')
         .limit(1);
-    }, 'potongan_persentase');
+    }, 'nilai_persen_per_transaksi');
 
-    q.addSelect(`coalesce('')`, 'nilai_persen_per_transaksi');
-    q.addSelect(`coalesce('')`, 'nilai_penyerapan');
+    q.addSelect(`sum(coalesce(abc.up2, 0))`, 'nilai_penyerapan');
 
     q.leftJoin('produk', 'produk', 'produk.kode_produk = p.kode_produk');
     q.leftJoin('promo_voucher', 'pv', 'pv.promo_id = p.id');
@@ -623,6 +621,20 @@ export const promosiReport = async (filter?: IFilter) => {
       'leads_closing',
       'lcs',
       'lcs.nik_ktp = pp.no_ktp and lcs.tgl_kredit > cast(pp.created_at as date) and lcs.kode_produk = pp.kode_produk',
+    );
+
+    q.leftJoin(
+      (qb: SelectQueryBuilder<any>) => {
+        return qb
+          .select('sum(pp2.up)', 'up2')
+          .addSelect('p2.id', 'id2')
+          .from('promo', 'p2')
+          .innerJoin('pki_pengajuan', 'pp2', 'pp2.promo_id = p2.id')
+          .groupBy('p2.id')
+          .addGroupBy('pp2.up');
+      },
+      'abc',
+      'abc.id2 = p.id',
     );
 
     if (filter.start_date && filter.end_date) {
@@ -638,6 +650,10 @@ export const promosiReport = async (filter?: IFilter) => {
       q.limit(filter.limit);
       q.offset(filter.offset);
     }
+
+    q.groupBy('p.id');
+    q.addGroupBy('produk.nama_produk');
+    q.addGroupBy('abc.up2');
 
     const data = await q.getRawMany();
     await queryRunner.release();
