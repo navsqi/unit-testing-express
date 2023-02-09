@@ -351,7 +351,7 @@ export const bulkCheckKTPAndApprove = async (req: Request, res: Response, next: 
 
       const getIp = parseIp(req);
 
-      if (currentLeads.is_ktp_valid == 0) {
+      if (currentLeads.nik_ktp && currentLeads.is_ktp_valid == 0 && !currentLeads.is_badan_usaha) {
         const checkKTP = await APIPegadaian.checkEktpDukcapil({
           nama: currentLeads.nama,
           nik: currentLeads.nik_ktp,
