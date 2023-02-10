@@ -606,8 +606,11 @@ export const createNewLeadsByCsv = async (req: Request, res: Response, next: Nex
 
     const dateDiff = Math.abs(common.getDiffDateCount(dayjs().format('YYYY-MM-DD'), findEvent.tanggal_event));
 
-    if (dateDiff > +process.env.DATERANGE_LEADS_CREATE_EVENT)
+    if (dateDiff > +process.env.DATERANGE_LEADS_CREATE_EVENT) {
+      await queryRunner.rollbackTransaction();
+      await queryRunner.release();
       return next(new CustomError('Tanggal event telah expired', 400));
+    }
 
     let csv: Express.Multer.File = null;
 
