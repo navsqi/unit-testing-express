@@ -305,7 +305,7 @@ export const genExcelReportEvent = async (req: Request, res: Response, next: Nex
 
     const { workbook, worksheet, headingStyle, outlineHeadingStyle, outlineStyle } = xls('Report Event');
 
-    const col = 16;
+    const col = 17;
 
     worksheet.column(1).setWidth(5);
     for (let i = 2; i <= col; i++) {
@@ -328,6 +328,7 @@ export const genExcelReportEvent = async (req: Request, res: Response, next: Nex
 
     const judulKolom = [
       'NO',
+      'NIK MO',
       'NAMA USER',
       'JENIS AKTIVITAS',
       'INSTANSI',
@@ -354,6 +355,7 @@ export const genExcelReportEvent = async (req: Request, res: Response, next: Nex
     let rows = 6;
 
     const valueKolom = [
+      { property: 'created_by_kode', isMoney: false, isDate: false },
       { property: 'created_by', isMoney: false, isDate: false },
       { property: 'jenis_event', isMoney: false, isDate: false },
       { property: 'nama_instansi', isMoney: false, isDate: false },
