@@ -20,5 +20,7 @@ router.get('/promosummary', protect(), reportController.getReportPromoSummary);
 router.get('/promosummary/excel', protect(), reportController.genExcelReportPromoSummary);
 router.get('/promoclosing', protect(), reportController.getReportPromoClosing);
 router.get('/promoclosing/excel', protect(), reportController.genExcelReportPromoClosing);
+router.get('/promoclosingv2', protect(), reportController.getReportPromoClosingV2);
+router.get('/promoclosingv2/excel', protect(), reportController.genExcelReportPromoClosingV2);
 
 export default router;

@@ -14,6 +14,9 @@ import PkiNasabah from './PkiNasabah';
 import Produk from './Produk';
 import MasterStatusLos from './MasterStatusLos';
 import Outlet from './Outlet';
+import PromoMicrosite from './PromoMicrosite';
+import Promo from './Promo';
+import User from './User';
 
 @Entity('pki_pengajuan', { synchronize: false })
 class PkiPengajuan {
@@ -126,6 +129,12 @@ class PkiPengajuan {
   sewa_modal: number;
 
   @Column({
+    type: 'double precision',
+    nullable: true,
+  })
+  up: number;
+
+  @Column({
     type: 'date',
     nullable: true,
   })
@@ -178,10 +187,9 @@ class PkiPengajuan {
 
   @Column({
     type: 'varchar',
-    length: 220,
     nullable: true,
   })
-  promomicrosite_id: string;
+  promomicrosite_id: number;
 
   @Column({
     type: 'varchar',
@@ -203,6 +211,13 @@ class PkiPengajuan {
   })
   klaim_at: Date;
 
+  @Column({
+    type: 'varchar',
+    length: 50,
+    nullable: true,
+  })
+  klaim_by: string;
+
   @OneToOne(() => PkiNasabah)
   @JoinColumn([{ name: 'no_ktp', referencedColumnName: 'no_ktp' }])
   pki_nasabah: PkiNasabah;
@@ -219,6 +234,14 @@ class PkiPengajuan {
   @JoinColumn([{ name: 'kode_produk', referencedColumnName: 'kode_produk' }])
   produk: Produk;
 
+  @ManyToOne(() => PromoMicrosite)
+  @JoinColumn([{ name: 'promomicrosite_id', referencedColumnName: 'id' }])
+  promo_microsite: PromoMicrosite;
+
+  @ManyToOne(() => Promo)
+  @JoinColumn([{ name: 'promo_id', referencedColumnName: 'id' }])
+  promo: Promo;
+
   @OneToOne(() => MasterStatusLos)
   @JoinColumn([{ name: 'status_pengajuan', referencedColumnName: 'id_status_microsite' }])
   master_status_los: MasterStatusLos;
@@ -226,6 +249,10 @@ class PkiPengajuan {
   @ManyToOne(() => Outlet)
   @JoinColumn([{ name: 'kode_outlet', referencedColumnName: 'kode' }])
   outlet: Outlet;
+
+  @ManyToOne(() => User)
+  @JoinColumn([{ name: 'klaim_by', referencedColumnName: 'nik' }])
+  klaim_by_user: User;
 }
 
 export default PkiPengajuan;

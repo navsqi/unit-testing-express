@@ -82,6 +82,8 @@ export const mapLeadsReport = (data: QueryResultLeadsReport[]) => {
       outlet_4: '',
       outlet_3: '',
       outlet_2: '',
+      is_karyawan: el.is_karyawan == 1 ? 'Karyawan' : 'Bukan Karyawan',
+      is_ktp_valid: el.is_ktp_valid == 1 ? 'Valid' : 'Tidak Valid',
     };
 
     if (el.nama_unit_kerja && el.unit) {
