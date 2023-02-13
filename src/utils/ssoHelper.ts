@@ -24,6 +24,10 @@ export default {
       return '00002';
     }
 
+    if (kodeOutlet && Number(kodeOutlet.length) === 3) {
+      return '00' + kodeOutlet;
+    }
+
     return kodeOutlet;
   },
 };

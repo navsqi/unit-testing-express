@@ -303,7 +303,7 @@ export const checkKTPAndApprove = async (req: Request, res: Response, next: Next
 
     const getIp = parseIp(req);
 
-    if (currentLeads.is_ktp_valid == 0) {
+    if (currentLeads.nik_ktp && currentLeads.is_ktp_valid == 0 && !currentLeads.is_badan_usaha) {
       const checkKTP = await APIPegadaian.checkEktpDukcapil({
         nama: currentLeads.nama,
         nik: currentLeads.nik_ktp,
@@ -351,7 +351,7 @@ export const bulkCheckKTPAndApprove = async (req: Request, res: Response, next: 
 
       const getIp = parseIp(req);
 
-      if (currentLeads.is_ktp_valid == 0) {
+      if (currentLeads.nik_ktp && currentLeads.is_ktp_valid == 0 && !currentLeads.is_badan_usaha) {
         const checkKTP = await APIPegadaian.checkEktpDukcapil({
           nama: currentLeads.nama,
           nik: currentLeads.nik_ktp,
@@ -578,7 +578,7 @@ export const createNewLeadsBadanUsaha = async (req: Request, res: Response, next
       updated_by: req.user.nik,
       source_data: 'FORM INPUT DATA',
       expired_referral: addDays(30),
-      status: 1,
+      status: 0,
     });
 
     const dataRes = {
@@ -606,8 +606,11 @@ export const createNewLeadsByCsv = async (req: Request, res: Response, next: Nex
 
     const dateDiff = Math.abs(common.getDiffDateCount(dayjs().format('YYYY-MM-DD'), findEvent.tanggal_event));
 
-    if (dateDiff > +process.env.DATERANGE_LEADS_CREATE_EVENT)
+    if (dateDiff > +process.env.DATERANGE_LEADS_CREATE_EVENT) {
+      await queryRunner.rollbackTransaction();
+      await queryRunner.release();
       return next(new CustomError('Tanggal event telah expired', 400));
+    }
 
     let csv: Express.Multer.File = null;
 

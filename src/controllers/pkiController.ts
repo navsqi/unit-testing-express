@@ -126,8 +126,29 @@ export const getPki = async (req: Request, res: Response, next: NextFunction) =>
         outlet: {
           nama: true,
         },
+        promo_microsite: {
+          nama_promosi: true,
+        },
+        promo: {
+          nama_promosi: true,
+        },
+        klaim_by_user: {
+          nama: true,
+          nik: true,
+          kode_role: true,
+          kode_unit_kerja: true,
+        },
       },
-      relations: ['pki_agunan', 'pki_nasabah', 'instansi', 'produk', 'outlet'],
+      relations: {
+        pki_agunan: true,
+        pki_nasabah: true,
+        instansi: true,
+        produk: true,
+        outlet: true,
+        promo_microsite: true,
+        promo: true,
+        klaim_by_user: true,
+      },
       take: paging.limit,
       skip: paging.offset,
       where,
