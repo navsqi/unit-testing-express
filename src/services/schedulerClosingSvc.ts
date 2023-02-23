@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import { dataSource } from '~/orm/dbCreateConnection';
+import User from '~/orm/entities/User';
 import { ITmpKreditQuery, ITmpKreditTabemasQuery } from '~/types/queryClosingTypes';
 import logger from '~/utils/logger';
 import queryClosing from '~/utils/queryClosing';
@@ -35,6 +36,14 @@ export const schedulerClosing = async () => {
 
       // jika tidak duplikat no kredit/kontrak insert ke tb leads_closing & up != 0
       if (checkNoKredit.length < 1 || !checkNoKredit) {
+        const userMo = await manager.findOne<User>(User, {
+          select: { nik: true, nama: true },
+          where: { kode_unit_kerja: kode_unit_kerja_pencairan },
+          order: { last_login: 'DESC' },
+        });
+        const nikMo = userMo ? userMo.nik : null;
+        const namaMo = userMo ? userMo.nama : null;
+
         await manager.query(
           `INSERT INTO leads_closing 
         (leads_id, 
@@ -52,7 +61,9 @@ export const schedulerClosing = async () => {
           status_new_cif, 
           channel_id, 
           channel, 
-          kode_produk) VALUES 
+          kode_produk,
+          nik_mo,
+          nama_mo) VALUES 
         ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16);
         `,
           [
@@ -72,6 +83,8 @@ export const schedulerClosing = async () => {
             tmpKredit.channel_id,
             tmpKredit.nama_channel,
             tmpKredit.product_code,
+            nikMo,
+            namaMo,
           ],
         );
       }
@@ -134,6 +147,14 @@ export const schedulerClosingTabemas = async () => {
 
       // jika omset tabemas != 0 insert ke leads closing
       if (up != 0) {
+        const userMo = await manager.findOne<User>(User, {
+          select: { nik: true, nama: true },
+          where: { kode_unit_kerja: kode_unit_kerja_pencairan },
+          order: { last_login: 'DESC' },
+        });
+        const nikMo = userMo ? userMo.nik : null;
+        const namaMo = userMo ? userMo.nama : null;
+
         // jika tidak duplikat insert ke tb leads_closing
         await manager.query(
           `INSERT INTO leads_closing 
@@ -151,7 +172,9 @@ export const schedulerClosingTabemas = async () => {
           channel_id,
           channel, 
           kode_produk,
-          channeling_syariah) VALUES 
+          channeling_syariah,
+          nik_mo,
+          nama_mo) VALUES 
         ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15);
         `,
           [
@@ -170,6 +193,8 @@ export const schedulerClosingTabemas = async () => {
             tmpKredit.nama_channel,
             tmpKredit.product_code,
             tmpKredit.channeling_syariah,
+            nikMo,
+            namaMo,
           ],
         );
 
