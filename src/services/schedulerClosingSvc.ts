@@ -146,7 +146,7 @@ export const schedulerClosingTabemas = async () => {
       }
 
       // jika omset tabemas != 0 insert ke leads closing
-      if (up == 0) {
+      if (up != 0) {
         const userMo = await manager.findOne<User>(User, {
           select: { nik: true, nama: true },
           where: { kode_unit_kerja: kode_unit_kerja_pencairan },
