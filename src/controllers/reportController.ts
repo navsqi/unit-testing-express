@@ -630,11 +630,13 @@ export const getReportClosing = async (req: Request, res: Response, next: NextFu
       start_date: (req.query.start_date as string) || '',
       end_date: (req.query.end_date as string) || '',
       outlet_id: outletIds,
-      is_mo: common.isSalesRole(req.user.kode_role),
+      is_mo: common.isSalesRole(req.user.kode_role, true),
       created_by: common.isSalesRole(req.user.kode_role) ? req.user.nik : req.query.created_by,
       page: Number(req.query.page) || 1,
       limit: Number(req.query.limit) || 250,
       offset: null,
+      order_by: req.query.order_by,
+      order_type: req.query.order_type,
     };
 
     const paging = queryHelper.paging({ ...filter });
@@ -690,8 +692,10 @@ export const genExcelReportClosing = async (req: Request, res: Response, next: N
       start_date: (req.query.start_date as string) || '',
       end_date: (req.query.end_date as string) || '',
       outlet_id: outletIds,
-      is_mo: common.isSalesRole(req.user.kode_role),
+      is_mo: common.isSalesRole(req.user.kode_role, true),
       created_by: common.isSalesRole(req.user.kode_role) ? req.user.nik : req.query.created_by,
+      order_by: req.query.order_by,
+      order_type: req.query.order_type,
     };
 
     if (!filter.start_date || !filter.end_date) return next(new CustomError('Pilih tanggal awal dan akhir', 400));
@@ -709,7 +713,7 @@ export const genExcelReportClosing = async (req: Request, res: Response, next: N
 
     const { workbook, worksheet, headingStyle, outlineHeadingStyle, outlineStyle } = xls('Report Closing');
 
-    const col = 19;
+    const col = 23;
 
     worksheet.column(1).setWidth(5);
     for (let i = 2; i <= col; i++) {
@@ -736,6 +740,8 @@ export const genExcelReportClosing = async (req: Request, res: Response, next: N
       'CABANG LEADS',
       'MASTER INSTANSI',
       'INSTANSI',
+      'NIK MO',
+      'NAMA MO',
       'KANWIL TRANSAKSI',
       'AREA TRANSAKSI',
       'CABANG TRANSAKSI',
@@ -750,6 +756,8 @@ export const genExcelReportClosing = async (req: Request, res: Response, next: N
       'PRODUK',
       'NO KREDIT',
       'OMSET',
+      'TANGGAL INPUT LEADS',
+      'TANGGAL APPROVE LEADS',
     ];
 
     for (const header of judulKolom) {
@@ -766,6 +774,8 @@ export const genExcelReportClosing = async (req: Request, res: Response, next: N
       { property: 'outlet_leads', isMoney: false, isDate: false },
       { property: 'nama_master_instansi', isMoney: false, isDate: false },
       { property: 'nama_instansi', isMoney: false, isDate: false },
+      { property: 'nik_mo', isMoney: false, isDate: false },
+      { property: 'nama_mo', isMoney: false, isDate: false },
       { property: 'outlet_2', isMoney: false, isDate: false },
       { property: 'outlet_3', isMoney: false, isDate: false },
       { property: 'nama_cabang_transaksi', isMoney: false, isDate: false },
@@ -780,6 +790,8 @@ export const genExcelReportClosing = async (req: Request, res: Response, next: N
       { property: 'nama_produk', isMoney: false, isDate: false },
       { property: 'no_kontrak', isMoney: false, isDate: false },
       { property: 'omset', isMoney: false, isDate: false },
+      { property: 'created_at_leads', isMoney: false, isDate: true },
+      { property: 'approved_at_leads', isMoney: false, isDate: true },
     ];
 
     for (const [index, val] of data.entries()) {

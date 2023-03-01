@@ -10,14 +10,26 @@ import CustomError from '~/utils/customError';
 import queryHelper from '~/utils/queryHelper';
 import * as common from '~/utils/common';
 import dayjs from 'dayjs';
+import { countLatestEventHistory, createEventHistory } from '~/services/eventHistorySvc';
+import globalConfig from '~/config/globalConfig';
 
 const eventRepo = dataSource.getRepository(Event);
 const instansiRepo = dataSource.getRepository(Instansi);
 
 export const createEvent = async (req: Request, res: Response, next: NextFunction) => {
   let fileName: string = null;
+  const actionType = 'CREATE';
 
   try {
+    const totalAktifitasPerhari = await countLatestEventHistory({
+      nik_user: req.user.nik,
+      event_type: globalConfig.events.limiter.eventType,
+      action_type: actionType,
+    });
+
+    if (totalAktifitasPerhari > globalConfig.events.limiter.count)
+      return next(new CustomError(`Anda telah telah mencapai batas pembuatan event per-hari`, 400));
+
     const bodies = req.body as Event;
 
     const dateDiff = Math.abs(common.getDiffDateCount(dayjs().format('YYYY-MM-DD'), bodies.tanggal_event));
@@ -57,6 +69,12 @@ export const createEvent = async (req: Request, res: Response, next: NextFunctio
     ev.created_by = bodies.created_by ? bodies.created_by : req.user.nik;
 
     const newEvent = await eventRepo.save(ev);
+
+    await createEventHistory({
+      action_type: actionType,
+      event_type: globalConfig.events.limiter.eventType,
+      nik_user: req.user.nik,
+    });
 
     const dataRes = {
       event: newEvent,
