@@ -3,7 +3,7 @@ import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeor
 @Entity('event_history', { synchronize: true })
 class EventHistory {
   @PrimaryGeneratedColumn()
-  id: number;
+  id?: number;
 
   @Column({
     length: 10,
@@ -22,7 +22,7 @@ class EventHistory {
 
   @Column()
   @CreateDateColumn()
-  created_at: Date;
+  created_at?: Date;
 }
 
 export default EventHistory;

@@ -12,6 +12,8 @@ interface IFilter {
   page?: number;
   limit?: number;
   offset?: any;
+  order_by?: any;
+  order_type?: any;
 }
 
 interface IFilterP2KI {
@@ -284,6 +286,8 @@ export const leadsReport = async (filter?: IFilter) => {
     q.addSelect('leads.is_ktp_valid', 'is_ktp_valid');
     q.addSelect('leads.flag_app', 'flag_app');
     q.addSelect('leads.kode_unit_kerja', 'kode_unit_kerja');
+    q.addSelect('leads.approved_at', 'approved_at_leads');
+    q.addSelect('leads.status', 'status_leads');
     q.addSelect('outlet.nama', 'nama_unit_kerja');
     q.addSelect('outlet.unit_kerja', 'unit');
     q.addSelect('outlet_p3.nama', 'nama_unit_kerja_parent_3');
@@ -291,6 +295,8 @@ export const leadsReport = async (filter?: IFilter) => {
     q.addSelect('outlet_p2.nama', 'nama_unit_kerja_parent_2');
     q.addSelect('outlet_p2.unit_kerja', 'unit_parent_2');
     q.addSelect('leadsclosing.kode_produk', 'kode_produk');
+    q.addSelect('lcs.nik_mo', 'nik_mo');
+    q.addSelect('lcs.nama_mo', 'nama_mo');
     q.addSelect('produk.nama_produk', 'nama_produk');
     q.addSelect('COALESCE(leadsclosing.omset, 0)', 'omset');
     q.addSelect('COALESCE(0)', 'osl');
@@ -303,6 +309,7 @@ export const leadsReport = async (filter?: IFilter) => {
     q.leftJoin('outlet', 'outlet', 'outlet.kode = leads.kode_unit_kerja');
     q.leftJoin('outlet', 'outlet_p3', 'outlet_p3.kode = outlet.parent');
     q.leftJoin('outlet', 'outlet_p2', 'outlet_p2.kode = outlet_p3.parent');
+    q.innerJoin('leads_closing', 'lcs', 'lcs.leads_id = leads.id');
 
     q.leftJoin(
       (qb) => {
@@ -313,6 +320,7 @@ export const leadsReport = async (filter?: IFilter) => {
           .addSelect('lcs.nik_ktp', 'nik_ktp')
           .addSelect('lcs.cif', 'cif')
           .addSelect('lcs.kode_produk', 'kode_produk')
+          .addSelect('lcs.no_kontrak', 'no_kontrak')
           .addSelect('SUM(lcs.up)', 'omset')
           // .addSelect('SUM(lcs.osl)', 'osl')
           // .addSelect('SUM(lcs.saldo_tabemas)', 'saldo_tabemas')
@@ -324,6 +332,24 @@ export const leadsReport = async (filter?: IFilter) => {
       },
       'leadsclosing',
       'leadsclosing.nik_ktp = leads.nik_ktp OR leadsclosing.cif = leads.cif',
+    );
+
+    q.leftJoin(
+      (qb) => {
+        const qb2 = qb as SelectQueryBuilder<any>;
+
+        qb2
+          .from('leads_closing_osl', 'lcs')
+          .addSelect('lcs.nik_ktp', 'nik_ktp')
+          .addSelect('lcs.cif', 'cif')
+          .addSelect('lcs.kode_produk', 'kode_produk');
+        // .addSelect('SUM(lcs.osl)', 'osl')
+        // .addSelect('SUM(lcs.saldo_tabemas)', 'saldo_tabemas')
+
+        return qb2;
+      },
+      'leadsclosingosl',
+      'leadsclosingosl.no_kontrak = leadsclosing.no_kontrak',
     );
 
     q.leftJoin('produk', 'produk', 'produk.kode_produk = leadsclosing.kode_produk');
@@ -407,6 +433,10 @@ export const closingReport = async (filter?: IFilter) => {
     q.addSelect('lcs.no_kontrak', 'no_kontrak');
     q.addSelect('lcs.channel', 'channel');
     q.addSelect('lcs.up', 'omset');
+    q.addSelect('lcs.nik_mo', 'nik_mo');
+    q.addSelect('lcs.nama_mo', 'nama_mo');
+    q.addSelect('leads.created_at', 'created_at_leads');
+    q.addSelect('leads.approved_at', 'approved_at_leads');
     q.addSelect('outlet_channel_syariah.nama', 'channel_syariah');
     // q.addSelect('coalesce(lcs.osl, 0)', 'osl_original');
     // q.addSelect('coalesce(lcs.saldo_tabemas, 0)', 'saldo_tabemas');
@@ -476,7 +506,18 @@ export const closingReport = async (filter?: IFilter) => {
       q.offset(filter.offset);
     }
 
-    q.orderBy('lcs.tgl_kredit');
+    let orderType: 'ASC' | 'DESC' = 'ASC';
+    if (filter.order_by) {
+      // produk.nama_produk
+      // leads.kode_unit_kerja
+      // lcs.no_kontrak
+      // outlet_cabang.nama
+      // instansi.nama_instansi
+      orderType = filter.order_type ?? 'ASC';
+      q.orderBy(filter.order_by, orderType);
+    } else {
+      q.orderBy('lcs.tgl_kredit');
+    }
 
     const data: QueryResultClosingReport[] = await q.getRawMany();
     await queryRunner.release();
@@ -833,7 +874,6 @@ export const promosiClosingReportV2 = async (filter?: IFilter) => {
       count: count ?? data.length,
     };
   } catch (error) {
-    console.log(error);
     await queryRunner.release();
     return { err: error.message, data: null };
   }
