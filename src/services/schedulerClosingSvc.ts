@@ -133,7 +133,7 @@ export const schedulerClosingTabemas = async () => {
       }
 
       // jika omset tabemas != 0 insert ke leads closing
-      if (up == 0) {
+      if (up != 0) {
         // jika tidak duplikat insert ke tb leads_closing
         await manager.query(
           `INSERT INTO leads_closing 
