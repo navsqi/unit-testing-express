@@ -11,6 +11,7 @@ const CRON_PATTERN = {
 export const cronBigDataClosing = async () => {
   await schedulerClosingSvc.schedulerClosing();
   await schedulerClosingSvc.schedulerClosingTabemas();
+  await schedulerClosingSvc.schedulerDeleteActivity();
 };
 
 const cronJob: CronJob = new CronJob(CRON_PATTERN.every7am, async () => {

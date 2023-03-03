@@ -147,12 +147,28 @@ class Instansi {
   @Column({
     type: 'smallint',
     default: 0,
+    transformer: {
+      to(value) {
+        return value == 0 ? 'MENUNGGU PERSETUJUAN' : 'DISETUJUI';
+      },
+      from(value) {
+        return value == 0 ? 'MENUNGGU PERSETUJUAN' : 'DISETUJUI';
+      },
+    },
   })
   is_approved: number;
 
   @Column({
     type: 'boolean',
     default: false,
+    transformer: {
+      to(value) {
+        return value ? 'DIHAPUS' : 'TIDAK';
+      },
+      from(value) {
+        return value ? 'DIHAPUS' : 'TIDAK';
+      },
+    },
   })
   is_deleted: boolean;
 
@@ -177,6 +193,8 @@ class Instansi {
 
   @Column('text', { array: true, default: [] })
   unit_assign: string;
+
+  count_assignment?: number;
 
   @ManyToOne(() => MasterInstansi)
   @JoinColumn([{ name: 'master_instansi_id', referencedColumnName: 'id' }])

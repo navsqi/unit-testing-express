@@ -8,6 +8,7 @@ import User from './User';
 import Mou from './Mou';
 import JenisAktivitas from './JenisAktivitas';
 import Event from './Event';
+import EventHistory from './EventHistory';
 import Leads from './Leads';
 import LeadsClosing from './LeadsClosing';
 import Produk from './Produk';
@@ -40,6 +41,7 @@ export default {
   AssignmentInstansi,
   JenisAktivitas,
   Event,
+  EventHistory,
   Leads,
   Produk,
   NasabahBadanUsaha,

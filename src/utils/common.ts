@@ -117,7 +117,8 @@ export const getKodePrefix = () => {
   return `${time}${digitAkhir}`;
 };
 
-export const isSalesRole = (kodeRole: string) => {
+export const isSalesRole = (kodeRole: string, isSpvMo = false) => {
+  if (isSpvMo && kodeRole == 'SPVMO') return true;
   if (kodeRole == 'MKTO' || kodeRole.includes('BPO')) return true;
 
   return false;
