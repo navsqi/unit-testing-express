@@ -5,7 +5,7 @@ import Instansi, { JENIS_INSTANSI } from '~/orm/entities/Instansi';
 import MasterInstansi from '~/orm/entities/MasterInstansi';
 import OrganisasiPegawai from '~/orm/entities/OrganisasiPegawai';
 import SaranaMedia from '~/orm/entities/SaranaMedia';
-import { listInstansi, listMasterInstansi } from '~/services/instansiSvc';
+import { listInstansi, listInstansiV2, listMasterInstansi } from '~/services/instansiSvc';
 import { konsolidasiTopBottom } from '~/services/konsolidasiSvc';
 import * as common from '~/utils/common';
 import { tanggal } from '~/utils/common';
@@ -312,6 +312,49 @@ export const getInstansi = async (req: Request, res: Response, next: NextFunctio
 
     return res.customSuccess(200, 'Get instansi', dataRes, {
       count: count,
+      rowCount: paging.limit,
+      limit: paging.limit,
+      offset: paging.offset,
+      page: Number(req.query.page),
+    });
+  } catch (e) {
+    return next(e);
+  }
+};
+
+export const getInstansiV2 = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const outletId = (req.query.kode_unit_kerja || req.user.kode_unit_kerja) as string;
+
+    const filter = {
+      nama_instansi: req.query.nama_instansi || '',
+      start_date: req.query.start_date || '',
+      end_date: req.query.end_date || '',
+      is_approved: req.query.is_approved ? +req.query.is_approved : '',
+      kode_outlet: outletId,
+      kategori_instansi: req.query.kategori_instansi || '',
+      jenis_instansi: req.query.jenis_instansi || '',
+      status_potensial: req.query.status_potensial || '',
+      user_nik: req.user.nik,
+      unit_assign: outletId,
+      is_deleted: false,
+    };
+
+    const paging = queryHelper.paging(req.query);
+
+    const instansi = await listInstansiV2(paging, filter);
+
+    const dataRes = {
+      meta: {
+        count: 0,
+        limit: paging.limit,
+        offset: paging.offset,
+      },
+      instansi,
+    };
+
+    return res.customSuccess(200, 'Get instansi', dataRes, {
+      count: 0,
       rowCount: paging.limit,
       limit: paging.limit,
       offset: paging.offset,

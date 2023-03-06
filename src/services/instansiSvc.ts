@@ -1,4 +1,4 @@
-import { Between, ILike, Raw } from 'typeorm';
+import { Between, ILike, Raw, SelectQueryBuilder } from 'typeorm';
 import { dataSource } from '~/orm/dbCreateConnection';
 import Instansi from '~/orm/entities/Instansi';
 import MasterInstansi from '~/orm/entities/MasterInstansi';
@@ -125,4 +125,42 @@ export const listInstansi = async (filter: any, paging: any): Promise<[Instansi[
   });
 
   return [instansi, count];
+};
+
+export const listInstansiV2 = async (paging: any, filter?: any) => {
+  const instansi = dataSource
+    .createQueryBuilder(Instansi, 'i')
+    .select('i.id')
+    .addSelect(`CONCAT(i.id,' - ', i.nama_instansi)`, 'nama_instansi')
+    .addSelect('COALESCE(ai.count_assignment, 0)', 'count_assignment')
+    .addSelect(`CONCAT(mi.id,' - ', mi.nama_instansi)`, 'nama_master_instansi')
+    .addSelect('i.alamat', 'alamat')
+    .addSelect('i.created_at', 'created_at')
+    .addSelect('i.is_approved', 'is_approved')
+    .addSelect('i.is_deleted', 'is_deleted')
+    .addSelect('i.status_potensial', 'status_potensial')
+    .innerJoin('i.master_instansi', 'mi')
+    .leftJoinAndMapOne(
+      'i.count_assignment',
+      (qb) => {
+        const q = qb as SelectQueryBuilder<any>;
+
+        q.from('assignment_instansi', 'ai')
+          .select('COUNT(*)', 'count_assignment')
+          .addSelect('ai.instansi_id', 'instansi_id')
+          .groupBy('instansi_id');
+
+        return q;
+      },
+      'ai',
+      'ai.instansi_id = i.id',
+    );
+
+  // if (filter.nama_instansi) {
+  //   instansi.andWhere('instansi.nama_instansi ~* :nama', { nama: filter.nama_instansi });
+  // }
+
+  const res = await instansi.limit(paging.limit).skip(paging.offset).getRawMany();
+
+  return res;
 };
