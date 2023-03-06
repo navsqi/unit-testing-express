@@ -3,8 +3,10 @@ import { konsolidasiTopBottom } from '~/services/konsolidasiSvc';
 import {
   closingReport,
   eventReport,
+  IFilterOSL,
   instansiReport,
   leadsReport,
+  OSLReport,
   promosiClosingReport,
   promosiClosingReportV2,
   promosiReport,
@@ -651,6 +653,60 @@ export const getReportClosing = async (req: Request, res: Response, next: NextFu
       return next(new CustomError(`Maksimal ${process.env.DATERANGE_REPORT} hari`, 400));
 
     const report = await closingReport(filter);
+
+    if (report.err) return next(new CustomError(report.err, 400));
+
+    const data = mapClosingReport(report.data);
+
+    const dataRes = {
+      meta: {
+        count: report.count,
+        rowCount: report.data.length,
+        page: filter.page,
+        limit: filter.limit,
+        offset: filter.offset,
+      },
+      report: data,
+    };
+
+    return res.customSuccess(200, 'Get report leads', dataRes, {
+      count: report.count,
+      rowCount: paging.limit,
+      limit: paging.limit,
+      offset: paging.offset,
+      page: Number(req.query.page),
+    });
+  } catch (e) {
+    return next(e);
+  }
+};
+
+export const getReportOSL = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const outletId = (req.query.kode_unit_kerja || req.user.kode_unit_kerja) as string;
+    let outletIds = [];
+
+    if (!outletId.startsWith('000')) {
+      outletIds = await konsolidasiTopBottom(outletId as string);
+    }
+
+    const filter: IFilterOSL = {
+      date: (req.query.date as string) || '',
+      outlet_id: outletIds,
+      is_mo: common.isSalesRole(req.user.kode_role, true),
+      created_by: common.isSalesRole(req.user.kode_role) ? req.user.nik : req.query.created_by,
+      page: Number(req.query.page) || 1,
+      limit: Number(req.query.limit) || 250,
+      offset: null,
+      order_by: req.query.order_by,
+      order_type: req.query.order_type,
+    };
+
+    const paging = queryHelper.paging({ ...filter });
+    filter.offset = paging.offset;
+    filter.limit = paging.limit;
+
+    const report = await OSLReport(filter);
 
     if (report.err) return next(new CustomError(report.err, 400));
 

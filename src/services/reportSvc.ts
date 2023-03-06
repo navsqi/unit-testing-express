@@ -16,6 +16,18 @@ interface IFilter {
   order_type?: any;
 }
 
+export interface IFilterOSL {
+  date?: string;
+  outlet_id?: string[];
+  created_by?: any;
+  is_mo?: boolean;
+  page?: number;
+  limit?: number;
+  offset?: any;
+  order_by?: any;
+  order_type?: any;
+}
+
 interface IFilterP2KI {
   no_pengajuan?: string;
   nama?: string;
@@ -638,6 +650,179 @@ export const closingReport = async (filter?: IFilter) => {
       count: count ?? data.length,
     };
   } catch (error) {
+    await queryRunner.release();
+    return { err: error.message, data: null };
+  }
+};
+
+export const OSLReport = async (filter?: IFilterOSL) => {
+  const queryRunner = dataSource.createQueryRunner();
+  await queryRunner.connect();
+  const manager = queryRunner.manager;
+
+  try {
+    const q = manager.createQueryBuilder();
+    q.from('leads', 'leads');
+    q.select('leads.nik_ktp', 'nik_ktp_nasabah');
+    q.addSelect('lcs.tgl_kredit', 'tgl_kredit');
+    q.addSelect('lcs.tgl_fpk', 'tgl_fpk');
+    q.addSelect('leads.nama', 'nama_nasabah');
+    q.addSelect('lcs.cif', 'cif');
+    q.addSelect('leads.no_hp', 'no_hp_nasabah');
+    q.addSelect('leads.is_karyawan', 'is_karyawan');
+    q.addSelect('leads.kode_produk', 'kode_produk');
+    q.addSelect('leads.instansi_id', 'instansi_id');
+    q.addSelect('instansi.jenis_instansi', 'jenis_instansi');
+    q.addSelect(`CONCAT(master_instansi.id, ' - ', master_instansi.nama_instansi)`, 'nama_master_instansi');
+    q.addSelect(`CONCAT(instansi.id, ' - ', instansi.nama_instansi)`, 'nama_instansi');
+    q.addSelect('outlet_instansi.nama', 'unit_kerja_instansi');
+    q.addSelect('leads.event_id', 'event_id');
+    q.addSelect('event.jenis_event', 'jenis_event');
+    q.addSelect('event.nama_event', 'nama_event');
+    q.addSelect('leads.created_by', 'created_by');
+    q.addSelect('leads.created_at', 'created_at');
+    q.addSelect('leads.step', 'step');
+    q.addSelect('leads.is_ktp_valid', 'is_ktp_valid');
+    q.addSelect('leads.flag_app', 'flag_app');
+    q.addSelect('leads.kode_unit_kerja', 'kode_unit_kerja');
+    q.addSelect('outlet.nama', 'nama_unit_kerja');
+    q.addSelect('outlet.kode', 'kode_outlet');
+    q.addSelect('outlet_cabang.nama', 'nama_cabang_transaksi');
+    q.addSelect('outlet_cabang.kode', 'kode_cabang_transaksi');
+    q.addSelect('outlet_leads.nama', 'outlet_leads');
+    q.addSelect('outlet.unit_kerja', 'unit');
+    q.addSelect('outlet_p3.nama', 'nama_unit_kerja_parent_3');
+    q.addSelect('outlet_p3.unit_kerja', 'unit_parent_3');
+    q.addSelect('outlet_p2.nama', 'nama_unit_kerja_parent_2');
+    q.addSelect('outlet_p2.unit_kerja', 'unit_parent_2');
+    q.addSelect('produk.nama_produk', 'nama_produk');
+    q.addSelect('lcs.no_kontrak', 'no_kontrak');
+    q.addSelect('lcs.channel', 'channel');
+    // q.addSelect('lcs.up', 'omset');
+    // q.addSelect((qb) => {
+    //   qb.from('leads_closing_osl', 'lcso').select('lcso.osl', 'osl').where('lcs.no_kontrak = lcso.no_kontrak').limit(1);
+
+    //   return qb;
+    // }, 'osl');
+    q.addSelect('lcs.osl', 'osl');
+    q.addSelect('lcs.saldo_tabemas', 'saldo_tabemas');
+    q.addSelect('lcs.nik_mo', 'nik_mo');
+    q.addSelect('lcs.nama_mo', 'nama_mo');
+    q.addSelect('leads.created_at', 'created_at_leads');
+    q.addSelect('leads.approved_at', 'approved_at_leads');
+    q.addSelect('outlet_channel_syariah.nama', 'channel_syariah');
+
+    q.leftJoin('event', 'event', 'event.id = leads.event_id');
+    q.leftJoin('instansi', 'instansi', 'instansi.id = leads.instansi_id');
+    q.leftJoin('master_instansi', 'master_instansi', 'master_instansi.id = instansi.master_instansi_id');
+    q.leftJoin('outlet', 'outlet_instansi', 'outlet_instansi.kode = instansi.kode_unit_kerja');
+
+    q.innerJoin('leads_closing_osl', 'lcs', 'lcs.leads_id = leads.id');
+
+    // q.leftJoin(
+    //   (qb) => {
+    //     const qb2 = qb as SelectQueryBuilder<any>;
+
+    //     qb2
+    //       .from('leads_closing_osl', 'lcso')
+    //       .addSelect('lcso.no_kontrak', 'no_kontrak')
+    //       .addSelect('lcso.osl', 'osl')
+    //       // .where('lcso.no_kontrak = lcs.no_kontrak')
+    //       .groupBy('lcso.no_kontrak')
+    //       .addGroupBy('lcso.osl');
+
+    //     return qb2;
+    //   },
+    //   'leadsclosingosl',
+    //   'lcs.tgl_kredit <= :date and lcs.no_kontrak = lcs.no_kontrak',
+    //   { date: filter.date },
+    // );
+
+    // q.leftJoin(
+    //   (qb) => {
+    //     const qb2 = qb as SelectQueryBuilder<any>;
+
+    //     qb2
+    //       .from('leads_closing_osl', 'lcs')
+    //       .addSelect('lcs.leads_id', 'leads_id')
+    //       .addSelect('lcs.saldo_tabemas', 'saldo_tabemas')
+    //       .where('lcs.tgl_kredit <= :date', { date: filter.date })
+    //       .orderBy('lcs.tgl_kredit', 'DESC')
+    //       .take(1);
+
+    //     return qb2;
+    //   },
+    //   'leadsclosingsaldote',
+    //   'leadsclosingsaldote.leads_id = lcs.leads_id',
+    // );
+
+    q.leftJoin('outlet', 'outlet_leads', 'outlet_leads.kode = leads.kode_unit_kerja');
+    if (filter.is_mo) {
+      q.leftJoin('outlet', 'outlet', 'outlet.kode = leads.kode_unit_kerja');
+    } else {
+      q.leftJoin('outlet', 'outlet', 'outlet.kode = lcs.kode_unit_kerja');
+    }
+    q.leftJoin('outlet', 'outlet_cabang', 'outlet_cabang.kode = lcs.kode_unit_kerja_pencairan');
+    q.leftJoin('outlet', 'outlet_p3', 'outlet_p3.kode = outlet.parent');
+    q.leftJoin('outlet', 'outlet_p2', 'outlet_p2.kode = outlet_p3.parent');
+    q.leftJoin('outlet', 'outlet_channel_syariah', 'lcs.channeling_syariah = outlet_channel_syariah.kode');
+    q.leftJoin('produk', 'produk', 'produk.kode_produk = lcs.kode_produk');
+
+    q.where('CAST(lcs.tgl_kredit AS date) = :date', { date: filter.date });
+
+    if (filter.outlet_id && filter.outlet_id.length > 0 && filter.is_mo) {
+      q.andWhere(
+        'leads.kode_unit_kerja IN (:...kodeUnitKerja) AND (lcs.kode_unit_kerja IN (:...lcsUnitKerja) OR  lcs.kode_unit_kerja_pencairan IN (:...lcsUnitKerja))',
+        {
+          kodeUnitKerja: filter.outlet_id,
+          lcsUnitKerja: filter.outlet_id,
+        },
+      );
+    } else if (filter.outlet_id && filter.outlet_id.length > 0 && !filter.is_mo) {
+      q.andWhere(
+        '(lcs.kode_unit_kerja IN (:...kodeUnitKerja) OR lcs.kode_unit_kerja_pencairan IN (:...kodeUnitKerja))',
+        {
+          kodeUnitKerja: filter.outlet_id,
+        },
+      );
+    }
+
+    let count = null;
+
+    if (filter.page && filter.limit && filter.offset !== null) {
+      count = 0;
+      const queryAndParams = await q.getQueryAndParameters();
+
+      const getCount = await manager.query(`SELECT COUNT(*) FROM (${queryAndParams[0]}) count_data`, queryAndParams[1]);
+      count = Number(getCount[0].count);
+
+      q.limit(filter.limit);
+      q.offset(filter.offset);
+    }
+
+    let orderType: 'ASC' | 'DESC' = 'ASC';
+    if (filter.order_by) {
+      // produk.nama_produk
+      // leads.kode_unit_kerja
+      // lcs.no_kontrak
+      // outlet_cabang.nama
+      // instansi.nama_instansi
+      orderType = filter.order_type ?? 'ASC';
+      q.orderBy(filter.order_by, orderType);
+    } else {
+      q.orderBy('lcs.tgl_kredit');
+    }
+
+    const data: QueryResultClosingReport[] = await q.getRawMany();
+    await queryRunner.release();
+
+    return {
+      err: false,
+      data,
+      count: count ?? data.length,
+    };
+  } catch (error) {
+    console.log('error', error);
     await queryRunner.release();
     return { err: error.message, data: null };
   }
