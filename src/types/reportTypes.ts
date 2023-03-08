@@ -84,6 +84,7 @@ export interface QueryResultLeadsReport {
   osl: number;
   saldo_tabemas: number;
   nama_produk?: string;
+  status_leads: number;
 }
 
 export interface QueryResultClosingReport {

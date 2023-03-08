@@ -34,6 +34,8 @@ export const getReportInstansi = async (req: Request, res: Response, next: NextF
       page: Number(req.query.page) || 1,
       limit: Number(req.query.limit) || 250,
       offset: null,
+      master_instansi_id: (Number(req.query.master_instansi_id) as number) ?? null,
+      jenis_instansi: req.query.jenis_instansi as string,
     };
 
     const paging = queryHelper.paging({ ...filter });
@@ -90,6 +92,8 @@ export const genExcelReportInstansi = async (req: Request, res: Response, next: 
       end_date: (req.query.end_date as string) || '',
       outlet_id: outletIds,
       created_by: common.isSalesRole(req.user.kode_role) ? req.user.nik : req.query.created_by,
+      master_instansi_id: (Number(req.query.master_instansi_id) as number) ?? null,
+      jenis_instansi: req.query.jenis_instansi as string,
     };
 
     if (!filter.start_date || !filter.end_date) return next(new CustomError('Pilih tanggal awal dan akhir', 400));
@@ -107,7 +111,7 @@ export const genExcelReportInstansi = async (req: Request, res: Response, next: 
 
     const { workbook, worksheet, headingStyle, outlineHeadingStyle, outlineStyle } = xls('Report Instansi');
 
-    const col = 18;
+    const col = 20;
 
     worksheet.column(1).setWidth(5);
     for (let i = 2; i <= col; i++) {
@@ -130,23 +134,25 @@ export const genExcelReportInstansi = async (req: Request, res: Response, next: 
 
     const judulKolom = [
       'NO',
-      'CREATE DATE',
-      'ID INSTANSI',
-      'KANWIL',
-      'AREA',
-      'CABANG',
       'NAMA INSTANSI',
       'MASTER INSTANSI',
       'JENIS INSTANSI',
       'KATEGORI INSTANSI',
       'STATUS POTENSIAL',
+      'CABANG',
+      'KANWIL',
+      'AREA',
       'OMSET',
       'OSL',
       'SALDO TE',
+      'TOTAL AKTIVITAS',
+      'TOTAL LEADS',
       'TOTAL MOU',
       'TOTAL PKS',
+      'TANGGAL INPUT',
       'TANGGAL UPDATE',
-      'USER UPDATE',
+      'NIK INPUT',
+      'NAMA INPUT',
     ];
 
     for (const header of judulKolom) {
@@ -159,23 +165,25 @@ export const genExcelReportInstansi = async (req: Request, res: Response, next: 
     let rows = 6;
 
     const valueKolom = [
-      { property: 'created_at', isMoney: false, isDate: true },
-      { property: 'id_instansi', isMoney: false, isDate: false },
-      { property: 'outlet_4', isMoney: false, isDate: false },
-      { property: 'outlet_3', isMoney: false, isDate: false },
-      { property: 'outlet_2', isMoney: false, isDate: false },
       { property: 'nama_instansi', isMoney: false, isDate: false },
       { property: 'nama_master_instansi', isMoney: false, isDate: false },
       { property: 'jenis_instansi', isMoney: false, isDate: false },
       { property: 'kategori_instansi', isMoney: false, isDate: false },
       { property: 'status_potensial', isMoney: false, isDate: false },
+      { property: 'outlet_4', isMoney: false, isDate: false },
+      { property: 'outlet_3', isMoney: false, isDate: false },
+      { property: 'outlet_2', isMoney: false, isDate: false },
       { property: 'omset', isMoney: true, isDate: false },
       { property: 'osl', isMoney: true, isDate: false },
       { property: 'saldo_tabemas', isMoney: false, isDate: false },
+      { property: 'jumlah_aktivitas', isMoney: false, isDate: false },
+      { property: 'jumlah_leads', isMoney: false, isDate: false },
       { property: 'jumlah_mou', isMoney: false, isDate: false },
       { property: 'jumlah_pks', isMoney: false, isDate: false },
+      { property: 'created_at', isMoney: false, isDate: true },
       { property: 'updated_at', isMoney: false, isDate: true },
-      { property: 'updated_by', isMoney: false, isDate: false },
+      { property: 'nik_created_by', isMoney: false, isDate: false },
+      { property: 'created_by', isMoney: false, isDate: false },
     ];
 
     for (const [index, val] of data.entries()) {
@@ -234,6 +242,8 @@ export const getReportEvent = async (req: Request, res: Response, next: NextFunc
       page: Number(req.query.page) || 1,
       limit: Number(req.query.limit) || 250,
       offset: null,
+      jenis_aktivitas: req.query.jenis_aktivitas as string,
+      instansi_id: Number(req.query.instansi_id) as number,
     };
 
     const paging = queryHelper.paging({ ...filter });
@@ -290,6 +300,8 @@ export const genExcelReportEvent = async (req: Request, res: Response, next: Nex
       end_date: (req.query.end_date as string) || '',
       outlet_id: outletIds,
       created_by: common.isSalesRole(req.user.kode_role) ? req.user.nik : req.query.created_by,
+      jenis_aktivitas: req.query.jenis_aktivitas as string,
+      instansi_id: Number(req.query.instansi_id) as number,
     };
 
     if (!filter.start_date || !filter.end_date) return next(new CustomError('Pilih tanggal awal dan akhir', 400));
@@ -307,7 +319,7 @@ export const genExcelReportEvent = async (req: Request, res: Response, next: Nex
 
     const { workbook, worksheet, headingStyle, outlineHeadingStyle, outlineStyle } = xls('Report Event');
 
-    const col = 17;
+    const col = 20;
 
     worksheet.column(1).setWidth(5);
     for (let i = 2; i <= col; i++) {
@@ -331,8 +343,9 @@ export const genExcelReportEvent = async (req: Request, res: Response, next: Nex
     const judulKolom = [
       'NO',
       'NIK MO',
-      'NAMA USER',
+      'NAMA MO',
       'JENIS AKTIVITAS',
+      'MASTER INSTANSI',
       'INSTANSI',
       'TANGGAL AKTIVITAS',
       'NAMA EVENT',
@@ -345,6 +358,9 @@ export const genExcelReportEvent = async (req: Request, res: Response, next: Nex
       'AREA',
       'KANWIL',
       'TANGGAL INPUT',
+      'OMSET',
+      'OSL',
+      'SALDO TABEMAS',
     ];
 
     for (const header of judulKolom) {
@@ -360,6 +376,7 @@ export const genExcelReportEvent = async (req: Request, res: Response, next: Nex
       { property: 'created_by_kode', isMoney: false, isDate: false },
       { property: 'created_by', isMoney: false, isDate: false },
       { property: 'jenis_event', isMoney: false, isDate: false },
+      { property: 'nama_master_instansi', isMoney: false, isDate: false },
       { property: 'nama_instansi', isMoney: false, isDate: false },
       { property: 'tanggal_event', isMoney: false, isDate: true },
       { property: 'nama_event', isMoney: false, isDate: false },
@@ -372,6 +389,9 @@ export const genExcelReportEvent = async (req: Request, res: Response, next: Nex
       { property: 'outlet_3', isMoney: false, isDate: false },
       { property: 'outlet_2', isMoney: false, isDate: false },
       { property: 'created_at', isMoney: false, isDate: true },
+      { property: 'omset', isMoney: false, isDate: false },
+      { property: 'osl', isMoney: false, isDate: false },
+      { property: 'saldo_tabemas', isMoney: false, isDate: false },
     ];
 
     for (const [index, val] of data.entries()) {
@@ -503,7 +523,7 @@ export const genExcelReportLeads = async (req: Request, res: Response, next: Nex
 
     const { workbook, worksheet, headingStyle, outlineHeadingStyle, outlineStyle } = xls('Report Leads');
 
-    const col = 21;
+    const col = 24;
 
     worksheet.column(1).setWidth(5);
     for (let i = 2; i <= col; i++) {
@@ -535,6 +555,7 @@ export const genExcelReportLeads = async (req: Request, res: Response, next: Nex
       'OMSET',
       'OSL',
       'SALDO TE',
+      'NAMA MASTER INSTANSI',
       'NAMA INSTANSI',
       'KATEGORI INSTANSI',
       'JENIS EVENT',
@@ -544,8 +565,10 @@ export const genExcelReportLeads = async (req: Request, res: Response, next: Nex
       'AREA',
       'KAMWIL',
       'TANGGAL INPUT',
-      'STATUS PROSPEK',
+      'TANGGAL APPROVE',
       'STATUS NIK KTP',
+      'NIK_MO',
+      'NAMA_MO',
     ];
 
     for (const header of judulKolom) {
@@ -567,6 +590,7 @@ export const genExcelReportLeads = async (req: Request, res: Response, next: Nex
       { property: 'omset', isMoney: false, isDate: false },
       { property: 'osl', isMoney: false, isDate: false },
       { property: 'saldo_tabemas', isMoney: false, isDate: false },
+      { property: 'nama_master_instansi', isMoney: false, isDate: false },
       { property: 'nama_instansi', isMoney: false, isDate: false },
       { property: 'kategori_instansi', isMoney: false, isDate: false },
       { property: 'jenis_event', isMoney: false, isDate: false },
@@ -576,8 +600,10 @@ export const genExcelReportLeads = async (req: Request, res: Response, next: Nex
       { property: 'outlet_3', isMoney: false, isDate: false },
       { property: 'outlet_2', isMoney: false, isDate: false },
       { property: 'created_at', isMoney: false, isDate: true },
-      { property: 'step', isMoney: false, isDate: false },
+      { property: 'approved_at_leads', isMoney: false, isDate: true },
       { property: 'is_ktp_valid', isMoney: false, isDate: false },
+      { property: 'created_by', isMoney: false, isDate: false },
+      { property: 'nama_created_by', isMoney: false, isDate: false },
     ];
 
     for (const [index, val] of data.entries()) {
@@ -653,60 +679,6 @@ export const getReportClosing = async (req: Request, res: Response, next: NextFu
       return next(new CustomError(`Maksimal ${process.env.DATERANGE_REPORT} hari`, 400));
 
     const report = await closingReport(filter);
-
-    if (report.err) return next(new CustomError(report.err, 400));
-
-    const data = mapClosingReport(report.data);
-
-    const dataRes = {
-      meta: {
-        count: report.count,
-        rowCount: report.data.length,
-        page: filter.page,
-        limit: filter.limit,
-        offset: filter.offset,
-      },
-      report: data,
-    };
-
-    return res.customSuccess(200, 'Get report leads', dataRes, {
-      count: report.count,
-      rowCount: paging.limit,
-      limit: paging.limit,
-      offset: paging.offset,
-      page: Number(req.query.page),
-    });
-  } catch (e) {
-    return next(e);
-  }
-};
-
-export const getReportOSL = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const outletId = (req.query.kode_unit_kerja || req.user.kode_unit_kerja) as string;
-    let outletIds = [];
-
-    if (!outletId.startsWith('000')) {
-      outletIds = await konsolidasiTopBottom(outletId as string);
-    }
-
-    const filter: IFilterOSL = {
-      date: (req.query.date as string) || '',
-      outlet_id: outletIds,
-      is_mo: common.isSalesRole(req.user.kode_role, true),
-      created_by: common.isSalesRole(req.user.kode_role) ? req.user.nik : req.query.created_by,
-      page: Number(req.query.page) || 1,
-      limit: Number(req.query.limit) || 250,
-      offset: null,
-      order_by: req.query.order_by,
-      order_type: req.query.order_type,
-    };
-
-    const paging = queryHelper.paging({ ...filter });
-    filter.offset = paging.offset;
-    filter.limit = paging.limit;
-
-    const report = await OSLReport(filter);
 
     if (report.err) return next(new CustomError(report.err, 400));
 
@@ -881,6 +853,211 @@ export const genExcelReportClosing = async (req: Request, res: Response, next: N
 
     res.set({
       'Content-Disposition': `attachment; filename="REPORTCLOSING-${Date.now()}.xlsx"`,
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+    return res.end(fileBuffer);
+  } catch (e) {
+    next(e);
+  }
+};
+
+export const getReportOSL = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const outletId = (req.query.kode_unit_kerja || req.user.kode_unit_kerja) as string;
+    let outletIds = [];
+
+    if (!outletId.startsWith('000')) {
+      outletIds = await konsolidasiTopBottom(outletId as string);
+    }
+
+    const filter: IFilterOSL = {
+      date: (req.query.date as string) || '',
+      outlet_id: outletIds,
+      is_mo: common.isSalesRole(req.user.kode_role, true),
+      created_by: common.isSalesRole(req.user.kode_role) ? req.user.nik : req.query.created_by,
+      page: Number(req.query.page) || 1,
+      limit: Number(req.query.limit) || 250,
+      offset: null,
+      order_by: req.query.order_by,
+      order_type: req.query.order_type,
+    };
+
+    const paging = queryHelper.paging({ ...filter });
+    filter.offset = paging.offset;
+    filter.limit = paging.limit;
+
+    const report = await OSLReport(filter);
+
+    if (report.err) return next(new CustomError(report.err, 400));
+
+    const data = mapClosingReport(report.data);
+
+    const dataRes = {
+      meta: {
+        count: report.count,
+        rowCount: report.data.length,
+        page: filter.page,
+        limit: filter.limit,
+        offset: filter.offset,
+      },
+      report: data,
+    };
+
+    return res.customSuccess(200, 'Get report OSL', dataRes, {
+      count: report.count,
+      rowCount: paging.limit,
+      limit: paging.limit,
+      offset: paging.offset,
+      page: Number(req.query.page),
+    });
+  } catch (e) {
+    return next(e);
+  }
+};
+
+export const genExcelReportOSL = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const outletId = (req.query.kode_unit_kerja || req.user.kode_unit_kerja) as string;
+    let outletIds = [];
+
+    if (!outletId.startsWith('000')) {
+      outletIds = await konsolidasiTopBottom(outletId as string);
+    }
+
+    const filter: IFilterOSL = {
+      date: (req.query.date as string) || '',
+      outlet_id: outletIds,
+      is_mo: common.isSalesRole(req.user.kode_role, true),
+      created_by: common.isSalesRole(req.user.kode_role) ? req.user.nik : req.query.created_by,
+      page: Number(req.query.page) || 1,
+      limit: Number(req.query.limit) || 250,
+      offset: null,
+      order_by: req.query.order_by,
+      order_type: req.query.order_type,
+    };
+
+    const report = await OSLReport(filter);
+
+    if (report.err) return next(new CustomError(report.err, 400));
+
+    const data = mapClosingReport(report.data);
+
+    const { workbook, worksheet, headingStyle, outlineHeadingStyle, outlineStyle } = xls('Report OSL');
+
+    const col = 24;
+
+    worksheet.column(1).setWidth(5);
+    for (let i = 2; i <= col; i++) {
+      const exclude = [];
+      worksheet.column(i).setWidth(exclude.includes(i) ? 10 : 25);
+    }
+
+    worksheet.cell(1, 1, 1, 9, true).string('REPORT OSL').style(headingStyle);
+    worksheet
+      .cell(2, 1, 2, 9, true)
+      .string(
+        `TANGGAL ${common.tanggal(req.query.start_date as string)} S.D. ${common.tanggal(
+          req.query.end_date as string,
+        )}`,
+      )
+      .style(headingStyle);
+
+    const barisHeading = 5;
+    let noHeading = 0;
+
+    const judulKolom = [
+      'NO',
+      'TANGGAL KREDIT',
+      'CABANG LEADS',
+      'MASTER INSTANSI',
+      'INSTANSI',
+      'NIK MO',
+      'NAMA MO',
+      'KANWIL TRANSAKSI',
+      'AREA TRANSAKSI',
+      'CABANG TRANSAKSI',
+      'KODE CABANG TRANSAKSI',
+      'OUTLET TRANSAKSI',
+      'KODE OUTLET TRANSAKSI',
+      'CHANNEL SYARIAH',
+      'CHANNEL',
+      'CIF',
+      'NIK KTP',
+      'NAMA',
+      'PRODUK',
+      'NO KREDIT',
+      'OSL',
+      'SALDO TABEMAS',
+      'TANGGAL INPUT LEADS',
+      'TANGGAL APPROVE LEADS',
+    ];
+
+    for (const header of judulKolom) {
+      worksheet
+        .cell(barisHeading, ++noHeading)
+        .string(header)
+        .style(outlineHeadingStyle);
+    }
+
+    let rows = 6;
+
+    const valueKolom = [
+      { property: 'tgl_kredit', isMoney: false, isDate: true },
+      { property: 'outlet_leads', isMoney: false, isDate: false },
+      { property: 'nama_master_instansi', isMoney: false, isDate: false },
+      { property: 'nama_instansi', isMoney: false, isDate: false },
+      { property: 'nik_mo', isMoney: false, isDate: false },
+      { property: 'nama_mo', isMoney: false, isDate: false },
+      { property: 'outlet_2', isMoney: false, isDate: false },
+      { property: 'outlet_3', isMoney: false, isDate: false },
+      { property: 'nama_cabang_transaksi', isMoney: false, isDate: false },
+      { property: 'kode_cabang_transaksi', isMoney: false, isDate: false },
+      { property: 'outlet_4', isMoney: false, isDate: false },
+      { property: 'kode_outlet', isMoney: false, isDate: false },
+      { property: 'channel_syariah', isMoney: false, isDate: false },
+      { property: 'channel', isMoney: false, isDate: false },
+      { property: 'cif', isMoney: false, isDate: false },
+      { property: 'nik_ktp_nasabah', isMoney: false, isDate: false },
+      { property: 'nama_nasabah', isMoney: false, isDate: false },
+      { property: 'nama_produk', isMoney: false, isDate: false },
+      { property: 'no_kontrak', isMoney: false, isDate: false },
+      { property: 'osl', isMoney: false, isDate: false },
+      { property: 'saldo_tabemas', isMoney: false, isDate: false },
+      { property: 'created_at_leads', isMoney: false, isDate: true },
+      { property: 'approved_at_leads', isMoney: false, isDate: true },
+    ];
+
+    for (const [index, val] of data.entries()) {
+      let bodyLineNum = 1;
+      worksheet
+        .cell(rows, 1)
+        .string(`${index + 1}`)
+        .style(outlineStyle);
+
+      for (const col of valueKolom) {
+        let data = String(val[col.property]);
+
+        if (col.isDate) {
+          data = common.tanggal(val[col.property]);
+        }
+
+        if (col.isMoney) {
+          data = common.rupiah(+val[col.property], false);
+        }
+
+        worksheet
+          .cell(rows, ++bodyLineNum)
+          .string(data && data != 'null' ? data : '-')
+          .style(outlineStyle);
+      }
+
+      rows++;
+    }
+
+    const fileBuffer = await workbook.writeToBuffer();
+
+    res.set({
+      'Content-Disposition': `attachment; filename="REPORTOSL-${Date.now()}.xlsx"`,
       'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     });
     return res.end(fileBuffer);

@@ -15,6 +15,7 @@ router.get('/instansi/excel', protect(), reportController.genExcelReportInstansi
 router.get('/leads', protect(), reportController.getReportLeads);
 router.get('/leads/excel', protect(), reportController.genExcelReportLeads);
 router.get('/osl', protect(), reportController.getReportOSL);
+router.get('/osl/excel', protect(), reportController.genExcelReportOSL);
 router.get('/closing', protect(), reportController.getReportClosing);
 router.get('/closing/excel', protect(), reportController.genExcelReportClosing);
 router.get('/promosummary', protect(), reportController.getReportPromoSummary);
