@@ -5,6 +5,8 @@ import {
   QueryResultLeadsReport,
 } from '~/types/reportTypes';
 
+import globalConfig from '~/config/globalConfig';
+
 export const mapInstansiReport = (data: QueryResultInstansiReports[]) => {
   const newData = data.map((el) => {
     const o = {
@@ -84,6 +86,7 @@ export const mapLeadsReport = (data: QueryResultLeadsReport[]) => {
       outlet_2: '',
       is_karyawan: el.is_karyawan == 1 ? 'Karyawan' : 'Bukan Karyawan',
       is_ktp_valid: el.is_ktp_valid == 1 ? 'TERVERIFIKASI' : 'TIDAK TERVERIFIKASI',
+      status_leads: globalConfig.leads.status[el.status_leads],
     };
 
     if (el.nama_unit_kerja && el.unit) {

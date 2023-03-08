@@ -1,4 +1,7 @@
 import {
+  AfterInsert,
+  AfterLoad,
+  AfterUpdate,
   Column,
   CreateDateColumn,
   Entity,
@@ -147,28 +150,14 @@ class Instansi {
   @Column({
     type: 'smallint',
     default: 0,
-    transformer: {
-      to(value) {
-        return value == 0 ? 'MENUNGGU PERSETUJUAN' : 'DISETUJUI';
-      },
-      from(value) {
-        return value == 0 ? 'MENUNGGU PERSETUJUAN' : 'DISETUJUI';
-      },
-    },
   })
   is_approved: number;
+
+  is_approved_text: string;
 
   @Column({
     type: 'boolean',
     default: false,
-    transformer: {
-      to(value) {
-        return value ? 'DIHAPUS' : 'TIDAK';
-      },
-      from(value) {
-        return value ? 'DIHAPUS' : 'TIDAK';
-      },
-    },
   })
   is_deleted: boolean;
 
@@ -218,6 +207,13 @@ class Instansi {
   @ManyToOne(() => User, { onUpdate: 'CASCADE', onDelete: 'NO ACTION' })
   @JoinColumn([{ name: 'created_by', referencedColumnName: 'nik' }])
   user_created: User;
+
+  @AfterLoad()
+  @AfterInsert()
+  @AfterUpdate()
+  generateFullname(): void {
+    this.is_approved_text = this.is_approved == 1 ? 'DITERIMA' : 'DITOLAK';
+  }
 }
 
 export default Instansi;

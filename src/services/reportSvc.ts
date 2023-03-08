@@ -14,6 +14,10 @@ interface IFilter {
   offset?: any;
   order_by?: any;
   order_type?: any;
+  jenis_aktivitas?: string;
+  instansi_id?: number;
+  master_instansi_id?: number;
+  jenis_instansi?: string;
 }
 
 export interface IFilterOSL {
@@ -56,8 +60,8 @@ export const instansiReport = async (filter?: IFilter) => {
     q.addSelect('i.created_by', 'nik_created_by');
     q.addSelect('user_update.nama', 'updated_by');
     q.addSelect('i.id', 'id_instansi');
-    q.addSelect('mi.nama_instansi', 'nama_master_instansi');
-    q.addSelect('i.nama_instansi', 'nama_instansi');
+    q.addSelect(`CONCAT(mi.id, ' - ', mi.nama_instansi)`, 'nama_master_instansi');
+    q.addSelect(`CONCAT(i.id, ' - ', i.nama_instansi)`, 'nama_instansi');
     q.addSelect('i.alamat', 'alamat');
     q.addSelect('i.email', 'email');
     q.addSelect('i.no_telepon_instansi', 'no_telepon_instansi');
@@ -73,6 +77,7 @@ export const instansiReport = async (filter?: IFilter) => {
     q.addSelect('coalesce(mou.jumlah_mou, 0)', 'jumlah_mou');
     q.addSelect('coalesce(pks.jumlah_pks, 0)', 'jumlah_pks');
     q.addSelect('coalesce(act.jumlah_aktivitas, 0)', 'jumlah_aktivitas');
+    q.addSelect('coalesce(countleads.jumlah_leads, 0)', 'jumlah_leads');
     q.addSelect('i.kode_unit_kerja', 'kode_unit_kerja');
     q.addSelect('outlet.nama', 'nama_unit_kerja');
     q.addSelect('outlet.unit_kerja', 'unit');
@@ -85,8 +90,8 @@ export const instansiReport = async (filter?: IFilter) => {
     q.leftJoin('users', 'user_update', 'user_update.nik = i.updated_by');
 
     q.addSelect('COALESCE(leads.omset, 0)', 'omset');
-    q.addSelect('COALESCE(0)', 'osl');
-    q.addSelect('COALESCE(0)', 'saldo_tabemas');
+    q.addSelect('COALESCE(leads.osl, 0)', 'osl');
+    q.addSelect('COALESCE(leads.saldo_tabemas, 0)', 'saldo_tabemas');
 
     q.innerJoin('master_instansi', 'mi', 'mi.id = i.master_instansi_id');
     q.leftJoin('outlet', 'outlet', 'outlet.kode = i.kode_unit_kerja');
@@ -131,6 +136,22 @@ export const instansiReport = async (filter?: IFilter) => {
         const qb2 = qb as SelectQueryBuilder<any>;
 
         qb2
+          .from('leads', 'l')
+          .addSelect('l.instansi_id', 'instansi_id')
+          .addSelect('count(*)', 'jumlah_leads')
+          .groupBy('instansi_id');
+
+        return qb2;
+      },
+      'countleads',
+      'countleads.instansi_id = i.id',
+    );
+
+    q.leftJoin(
+      (qb) => {
+        const qb2 = qb as SelectQueryBuilder<any>;
+
+        qb2
           .from('mou', 'm')
           .addSelect('instansi_id')
           .addSelect('count(*)', 'jumlah_pks')
@@ -159,10 +180,14 @@ export const instansiReport = async (filter?: IFilter) => {
               const sq2 = sq as SelectQueryBuilder<any>;
 
               sq2
+                .distinctOn(['lcs_osl.no_kontrak'])
                 .from('leads_closing_osl', 'lcs_osl')
                 .select('lcs_osl.leads_id', 'leads_id')
                 .addSelect('lcs_osl.osl', 'osl')
-                .addSelect('lcs_osl.saldo_tabemas', 'saldo_tabemas');
+                .addSelect('lcs_osl.saldo_tabemas', 'saldo_tabemas')
+                .addSelect('lcs_osl.no_kontrak', 'no_kontrak')
+                .orderBy('lcs_osl.no_kontrak')
+                .addOrderBy('lcs_osl.tgl_kredit');
 
               return sq2;
             },
@@ -187,6 +212,14 @@ export const instansiReport = async (filter?: IFilter) => {
 
     if (filter.created_by) {
       q.andWhere('i.created_by = :userId', { userId: filter.created_by });
+    }
+
+    if (filter.jenis_instansi) {
+      q.andWhere('i.jenis_instansi = :jenisInstansi', { jenisInstansi: filter.jenis_instansi });
+    }
+
+    if (filter.master_instansi_id) {
+      q.andWhere('i.master_instansi_id = :masterInstansiId', { masterInstansiId: filter.master_instansi_id });
     }
 
     let count = null;
@@ -244,10 +277,10 @@ export const eventReport = async (filter?: IFilter) => {
     q.addSelect('outlet_p3.unit_kerja', 'unit_parent_3');
     q.addSelect('outlet_p2.nama', 'nama_unit_kerja_parent_2');
     q.addSelect('outlet_p2.unit_kerja', 'unit_parent_2');
-    q.addSelect('coalesce(leads.countall, 0)', 'jumlah_prospek');
-    q.addSelect('coalesce(leads.omset_event, 0)', 'omset');
-    q.addSelect('coalesce(leads.osl_event, 0)', 'osl');
-    q.addSelect('coalesce(leads.saldo_tabemas_event, 0)', 'saldo_tabemas');
+    q.addSelect('coalesce(countleads.jumlah_leads, 0)', 'jumlah_prospek');
+    q.addSelect('coalesce(leads.omset, 0)', 'omset');
+    q.addSelect('coalesce(leads.osl, 0)', 'osl');
+    q.addSelect('coalesce(leads.saldo_tabemas, 0)', 'saldo_tabemas');
 
     q.leftJoin('instansi', 'i', 'i.id = e.instansi_id');
     q.leftJoin('master_instansi', 'mi', 'mi.id = i.master_instansi_id');
@@ -262,39 +295,46 @@ export const eventReport = async (filter?: IFilter) => {
 
         qb2
           .from('leads', 'l')
-          // .select('l.id')
           .addSelect('l.event_id', 'event_id')
-          .addSelect('count(*)', 'countall')
-          .addSelect('sum(omset)', 'omset_event')
-          .addSelect('sum(osl)', 'osl_event')
-          .addSelect('sum(saldo_tabemas)', 'saldo_tabemas_event')
-          .leftJoin(
-            (sq) => {
-              const sq1 = sq as SelectQueryBuilder<any>;
+          .addSelect('count(*)', 'jumlah_leads')
+          .groupBy('event_id');
 
-              sq1.from('leads_closing', 'lcs').select('lcs.up', 'omset').addSelect('lcs.leads_id', 'leads_id');
+        return qb2;
+      },
+      'countleads',
+      'countleads.event_id = e.id',
+    );
 
-              return sq1;
-            },
-            'leads_closing_omset',
-            'leads_closing_omset.leads_id = l.id',
-          )
+    q.leftJoin(
+      (qb) => {
+        const qb2 = qb as SelectQueryBuilder<any>;
+
+        qb2
+          .from('leads', 'l')
+          .addSelect('l.event_id', 'event_id')
+          .addSelect('sum(lcs.up)', 'omset')
+          .addSelect('sum(leads_closing_omset_osl.osl)', 'osl')
+          .addSelect('sum(leads_closing_omset_osl.saldo_tabemas)', 'saldo_tabemas')
+          .innerJoin('leads_closing', 'lcs', 'lcs.leads_id = l.id')
           .leftJoin(
             (sq) => {
               const sq2 = sq as SelectQueryBuilder<any>;
 
               sq2
+                .distinctOn(['lcs_osl.no_kontrak'])
                 .from('leads_closing_osl', 'lcs_osl')
                 .select('lcs_osl.leads_id', 'leads_id')
                 .addSelect('lcs_osl.osl', 'osl')
-                .addSelect('lcs_osl.saldo_tabemas', 'saldo_tabemas');
+                .addSelect('lcs_osl.saldo_tabemas', 'saldo_tabemas')
+                .addSelect('lcs_osl.no_kontrak', 'no_kontrak')
+                .orderBy('lcs_osl.no_kontrak')
+                .addOrderBy('lcs_osl.tgl_kredit');
 
               return sq2;
             },
             'leads_closing_omset_osl',
             'leads_closing_omset_osl.leads_id = l.id',
           )
-          .where('l.status = 1')
           .groupBy('l.event_id');
 
         return qb2;
@@ -354,6 +394,14 @@ export const eventReport = async (filter?: IFilter) => {
       q.andWhere('e.created_by = :userId', { userId: filter.created_by });
     }
 
+    if (filter.instansi_id) {
+      q.andWhere('e.instansi_id = :instansiId', { instansiId: filter.instansi_id });
+    }
+
+    if (filter.jenis_aktivitas) {
+      q.andWhere('e.jenis_event = :jenisAktivitas', { jenisAktivitas: filter.jenis_aktivitas });
+    }
+
     let count = null;
 
     if (filter.page && filter.limit && filter.offset !== null) {
@@ -396,8 +444,8 @@ export const leadsReport = async (filter?: IFilter) => {
     q.addSelect('leads.is_ktp_valid', 'is_ktp_valid');
     q.addSelect('leads.instansi_id', 'instansi_id');
     q.addSelect('instansi.jenis_instansi', 'jenis_instansi');
-    q.addSelect('master_instansi.nama_instansi', 'nama_master_instansi');
-    q.addSelect('instansi.nama_instansi', 'nama_instansi');
+    q.addSelect(`CONCAT(master_instansi.id, ' - ', master_instansi.nama_instansi)`, 'nama_master_instansi');
+    q.addSelect(`CONCAT(instansi.id, ' - ', instansi.nama_instansi)`, 'nama_instansi');
     q.addSelect('instansi.kategori_instansi', 'kategori_instansi');
     q.addSelect('leads.event_id', 'event_id');
     q.addSelect('event.jenis_event', 'jenis_event');
@@ -422,8 +470,14 @@ export const leadsReport = async (filter?: IFilter) => {
     q.addSelect('leads.created_by', 'nik_created_by');
     q.addSelect('users.nama', 'nama_created_by');
     q.addSelect('COALESCE(leadsclosing.omset, 0)', 'omset');
-    q.addSelect('COALESCE(leadsclosingosl.osl, 0)', 'osl');
-    q.addSelect('COALESCE(leadsclosingosl.saldo_tabemas, 0)', 'saldo_tabemas');
+    q.addSelect(
+      'COALESCE((SELECT SUM(osl) from (SELECT distinct on(no_kontrak) no_kontrak, osl FROM leads_closing_osl lco WHERE lco.leads_id = leads.id AND lco.kode_produk = leadsclosing.kode_produk ORDER BY lco.no_kontrak, lco.tgl_kredit DESC) a), 0)',
+      'osl',
+    );
+    q.addSelect(
+      'COALESCE((SELECT SUM(saldo_tabemas) from (SELECT distinct on(no_kontrak) no_kontrak, saldo_tabemas FROM leads_closing_osl lco WHERE lco.leads_id = leads.id AND lco.kode_produk = leadsclosing.kode_produk ORDER BY lco.no_kontrak, lco.tgl_kredit DESC) a), 0)',
+      'saldo_tabemas',
+    );
 
     q.leftJoin('event', 'event', 'event.id = leads.event_id');
     q.leftJoin('instansi', 'instansi', 'instansi.id = leads.instansi_id');
@@ -452,26 +506,26 @@ export const leadsReport = async (filter?: IFilter) => {
       'leadsclosing.leads_id = leads.id',
     );
 
-    q.leftJoin(
-      (qb) => {
-        const qb2 = qb as SelectQueryBuilder<any>;
+    // q.leftJoin(
+    //   (qb) => {
+    //     const qb2 = qb as SelectQueryBuilder<any>;
 
-        qb2
-          .from('leads_closing_osl', 'lcs')
-          .addSelect('lcs.leads_id', 'leads_id')
-          .addSelect('lcs.kode_produk', 'kode_produk')
-          .addSelect('lcs.tgl_kredit', 'tgl_kredit')
-          .addSelect('SUM(lcs.osl)', 'osl')
-          .addSelect('SUM(lcs.saldo_tabemas)', 'saldo_tabemas')
-          .groupBy('lcs.leads_id')
-          .addGroupBy('lcs.kode_produk')
-          .addGroupBy('lcs.tgl_kredit');
+    //     qb2
+    //       .from('leads_closing_osl', 'lcs')
+    //       .addSelect('lcs.leads_id', 'leads_id')
+    //       .addSelect('lcs.kode_produk', 'kode_produk')
+    //       .addSelect('lcs.tgl_kredit', 'tgl_kredit')
+    //       .addSelect('SUM(lcs.osl)', 'osl')
+    //       .addSelect('SUM(lcs.saldo_tabemas)', 'saldo_tabemas')
+    //       .groupBy('lcs.leads_id')
+    //       .addGroupBy('lcs.kode_produk')
+    //       .addGroupBy('lcs.tgl_kredit');
 
-        return qb2;
-      },
-      'leadsclosingosl',
-      'leadsclosingosl.leads_id = leadsclosing.leads_id',
-    );
+    //     return qb2;
+    //   },
+    //   'leadsclosingosl',
+    //   'leadsclosingosl.leads_id = leadsclosing.leads_id',
+    // );
 
     q.leftJoin('produk', 'produk', 'produk.kode_produk = leadsclosing.kode_produk');
     q.leftJoin('users', 'users', 'users.nik = leads.created_by');
@@ -528,8 +582,8 @@ export const closingReport = async (filter?: IFilter) => {
     q.addSelect('leads.is_karyawan', 'is_karyawan');
     q.addSelect('leads.kode_produk', 'kode_produk');
     q.addSelect('leads.instansi_id', 'instansi_id');
-    q.addSelect('instansi.jenis_instansi', 'jenis_instansi');
-    q.addSelect('master_instansi.nama_instansi', 'nama_master_instansi');
+    q.addSelect(`CONCAT(master_instansi.id, ' - ', master_instansi.nama_instansi)`, 'nama_master_instansi');
+    q.addSelect(`CONCAT(instansi.id, ' - ', instansi.nama_instansi)`, 'nama_instansi');
     q.addSelect('instansi.nama_instansi', 'nama_instansi');
     q.addSelect('outlet_instansi.nama', 'unit_kerja_instansi');
     q.addSelect('leads.event_id', 'event_id');
