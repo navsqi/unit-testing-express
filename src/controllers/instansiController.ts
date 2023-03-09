@@ -5,7 +5,7 @@ import Instansi, { JENIS_INSTANSI } from '~/orm/entities/Instansi';
 import MasterInstansi from '~/orm/entities/MasterInstansi';
 import OrganisasiPegawai from '~/orm/entities/OrganisasiPegawai';
 import SaranaMedia from '~/orm/entities/SaranaMedia';
-import { listInstansi, listInstansiV2, listMasterInstansi } from '~/services/instansiSvc';
+import { IFilterInstansi, listInstansi, listInstansiV2, listMasterInstansi } from '~/services/instansiSvc';
 import { konsolidasiTopBottom } from '~/services/konsolidasiSvc';
 import * as common from '~/utils/common';
 import { tanggal } from '~/utils/common';
@@ -326,27 +326,44 @@ export const getInstansiV2 = async (req: Request, res: Response, next: NextFunct
   try {
     const outletId = (req.query.kode_unit_kerja || req.user.kode_unit_kerja) as string;
 
-    const filter = {
-      nama_instansi: req.query.nama_instansi || '',
-      start_date: req.query.start_date || '',
-      end_date: req.query.end_date || '',
-      is_approved: req.query.is_approved ? +req.query.is_approved : '',
+    let filter: IFilterInstansi = {
+      nama_instansi: (req.query.nama_instansi as string) || '',
+      start_date: (req.query.start_date as string) || '',
+      end_date: (req.query.end_date as string) || '',
+      is_approved: req.query.is_approved ? +req.query.is_approved : null,
       kode_outlet: outletId,
-      kategori_instansi: req.query.kategori_instansi || '',
-      jenis_instansi: req.query.jenis_instansi || '',
-      status_potensial: req.query.status_potensial || '',
+      kategori_instansi: (req.query.kategori_instansi as string) || '',
+      jenis_instansi: (req.query.jenis_instansi as string) || '',
+      status_potensial: (req.query.status_potensial as string) || '',
       user_nik: req.user.nik,
       unit_assign: outletId,
       is_deleted: false,
+      is_assign: Number(req.query.is_assign) as number,
+      order_by: (req.query.order_by as string) ?? 'i.is_approved',
+      order_type: (req.query.order_type as string) ?? 'ASC',
     };
 
     const paging = queryHelper.paging(req.query);
 
-    const instansi = await listInstansiV2(paging, filter);
+    if (req.query?.is_dropdown == '1') {
+      filter = {
+        is_dropdown: true,
+        nama_instansi: (req.query.nama_instansi as string) || '',
+        is_approved: 1,
+        kode_outlet: outletId,
+        user_nik: req.user.nik,
+        unit_assign: outletId,
+        is_deleted: false,
+      };
+
+      paging.limit = 400;
+    }
+
+    const [instansi, count] = await listInstansiV2(paging, filter);
 
     const dataRes = {
       meta: {
-        count: 0,
+        count: count,
         limit: paging.limit,
         offset: paging.offset,
       },
@@ -354,7 +371,7 @@ export const getInstansiV2 = async (req: Request, res: Response, next: NextFunct
     };
 
     return res.customSuccess(200, 'Get instansi', dataRes, {
-      count: 0,
+      count: count as any,
       rowCount: paging.limit,
       limit: paging.limit,
       offset: paging.offset,
@@ -362,6 +379,126 @@ export const getInstansiV2 = async (req: Request, res: Response, next: NextFunct
     });
   } catch (e) {
     return next(e);
+  }
+};
+
+export const genExcelInstansiV2 = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const outletId = (req.query.kode_unit_kerja || req.user.kode_unit_kerja) as string;
+
+    const filter: IFilterInstansi = {
+      nama_instansi: (req.query.nama_instansi as string) || '',
+      start_date: (req.query.start_date as string) || '',
+      end_date: (req.query.end_date as string) || '',
+      is_approved: req.query.is_approved ? +req.query.is_approved : null,
+      kode_outlet: outletId,
+      kategori_instansi: (req.query.kategori_instansi as string) || '',
+      jenis_instansi: (req.query.jenis_instansi as string) || '',
+      status_potensial: (req.query.status_potensial as string) || '',
+      user_nik: req.user.nik,
+      unit_assign: outletId,
+      is_deleted: false,
+      is_assign: Number(req.query.is_assign) as number,
+      order_by: (req.query.order_by as string) ?? 'i.is_approved',
+      order_type: (req.query.order_type as string) ?? 'ASC',
+    };
+
+    if (!filter.start_date || !filter.end_date) return next(new CustomError('Pilih tanggal awal dan akhir', 400));
+
+    const dateDiff = common.getDiffDateCount(filter.start_date, filter.end_date);
+
+    if (dateDiff > +process.env.DATERANGE_INSTANSI_EXCEL)
+      return next(new CustomError(`Maksimal ${process.env.DATERANGE_INSTANSI_EXCEL} hari`, 400));
+
+    const paging = common.pagingExcel();
+
+    const [instansi, count] = await listInstansiV2(paging, filter);
+
+    const { workbook, worksheet, headingStyle, outlineHeadingStyle, outlineStyle } = xls('LIST INSTANSI KAMILA');
+
+    const col = 20;
+
+    worksheet.column(1).setWidth(5);
+    for (let i = 2; i <= col; i++) {
+      const exclude = [13, 14, 15, 16];
+      worksheet.column(i).setWidth(exclude.includes(i) ? 10 : 25);
+    }
+
+    worksheet.cell(1, 1, 1, 9, true).string('LIST INSTANSI').style(headingStyle);
+    worksheet
+      .cell(2, 1, 2, 9, true)
+      .string(`TANGGAL ${tanggal(req.query.start_date as string)} S.D. ${tanggal(req.query.end_date as string)}`)
+      .style(headingStyle);
+
+    const judulKolom = [
+      'NO',
+      'STATUS POTENSIAL',
+      'MASTER INSTANSI',
+      'NAMA INSTANSI',
+      'ALAMAT',
+      'JUMLAH ASSIGNMENT',
+      'TANGGAL INPUT',
+      'STATUS',
+    ];
+
+    const barisHeading = 5;
+    let noHeading = 0;
+
+    for (const header of judulKolom) {
+      worksheet
+        .cell(barisHeading, ++noHeading)
+        .string(header)
+        .style(outlineHeadingStyle);
+    }
+
+    let rows = 6;
+
+    const valueKolom = [
+      { property: 'status_potensial', isMoney: false, isDate: false },
+      { property: 'nama_master_instansi', isMoney: false, isDate: false },
+      { property: 'nama_instansi', isMoney: false, isDate: false },
+      { property: 'alamat', isMoney: false, isDate: false },
+      { property: 'count_assignment', isMoney: false, isDate: false },
+      { property: 'created_at', isMoney: false, isDate: true },
+      { property: 'status', isMoney: false, isDate: false },
+    ];
+
+    for (const [index, val] of (instansi as any[]).entries()) {
+      let bodyLineNum = 1;
+      worksheet
+        .cell(rows, 1)
+        .string(`${index + 1}`)
+        .style(outlineStyle);
+
+      for (const col of valueKolom) {
+        let data = String(common.getDescendantProp(val, col.property));
+
+        if (col.isDate) {
+          data = common.tanggal(val[col.property]);
+        }
+
+        if (col.isMoney) {
+          data = common.rupiah(+val[col.property], false);
+        }
+
+        worksheet
+          .cell(rows, ++bodyLineNum)
+          .string(data && data != 'null' ? data : '-')
+          .style(outlineStyle);
+      }
+
+      rows++;
+    }
+
+    const fileBuffer = await workbook.writeToBuffer();
+
+    res.set({
+      'Content-Disposition': `attachment; filename="INSTANSI-${Date.now()}.xlsx"`,
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+    return res.end(fileBuffer);
+  } catch (e) {
+    next(e);
   }
 };
 

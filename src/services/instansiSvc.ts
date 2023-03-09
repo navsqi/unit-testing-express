@@ -2,10 +2,30 @@ import { Between, ILike, Raw, SelectQueryBuilder } from 'typeorm';
 import { dataSource } from '~/orm/dbCreateConnection';
 import Instansi from '~/orm/entities/Instansi';
 import MasterInstansi from '~/orm/entities/MasterInstansi';
+import { IPaging } from '~/utils/queryHelper';
 import { getRecursiveOutletQuery } from './konsolidasiSvc';
 
 const masterInsRepo = dataSource.getRepository(MasterInstansi);
 const instansiRepo = dataSource.getRepository(Instansi);
+
+export interface IFilterInstansi {
+  nama_instansi?: string;
+  start_date?: string;
+  end_date?: string;
+  kode_outlet?: string;
+  kode_unit_kerja?: string;
+  kategori_instansi?: string;
+  jenis_instansi?: string;
+  status_potensial?: string;
+  is_deleted?: boolean;
+  is_approved?: number;
+  unit_assign?: string;
+  user_nik?: string;
+  is_assign?: number;
+  order_by?: string;
+  order_type?: string;
+  is_dropdown?: boolean;
+}
 
 export const listMasterInstansi = async (filter: any, paging: any): Promise<[MasterInstansi[], number]> => {
   const f: { [key: string]: any } = {};
@@ -59,10 +79,6 @@ export const listInstansi = async (filter: any, paging: any): Promise<[Instansi[
   if (filter.start_date && filter.end_date) {
     f['created_at'] = Between(new Date(`${filter.start_date} 00:00:00`), new Date(`${filter.end_date} 23:59:59`));
   }
-
-  // if (filter.outlet_id && filter.outlet_id.length > 0) {
-  //   f['kode_unit_kerja'] = In(filter.outlet_id);
-  // }
 
   if (filter.kode_outlet && !filter.kode_outlet.startsWith('000')) {
     f['kode_unit_kerja'] = Raw((alias) => `${alias} IN (${getRecursiveOutletQuery(filter.kode_outlet)})`);
@@ -127,40 +143,97 @@ export const listInstansi = async (filter: any, paging: any): Promise<[Instansi[
   return [instansi, count];
 };
 
-export const listInstansiV2 = async (paging: any, filter?: any) => {
+export const listInstansiV2 = async (paging: IPaging, filter?: IFilterInstansi) => {
   const instansi = dataSource
     .createQueryBuilder(Instansi, 'i')
-    .select('i.id')
+    .select('i.id', 'instansi_id')
     .addSelect(`CONCAT(i.id,' - ', i.nama_instansi)`, 'nama_instansi')
-    .addSelect('COALESCE(ai.count_assignment, 0)', 'count_assignment')
-    .addSelect(`CONCAT(mi.id,' - ', mi.nama_instansi)`, 'nama_master_instansi')
-    .addSelect('i.alamat', 'alamat')
-    .addSelect('i.created_at', 'created_at')
-    .addSelect('i.is_approved', 'is_approved')
-    .addSelect('i.is_deleted', 'is_deleted')
-    .addSelect('i.status_potensial', 'status_potensial')
-    .innerJoin('i.master_instansi', 'mi')
-    .leftJoinAndMapOne(
-      'i.count_assignment',
-      (qb) => {
-        const q = qb as SelectQueryBuilder<any>;
+    .addSelect(`CONCAT(mi.id,' - ', mi.nama_instansi)`, 'nama_master_instansi');
 
-        q.from('assignment_instansi', 'ai')
-          .select('COUNT(*)', 'count_assignment')
-          .addSelect('ai.instansi_id', 'instansi_id')
-          .groupBy('instansi_id');
+  if (!filter.is_dropdown) {
+    instansi
+      .addSelect('COALESCE(ai.count_assignment, 0)', 'count_assignment')
+      .addSelect('i.alamat', 'alamat')
+      .addSelect('i.created_at', 'created_at')
+      .addSelect(`i.is_approved`, 'is_approved')
+      .addSelect(`(CASE WHEN i.is_approved = 1 THEN 'DISETUJUI' ELSE 'PENGAJUAN' END)`, 'status')
+      .addSelect('i.is_deleted', 'is_deleted')
+      .addSelect('i.status_potensial', 'status_potensial')
+      .addSelect('o.nama', 'cakupan_instansi')
+      .innerJoin('i.cakupan_instansi', 'o')
+      .leftJoinAndMapOne(
+        'i.count_assignment',
+        (qb) => {
+          const q = qb as SelectQueryBuilder<any>;
 
-        return q;
-      },
-      'ai',
-      'ai.instansi_id = i.id',
-    );
+          q.from('assignment_instansi', 'ai')
+            .select('COUNT(*)', 'count_assignment')
+            .addSelect('ai.instansi_id', 'instansi_id')
+            .groupBy('instansi_id');
 
-  // if (filter.nama_instansi) {
-  //   instansi.andWhere('instansi.nama_instansi ~* :nama', { nama: filter.nama_instansi });
-  // }
+          return q;
+        },
+        'ai',
+        'ai.instansi_id = i.id',
+      );
+  }
 
-  const res = await instansi.limit(paging.limit).skip(paging.offset).getRawMany();
+  instansi.innerJoin('i.master_instansi', 'mi');
 
-  return res;
+  let whereClause1 = 'i.is_deleted = :isDeleted ';
+  const bindParams1: { [key: string]: any } = { isDeleted: filter.is_deleted };
+
+  let whereClause2 = 'i.is_deleted = :isDeleted ';
+  let bindParams2: { [key: string]: any } = { isDeleted: filter.is_deleted };
+
+  if (typeof filter.is_approved == 'number') {
+    whereClause1 += 'AND i.is_approved = :isApproved ';
+    bindParams1.isApproved = filter.is_approved;
+  }
+
+  if (filter.start_date && filter.end_date) {
+    whereClause1 += 'AND i.created_at >= :startDate and i.created_at <= :endDate ';
+    bindParams1.startDate = new Date(`${filter.start_date} 00:00:00`);
+    bindParams1.endDate = new Date(`${filter.end_date} 23:59:59`);
+  }
+
+  if (filter.kategori_instansi) {
+    whereClause1 += 'AND i.kategori_instansi = :kategoriInstansi ';
+    bindParams1.kategoriInstansi = filter.kategori_instansi;
+  }
+
+  if (filter.nama_instansi) {
+    whereClause1 += 'AND i.nama_instansi ~* :namaInstansi ';
+    bindParams1.namaInstansi = filter.nama_instansi;
+  }
+
+  if (filter.jenis_instansi) {
+    whereClause1 += 'AND i.jenis_instansi = :jenisInstansi ';
+    bindParams1.jenisInstansi = filter.jenis_instansi;
+  }
+
+  if (filter.status_potensial) {
+    whereClause1 += 'AND i.status_potensial = :statusPotensial ';
+    bindParams1.statusPotensial = filter.status_potensial;
+  }
+
+  whereClause2 = whereClause1;
+  bindParams2 = bindParams1;
+
+  if (filter.kode_outlet && !filter.kode_outlet.startsWith('000')) {
+    whereClause1 += `AND i.kode_unit_kerja IN (${getRecursiveOutletQuery(filter.kode_outlet)}) `;
+  }
+
+  instansi.where(whereClause1, bindParams1).orWhere(whereClause2, bindParams2);
+
+  if (paging.limit && paging.offset) {
+    instansi.take(paging.limit).skip(paging.offset);
+  }
+
+  instansi.orderBy('i.is_approved', 'ASC').addOrderBy('i.created_at', 'DESC');
+  instansi.limit(paging.limit).skip(paging.offset);
+  const count = await instansi.getCount();
+  const res = await instansi.getRawMany();
+
+  return [res, count];
 };

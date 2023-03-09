@@ -212,7 +212,7 @@ class Instansi {
   @AfterInsert()
   @AfterUpdate()
   generateFullname(): void {
-    this.is_approved_text = this.is_approved == 1 ? 'DITERIMA' : 'DITOLAK';
+    this.is_approved_text = this.is_approved == 1 ? 'DISETUJUI' : 'PENGAJUAN';
   }
 }
 

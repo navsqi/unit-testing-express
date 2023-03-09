@@ -422,7 +422,6 @@ export const eventReport = async (filter?: IFilter) => {
       count: count ?? data.length,
     };
   } catch (error) {
-    console.log(error);
     await queryRunner.release();
     return { err: error.message, data: null };
   }
@@ -876,7 +875,6 @@ export const OSLReport = async (filter?: IFilterOSL) => {
       count: count ?? data.length,
     };
   } catch (error) {
-    console.log('error', error);
     await queryRunner.release();
     return { err: error.message, data: null };
   }
