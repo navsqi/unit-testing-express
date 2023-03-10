@@ -12,7 +12,11 @@ export interface IValidationCSV {
 const validationCsv = (data: IValidationCSV) => {
   const errors = [];
 
-  if (!data.nik_ktp || !validator.isLength(data.nik_ktp, { min: 16, max: 16 }) || !validator.isNumeric(data.nik_ktp)) {
+  if (
+    !data.nik_ktp ||
+    !validator.isLength(data.nik_ktp, { min: 16, max: 16 }) ||
+    !validator.isNumeric(data.nik_ktp, { no_symbols: true })
+  ) {
     errors.push('NIK EKTP harus 16 digit angka');
   }
 
