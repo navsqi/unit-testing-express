@@ -17,6 +17,8 @@ import { konsolidasiTopBottom } from '~/services/konsolidasiSvc';
 import { IKTPPassion } from '~/types/APIPegadaianTypes';
 import { addDays, bufferToStream, parseIp } from '~/utils/common';
 import validationCsv from '~/utils/validationCsv';
+import { IFilterLeads, listLeadsV2 } from '~/services/leadsSvc';
+import xls from '~/utils/xls';
 
 const leadsRepo = dataSource.getRepository(Leads);
 const eventRepo = dataSource.getRepository(Event);
@@ -159,6 +161,195 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
       offset: paging.offset,
       page: Number(req.query.page),
     });
+  } catch (e) {
+    return next(e);
+  }
+};
+
+export const getLeadsV2 = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const kode_outlet = (req.query.kode_unit_kerja as string) ?? req.user.nik;
+
+    const filter: IFilterLeads = {
+      nama: req.query.nama as string,
+      status: req.query.status ? +req.query.status : null,
+      kode_unit_kerja: kode_outlet,
+      is_session: req.query.is_session ? +req.query.is_session : null,
+      is_badan_usaha: req.query.is_badan_usaha ? +req.query.is_badan_usaha : null,
+      instansi_id: req.query.instansi_id ? +req.query.instansi_id : null,
+      event_id: req.query.event_id ? +req.query.event_id : null,
+      pic_selena: req.query.pic_selena as string,
+      follow_up_pic_selena: req.query.follow_up_pic_selena ? (+req.query.follow_up_pic_selena as number) : null,
+      is_pusat: kode_outlet.includes('000'),
+      nik_ktp: req.query.nik_ktp as string,
+      start_date: req.query.start_date as string,
+      end_date: req.query.end_date as string,
+    };
+
+    const paging = queryHelper.paging(req.query);
+
+    const [leads, count] = await listLeadsV2(paging, filter);
+
+    const dataRes = {
+      leads,
+    };
+
+    return res.customSuccess(200, 'Get leads', dataRes, {
+      count: count,
+      rowCount: paging.limit,
+      limit: paging.limit,
+      offset: paging.offset,
+      page: Number(req.query.page),
+    });
+  } catch (e) {
+    return next(e);
+  }
+};
+
+export const genExcelLeadsV2 = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const kode_outlet = (req.query.kode_unit_kerja as string) ?? req.user.nik;
+
+    const filter: IFilterLeads = {
+      nama: req.query.nama as string,
+      status: req.query.status ? +req.query.status : null,
+      kode_unit_kerja: kode_outlet,
+      is_session: req.query.is_session ? +req.query.is_session : null,
+      is_badan_usaha: req.query.is_badan_usaha ? +req.query.is_badan_usaha : null,
+      instansi_id: req.query.instansi_id ? +req.query.instansi_id : null,
+      event_id: req.query.event_id ? +req.query.event_id : null,
+      pic_selena: req.query.pic_selena as string,
+      follow_up_pic_selena: req.query.follow_up_pic_selena ? (+req.query.follow_up_pic_selena as number) : null,
+      is_pusat: kode_outlet.includes('000'),
+      nik_ktp: req.query.nik_ktp as string,
+      start_date: req.query.start_date as string,
+      end_date: req.query.end_date as string,
+    };
+
+    if (!filter.start_date || !filter.end_date) return next(new CustomError('Pilih tanggal awal dan akhir', 400));
+
+    const dateDiff = common.getDiffDateCount(filter.start_date, filter.end_date);
+
+    if (dateDiff > +process.env.DATERANGE_INSTANSI_EXCEL)
+      return next(new CustomError(`Maksimal ${process.env.DATERANGE_INSTANSI_EXCEL} hari`, 400));
+
+    const paging = queryHelper.paging(req.query);
+
+    const [leads, count] = await listLeadsV2(paging, filter);
+
+    const { workbook, worksheet, headingStyle, outlineHeadingStyle, outlineStyle } = xls('LIST LEADS KAMILA');
+
+    const col = 22;
+
+    worksheet.column(1).setWidth(5);
+    for (let i = 2; i <= col; i++) {
+      const exclude = [13, 14, 15, 16];
+      worksheet.column(i).setWidth(exclude.includes(i) ? 10 : 25);
+    }
+
+    worksheet.cell(1, 1, 1, 9, true).string('LIST LEADS').style(headingStyle);
+    worksheet
+      .cell(2, 1, 2, 9, true)
+      .string(
+        `TANGGAL ${common.tanggal(filter.start_date as string)} S.D. ${common.tanggal(filter.end_date as string)}`,
+      )
+      .style(headingStyle);
+
+    const judulKolom = [
+      'NO',
+      'NIK KTP',
+      'CIF',
+      'NAMA',
+      'NO TELEPON',
+      'PRODUK INISIASI',
+      'AKTIVITAS',
+      'STATUS KARYAWAN',
+      'MASTER INSTANSI',
+      'INSTANSI',
+      'JENIS NASABAH',
+      'PIC SELENA',
+      'NIK MO',
+      'NAMA MO',
+      'CABANG',
+      'AREA',
+      'KANWIL',
+      'TANGGAL INPUT',
+      'TANGGAL PERSETUJUAN',
+      'USER PERSETUJUAN',
+      'STATUS',
+      'STATUS VERIFIKASI DUKCAPIL',
+    ];
+
+    const barisHeading = 5;
+    let noHeading = 0;
+
+    for (const header of judulKolom) {
+      worksheet
+        .cell(barisHeading, ++noHeading)
+        .string(header)
+        .style(outlineHeadingStyle);
+    }
+
+    let rows = 6;
+
+    const valueKolom = [
+      { property: 'nik_ktp', isMoney: false, isDate: false },
+      { property: 'cif', isMoney: false, isDate: false },
+      { property: 'nama', isMoney: false, isDate: false },
+      { property: 'no_hp', isMoney: false, isDate: false },
+      { property: 'nama_produk', isMoney: false, isDate: false },
+      { property: 'nama_event', isMoney: false, isDate: false },
+      { property: 'status_karyawan', isMoney: false, isDate: false },
+      { property: 'nama_master_instansi', isMoney: false, isDate: false },
+      { property: 'nama_instansi', isMoney: false, isDate: false },
+      { property: 'jenis_nasabah', isMoney: false, isDate: false },
+      { property: 'pic_selena', isMoney: false, isDate: false },
+      { property: 'nik_mo', isMoney: false, isDate: false },
+      { property: 'nama_mo', isMoney: false, isDate: false },
+      { property: 'cabang', isMoney: false, isDate: false },
+      { property: 'area', isMoney: false, isDate: false },
+      { property: 'kanwil', isMoney: false, isDate: false },
+      { property: 'created_at', isMoney: false, isDate: true },
+      { property: 'approved_at', isMoney: false, isDate: true },
+      { property: 'updated_by', isMoney: false, isDate: false },
+      { property: 'status_leads', isMoney: false, isDate: false },
+      { property: 'status_dukcapil', isMoney: false, isDate: false },
+    ];
+
+    for (const [index, val] of (leads as any[]).entries()) {
+      let bodyLineNum = 1;
+      worksheet
+        .cell(rows, 1)
+        .string(`${index + 1}`)
+        .style(outlineStyle);
+
+      for (const col of valueKolom) {
+        let data = String(common.getDescendantProp(val, col.property));
+
+        if (col.isDate) {
+          data = common.tanggal(val[col.property]);
+        }
+
+        if (col.isMoney) {
+          data = common.rupiah(+val[col.property], false);
+        }
+
+        worksheet
+          .cell(rows, ++bodyLineNum)
+          .string(data && data != 'null' ? data : '-')
+          .style(outlineStyle);
+      }
+
+      rows++;
+    }
+
+    const fileBuffer = await workbook.writeToBuffer();
+
+    res.set({
+      'Content-Disposition': `attachment; filename="LEADS-${Date.now()}.xlsx"`,
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+    return res.end(fileBuffer);
   } catch (e) {
     return next(e);
   }
