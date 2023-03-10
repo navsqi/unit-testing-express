@@ -168,7 +168,7 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
 
 export const getLeadsV2 = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const kode_outlet = (req.query.kode_unit_kerja as string) ?? req.user.nik;
+    const kode_outlet = (req.query.kode_unit_kerja as string) || req.user.kode_unit_kerja;
 
     const filter: IFilterLeads = {
       nama: req.query.nama as string,

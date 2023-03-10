@@ -154,7 +154,7 @@ export const listLeadsV2 = async (paging: IPaging, filter?: IFilterLeads): Promi
   }
 
   if (filter.kode_unit_kerja && !filter.is_pusat) {
-    leads.andWhere(`i.kode_unit_kerja IN (${getRecursiveOutletQuery(filter.kode_unit_kerja)}`);
+    leads.andWhere(`i.kode_unit_kerja IN (${getRecursiveOutletQuery(filter.kode_unit_kerja)})`);
   }
 
   if (filter.nik_ktp) {
