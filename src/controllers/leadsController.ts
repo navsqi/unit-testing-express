@@ -644,6 +644,7 @@ export const createNewLeadsByCsv = async (req: Request, res: Response, next: Nex
         dataInput.push(leads);
       })
       .on('end', async () => {
+        const nik: string[] = [];
         for (const [index, data] of dataInput.entries()) {
           validate = validationCsv({
             nama: data.nama,
@@ -660,13 +661,13 @@ export const createNewLeadsByCsv = async (req: Request, res: Response, next: Nex
           const checkExistingLeads = await queryRunner.manager.findOne(Leads, {
             where: {
               nik_ktp: data.nik_ktp,
-              kode_produk: data.kode_produk,
-              step: 'CLP',
             },
+            transaction: true,
           });
 
-          if (!checkExistingLeads) {
+          if (!checkExistingLeads && !nik.includes(data.nik_ktp)) {
             await queryRunner.manager.save(Leads, data);
+            nik.push(data.nik_ktp);
           }
         }
 
