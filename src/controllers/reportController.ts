@@ -955,11 +955,7 @@ export const genExcelReportOSL = async (req: Request, res: Response, next: NextF
     worksheet.cell(1, 1, 1, 9, true).string('REPORT OSL').style(headingStyle);
     worksheet
       .cell(2, 1, 2, 9, true)
-      .string(
-        `TANGGAL ${common.tanggal(req.query.start_date as string)} S.D. ${common.tanggal(
-          req.query.end_date as string,
-        )}`,
-      )
+      .string(`TANGGAL ${common.tanggal(filter.date as string)}`)
       .style(headingStyle);
 
     const barisHeading = 5;
@@ -1038,7 +1034,8 @@ export const genExcelReportOSL = async (req: Request, res: Response, next: NextF
         let data = String(val[col.property]);
 
         if (col.isDate) {
-          data = common.tanggal(val[col.property]);
+          const tgl = common.tanggal(val[col.property]);
+          data = tgl == 'Invalid Date' ? '—' : tgl;
         }
 
         if (col.isMoney) {

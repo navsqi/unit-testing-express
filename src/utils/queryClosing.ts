@@ -1,5 +1,5 @@
 // AND (tmpk.kode_outlet = l.kode_unit_kerja OR tmpk.kode_cabang = l.kode_unit_kerja)
-// kode outlet => upc, kode_cabang => cp
+// kode outlet => upc, kode_cabang AS kode_outlet_pencairan => cp
 // channel_syariah => cps
 export const selectTmpKredit = `
 SELECT

@@ -343,46 +343,6 @@ export const eventReport = async (filter?: IFilter) => {
       'leads.event_id = e.id',
     );
 
-    // omset & OSL
-    // q.leftJoin(
-    //   (qb) => {
-    //     const qb2 = qb as SelectQueryBuilder<any>;
-
-    //     qb2
-    //       .from('leads_closing', 'lcs')
-    //       .addSelect('lcs.leads_id', 'leads_id')
-    //       .addSelect('lcs.kode_produk', 'kode_produk')
-    //       .addSelect('SUM(lcs.up)', 'omset')
-    //       .groupBy('lcs.leads_id')
-    //       .addGroupBy('lcs.kode_produk');
-
-    //     return qb2;
-    //   },
-    //   'leadsclosing',
-    //   'leadsclosing.leads_id = leads.id',
-    // );
-
-    // q.leftJoin(
-    //   (qb) => {
-    //     const qb2 = qb as SelectQueryBuilder<any>;
-
-    //     qb2
-    //       .from('leads_closing_osl', 'lcs')
-    //       .addSelect('lcs.leads_id', 'leads_id')
-    //       .addSelect('lcs.kode_produk', 'kode_produk')
-    //       // .addSelect('SUM(lcs.up)', 'omset')
-    //       .addSelect('SUM(lcs.osl)', 'osl')
-    //       .addSelect('SUM(lcs.saldo_tabemas)', 'saldo_tabemas')
-    //       .groupBy('lcs.leads_id')
-    //       .addGroupBy('lcs.kode_produk');
-
-    //     return qb2;
-    //   },
-    //   'leadsclosingosl',
-    //   'leadsclosingosl.leads_id = leadsclosing.leads_id',
-    // );
-    // end of omset & OSL
-
     q.where('CAST(e.tanggal_event AS date) >= :startDate', { startDate: filter.start_date });
     q.andWhere('CAST(e.tanggal_event AS date) <= :endDate', { endDate: filter.end_date });
 
@@ -422,7 +382,6 @@ export const eventReport = async (filter?: IFilter) => {
       count: count ?? data.length,
     };
   } catch (error) {
-    console.log(error);
     await queryRunner.release();
     return { err: error.message, data: null };
   }
@@ -486,7 +445,6 @@ export const leadsReport = async (filter?: IFilter) => {
     q.leftJoin('outlet', 'outlet', 'outlet.kode = leads.kode_unit_kerja');
     q.leftJoin('outlet', 'outlet_p3', 'outlet_p3.kode = outlet.parent');
     q.leftJoin('outlet', 'outlet_p2', 'outlet_p2.kode = outlet_p3.parent');
-    // q.leftJoin('leads_closing', 'lcs', 'lcs.leads_id = leads.id');
 
     q.leftJoin(
       (qb) => {
@@ -505,27 +463,6 @@ export const leadsReport = async (filter?: IFilter) => {
       'leadsclosing',
       'leadsclosing.leads_id = leads.id',
     );
-
-    // q.leftJoin(
-    //   (qb) => {
-    //     const qb2 = qb as SelectQueryBuilder<any>;
-
-    //     qb2
-    //       .from('leads_closing_osl', 'lcs')
-    //       .addSelect('lcs.leads_id', 'leads_id')
-    //       .addSelect('lcs.kode_produk', 'kode_produk')
-    //       .addSelect('lcs.tgl_kredit', 'tgl_kredit')
-    //       .addSelect('SUM(lcs.osl)', 'osl')
-    //       .addSelect('SUM(lcs.saldo_tabemas)', 'saldo_tabemas')
-    //       .groupBy('lcs.leads_id')
-    //       .addGroupBy('lcs.kode_produk')
-    //       .addGroupBy('lcs.tgl_kredit');
-
-    //     return qb2;
-    //   },
-    //   'leadsclosingosl',
-    //   'leadsclosingosl.leads_id = leadsclosing.leads_id',
-    // );
 
     q.leftJoin('produk', 'produk', 'produk.kode_produk = leadsclosing.kode_produk');
     q.leftJoin('users', 'users', 'users.nik = leads.created_by');
@@ -614,22 +551,6 @@ export const closingReport = async (filter?: IFilter) => {
     q.addSelect('leads.created_at', 'created_at_leads');
     q.addSelect('leads.approved_at', 'approved_at_leads');
     q.addSelect('outlet_channel_syariah.nama', 'channel_syariah');
-    // q.addSelect('coalesce(lcs.osl, 0)', 'osl_original');
-    // q.addSelect('coalesce(lcs.saldo_tabemas, 0)', 'saldo_tabemas');
-    // q.addSelect((subQuery) => {
-    //   return subQuery
-    //     .select('osl')
-    //     .from('leads_closing', 'lc2')
-    //     .where('lc2.no_kontrak = lcs.no_kontrak AND osl IS NOT NULL')
-    //     .limit(1);
-    // }, 'osl');
-    // q.addSelect((subQuery) => {
-    //   return subQuery
-    //     .select('saldo_tabemas')
-    //     .from('leads_closing', 'lc2')
-    //     .where('lc2.no_kontrak = lcs.no_kontrak AND saldo_tabemas IS NOT NULL')
-    //     .limit(1);
-    // }, 'saldo_tabemas');
 
     q.leftJoin('event', 'event', 'event.id = leads.event_id');
     q.leftJoin('instansi', 'instansi', 'instansi.id = leads.instansi_id');
@@ -752,12 +673,7 @@ export const OSLReport = async (filter?: IFilterOSL) => {
     q.addSelect('produk.nama_produk', 'nama_produk');
     q.addSelect('lcs.no_kontrak', 'no_kontrak');
     q.addSelect('lcs.channel', 'channel');
-    // q.addSelect('lcs.up', 'omset');
-    // q.addSelect((qb) => {
-    //   qb.from('leads_closing_osl', 'lcso').select('lcso.osl', 'osl').where('lcs.no_kontrak = lcso.no_kontrak').limit(1);
 
-    //   return qb;
-    // }, 'osl');
     q.addSelect('lcs.osl', 'osl');
     q.addSelect('lcs.saldo_tabemas', 'saldo_tabemas');
     q.addSelect('lcs.nik_mo', 'nik_mo');
@@ -771,44 +687,9 @@ export const OSLReport = async (filter?: IFilterOSL) => {
     q.leftJoin('master_instansi', 'master_instansi', 'master_instansi.id = instansi.master_instansi_id');
     q.leftJoin('outlet', 'outlet_instansi', 'outlet_instansi.kode = instansi.kode_unit_kerja');
 
-    q.innerJoin('leads_closing_osl', 'lcs', 'lcs.leads_id = leads.id');
-
-    // q.leftJoin(
-    //   (qb) => {
-    //     const qb2 = qb as SelectQueryBuilder<any>;
-
-    //     qb2
-    //       .from('leads_closing_osl', 'lcso')
-    //       .addSelect('lcso.no_kontrak', 'no_kontrak')
-    //       .addSelect('lcso.osl', 'osl')
-    //       // .where('lcso.no_kontrak = lcs.no_kontrak')
-    //       .groupBy('lcso.no_kontrak')
-    //       .addGroupBy('lcso.osl');
-
-    //     return qb2;
-    //   },
-    //   'leadsclosingosl',
-    //   'lcs.tgl_kredit <= :date and lcs.no_kontrak = lcs.no_kontrak',
-    //   { date: filter.date },
-    // );
-
-    // q.leftJoin(
-    //   (qb) => {
-    //     const qb2 = qb as SelectQueryBuilder<any>;
-
-    //     qb2
-    //       .from('leads_closing_osl', 'lcs')
-    //       .addSelect('lcs.leads_id', 'leads_id')
-    //       .addSelect('lcs.saldo_tabemas', 'saldo_tabemas')
-    //       .where('lcs.tgl_kredit <= :date', { date: filter.date })
-    //       .orderBy('lcs.tgl_kredit', 'DESC')
-    //       .take(1);
-
-    //     return qb2;
-    //   },
-    //   'leadsclosingsaldote',
-    //   'leadsclosingsaldote.leads_id = lcs.leads_id',
-    // );
+    q.innerJoin('leads_closing_osl', 'lcs', 'lcs.leads_id = leads.id and lcs.tgl_kredit = :tglKredit', {
+      tglKredit: filter.date,
+    });
 
     q.leftJoin('outlet', 'outlet_leads', 'outlet_leads.kode = leads.kode_unit_kerja');
     if (filter.is_mo) {
@@ -823,6 +704,7 @@ export const OSLReport = async (filter?: IFilterOSL) => {
     q.leftJoin('produk', 'produk', 'produk.kode_produk = lcs.kode_produk');
 
     q.where('CAST(lcs.tgl_kredit AS date) = :date', { date: filter.date });
+    q.andWhere('leads.status = 1');
 
     if (filter.outlet_id && filter.outlet_id.length > 0 && filter.is_mo) {
       q.andWhere(
@@ -876,7 +758,6 @@ export const OSLReport = async (filter?: IFilterOSL) => {
       count: count ?? data.length,
     };
   } catch (error) {
-    console.log('error', error);
     await queryRunner.release();
     return { err: error.message, data: null };
   }
@@ -1101,14 +982,6 @@ export const promosiClosingReport = async (filter?: IFilter) => {
       'CASE WHEN pv.potongan_persentase <> 0 THEN pv.potongan_persentase * pki_pengajuan.up / 100 ELSE pv.potongan_rp END',
       'nilai_promosi',
     ); // promosi
-
-    // q.addSelect((subQuery) => {
-    //   return subQuery
-    //     .select('sum()')
-    //     .from('leads_closing', 'lc2')
-    //     .where('lc2.no_kontrak = lcs.no_kontrak AND osl IS NOT NULL')
-    //     .limit(1);
-    // }, 'osl');
 
     q.leftJoin('instansi', 'instansi', 'instansi.id = leads.instansi_id');
     q.leftJoin('outlet', 'outlet_instansi', 'outlet_instansi.kode = instansi.kode_unit_kerja');

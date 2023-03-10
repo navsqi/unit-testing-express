@@ -5,7 +5,7 @@ import protect from '../../middlewares/protect';
 
 const router = Router();
 
-router.get('/child/excel', protect(), instansiController.genExcelInstansi);
+router.get('/child/excel', protect(), instansiController.genExcelInstansiV2);
 router.get('/child/', protect(), instansiController.getInstansiV2);
 router.get('/child/:id', protect(), instansiController.getInstansiById);
 

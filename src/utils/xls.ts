@@ -1,6 +1,6 @@
 import excel, { Style } from 'excel4node';
 
-const xls = (name = 'Laporan DKS') => {
+const xls = (name = 'Export Excel Kamila') => {
   // Create a new instance of a Workbook class
   const workbook = new excel.Workbook();
 
