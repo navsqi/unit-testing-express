@@ -1,9 +1,7 @@
 import { Router } from 'express';
-import { eventHandler } from '~/index';
-import { basicAuth } from '~/middlewares/basicAuth';
+import * as promoVoucherController from '~/controllers/promoVoucherController';
 import protect from '~/middlewares/protect';
 import { uploadBuffer } from '~/utils/uploadFile';
-import * as promoVoucherController from '~/controllers/promoVoucherController';
 
 const router = Router();
 
