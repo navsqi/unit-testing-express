@@ -148,6 +148,8 @@ class Leads {
 
   // status 1 = approved
   // status 0 = not approved
+  // status 2 = rejected
+  // status 3 = deleted
   @Column({
     type: 'smallint',
     default: 0,
