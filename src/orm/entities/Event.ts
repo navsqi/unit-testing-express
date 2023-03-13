@@ -1,4 +1,7 @@
 import {
+  AfterInsert,
+  AfterLoad,
+  AfterUpdate,
   Column,
   CreateDateColumn,
   Entity,
@@ -121,6 +124,15 @@ class Event {
   @ManyToOne(() => Instansi)
   @JoinColumn([{ name: 'instansi_id', referencedColumnName: 'id' }])
   instansi: Instansi;
+
+  nama_aktivitas: string;
+
+  @AfterLoad()
+  @AfterInsert()
+  @AfterUpdate()
+  generateEventName(): void {
+    this.nama_aktivitas = this.tanggal_event + ' | ' + this.nama_event;
+  }
 }
 
 export default Event;

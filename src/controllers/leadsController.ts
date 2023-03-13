@@ -689,13 +689,20 @@ export const createNewLeadsPerorangan = async (req: Request, res: Response, next
 
     const getExistingLeads = await leadsRepo.findOne({
       where: { nik_ktp: bodies.nik_ktp },
-      relations: ['user_created'],
+      select: {
+        outlet: {
+          nama: true,
+        },
+      },
+      relations: {
+        outlet: true,
+      },
     });
 
     if (getExistingLeads) {
       return next(
         new CustomError(
-          `NIK ${getExistingLeads.nik_ktp} dengan kode produk ${bodies.kode_produk} telah diprospek oleh ${getExistingLeads.user_created.nik}`,
+          `NIK ${getExistingLeads.nik_ktp} dengan kode produk ${bodies.kode_produk} telah diprospek oleh ${getExistingLeads.created_by} (${getExistingLeads.outlet.nama})`,
           400,
         ),
       );

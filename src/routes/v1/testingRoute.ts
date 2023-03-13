@@ -1,18 +1,18 @@
 import dayjs from 'dayjs';
 import { Router } from 'express';
-import { eventHandler } from '~/index';
+import { eventHandler } from '~/utils/connect';
 import { basicAuth } from '~/middlewares/basicAuth';
 
 const router = Router();
 
 router.get('/', (req, res) => {
-  res.send(`Executed at ${dayjs().format('DD/MM/YYYY HH:mm:ss')}, Updated at 10/03/2023 14:15`);
+  res.send(`Executed at ${dayjs().format('DD/MM/YYYY HH:mm:ss')}, Updated at 13/03/2023 14:15`);
 });
 
 router.put('/closing-scheduler', basicAuth, async (req, res) => {
   eventHandler.emit('performBackgroundTask', 'ini data lho');
 
-  res.send(`Executed at ${dayjs().format('DD/MM/YYYY HH:mm:ss')}, Updated at 10/03/2023 14:15 | Cron dieksekusi`);
+  res.send(`Executed at ${dayjs().format('DD/MM/YYYY HH:mm:ss')}, Updated at 13/03/2023 14:15 | Cron dieksekusi`);
 });
 
 export default router;

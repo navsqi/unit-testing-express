@@ -158,7 +158,7 @@ export const listLeadsV2 = async (paging: IPaging, filter?: IFilterLeads): Promi
   }
 
   if (filter.nik_ktp) {
-    leads.andWhere(`i.nik_ktp = :nik_ktp`, { nik_ktp: filter.nik_ktp });
+    leads.andWhere(`l.nik_ktp ~* :nik_ktp`, { nik_ktp: filter.nik_ktp });
   }
 
   if (filter.is_badan_usaha) {
