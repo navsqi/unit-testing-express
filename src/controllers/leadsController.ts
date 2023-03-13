@@ -172,7 +172,7 @@ export const getLeadsV2 = async (req: Request, res: Response, next: NextFunction
 
     const filter: IFilterLeads = {
       nama: req.query.nama as string,
-      status: req.query.status ? +req.query.status : null,
+      status: req.query.status ? req.query.status.toString() : null,
       kode_unit_kerja: kode_outlet,
       is_session: req.query.is_session ? +req.query.is_session : null,
       is_badan_usaha: req.query.is_badan_usaha ? +req.query.is_badan_usaha : null,
@@ -212,7 +212,7 @@ export const genExcelLeadsV2 = async (req: Request, res: Response, next: NextFun
 
     const filter: IFilterLeads = {
       nama: req.query.nama as string,
-      status: req.query.status ? +req.query.status : null,
+      status: req.query.status ? req.query.status.toString() : null,
       kode_unit_kerja: kode_outlet,
       is_session: req.query.is_session ? +req.query.is_session : null,
       is_badan_usaha: req.query.is_badan_usaha ? +req.query.is_badan_usaha : null,

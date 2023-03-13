@@ -50,7 +50,7 @@ export interface ResponseListLeads {
 
 export interface IFilterLeads {
   nama?: string;
-  status?: number;
+  status?: string;
   kode_unit_kerja?: string;
   is_session?: number;
   is_badan_usaha?: number;
@@ -68,6 +68,7 @@ export const listLeadsV2 = async (paging: IPaging, filter?: IFilterLeads): Promi
   const leads = dataSource
     .createQueryBuilder(Leads, 'l')
     .select('l.nik_ktp', 'nik_ktp')
+    .addSelect('l.kode_unit_kerja', 'kode_outlet')
     .addSelect('l.cif', 'cif')
     .addSelect('l.nama', 'nama')
     .addSelect('l.no_hp', 'no_hp')
@@ -151,6 +152,11 @@ export const listLeadsV2 = async (paging: IPaging, filter?: IFilterLeads): Promi
 
   if (filter.instansi_id) {
     leads.andWhere('l.instansi_id = :instansi_id', { instansi_id: filter.instansi_id });
+  }
+
+  console.log(filter);
+  if (filter.status) {
+    leads.andWhere('l.status = :status', { status: filter.status });
   }
 
   if (filter.kode_unit_kerja && !filter.is_pusat) {
