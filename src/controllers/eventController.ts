@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { Between, FindOptionsWhere, ILike, In } from 'typeorm';
+import { Between, FindOptionsWhere, ILike, In, Raw } from 'typeorm';
 import { objectRemove, objectUpload } from '~/config/minio';
 import { dataSource } from '~/orm/dbCreateConnection';
 import Event from '~/orm/entities/Event';
@@ -98,12 +98,17 @@ export const getEvent = async (req: Request, res: Response, next: NextFunction) 
       instansi_id: +qs.instansi_id,
       start_date: (qs.start_date as string) || '',
       end_date: (qs.end_date as string) || '',
+      is_active: qs.is_active && qs.is_active == '1',
     };
 
     if (common.isSalesRole(req.user.kode_role)) filter.is_session = 1;
 
     if (filter.nama_event) {
       where['nama_event'] = ILike(`%${filter.nama_event}%`);
+    }
+
+    if (filter.is_active) {
+      where['tanggal_event'] = Raw((a) => `(${a} >= current_date - 7 AND ${a} <= current_date + 7)`);
     }
 
     if (filter.is_session === 1) {
@@ -135,6 +140,7 @@ export const getEvent = async (req: Request, res: Response, next: NextFunction) 
     const [event, count] = await eventRepo.findAndCount({
       select: {
         instansi: {
+          id: true,
           nama_instansi: true,
         },
         outlet: {

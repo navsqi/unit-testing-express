@@ -1,9 +1,6 @@
 import { Router } from 'express';
-import { eventHandler } from '~/index';
-import { basicAuth } from '~/middlewares/basicAuth';
-import protect from '~/middlewares/protect';
-import { uploadBuffer } from '~/utils/uploadFile';
 import * as klaimMoController from '~/controllers/klaimMoController';
+import protect from '~/middlewares/protect';
 
 const router = Router();
 
