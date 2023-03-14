@@ -684,7 +684,9 @@ export const createNewLeadsByCsv = async (req: Request, res: Response, next: Nex
         await queryRunner.commitTransaction();
         await queryRunner.release();
 
-        return res.customSuccess(200, 'Create leads success', dataRes);
+        const msg = `${nik.length} Data Leads Berhasil Di-input`;
+
+        return res.customSuccess(200, msg, dataRes);
       })
       .on('error', async (error) => {
         await queryRunner.rollbackTransaction();
