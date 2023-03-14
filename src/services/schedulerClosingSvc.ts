@@ -81,6 +81,8 @@ export const schedulerClosing = async () => {
         `UPDATE leads SET cif = $1, cif_created_at = $2, step = 'CLS' WHERE nik_ktp = $3 AND id = '${tmpKredit.leads_id}' AND cif IS NULL AND step = 'CLP'`,
         [tmpKredit.cif, tmpKredit.tgl_cif, tmpKredit.nik_ktp],
       );
+
+      await manager.query(`DELETE FROM history_tmp_kredit WHERE tgl_kredit = $1`, [tmpKredit.tgl_kredit]);
     }
 
     // menghapus data history bigdata
@@ -179,6 +181,8 @@ export const schedulerClosingTabemas = async () => {
           ['CLS', tmpKredit.cif],
         );
       }
+
+      await manager.query(`DELETE FROM history_tmp_kredit_tabemas WHERE tgl_transaksi = $1`, [tmpKredit.tgl_kredit]);
     }
 
     // menghapus data history bigdata
