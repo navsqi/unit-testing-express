@@ -1,30 +1,14 @@
-import { FilterQuery, QueryOptions, UpdateQuery } from "mongoose";
-import ProductModel, {
-  ProductDocument,
-  ProductInput,
-} from "../models/product.model";
+import { FilterQuery, QueryOptions, UpdateQuery, DocumentDefinition } from "mongoose";
+import ProductModel, { ProductDocument, ProductInput } from "../models/product.model";
 import { databaseResponseTimeHistogram } from "../utils/metrics";
 
-export async function createProduct(input: ProductInput) {
-  const metricsLabels = {
-    operation: "createProduct",
-  };
-
-  const timer = databaseResponseTimeHistogram.startTimer();
-  try {
-    const result = await ProductModel.create(input);
-    timer({ ...metricsLabels, success: "true" });
-    return result;
-  } catch (e) {
-    timer({ ...metricsLabels, success: "false" });
-    throw e;
-  }
+export async function createProduct(
+  input: DocumentDefinition<Omit<ProductDocument, "createdAt" | "updatedAt" | "productId">>
+) {
+  return ProductModel.create(input);
 }
 
-export async function findProduct(
-  query: FilterQuery<ProductDocument>,
-  options: QueryOptions = { lean: true }
-) {
+export async function findProduct(query: FilterQuery<ProductDocument>, options: QueryOptions = { lean: true }) {
   const metricsLabels = {
     operation: "findProduct",
   };
