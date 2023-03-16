@@ -20,9 +20,7 @@ export const basicAuth = async (req: Request, res: Response, next: NextFunction)
     res.set('WWW-Authenticate', 'Basic realm="401"');
     res.status(401).json({ status: 'fail', message: 'Authentication required' });
   } catch (e) {
-    logger.error(e, 'BASIC_AUTH');
+    logger.error(e);
     return next(new CustomError('Something went wrong', 500));
   }
-
-  // -----------------------------------------------------------------------
 };

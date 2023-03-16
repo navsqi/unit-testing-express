@@ -1,5 +1,5 @@
 import { response, Response } from 'express';
-import { MetaPages } from '~/types/metaPageTypes';
+import { MetaPages } from '~/types/metaPage.types';
 
 response.customSuccess = function (
   httpStatusCode: number,

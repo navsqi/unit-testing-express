@@ -5,38 +5,8 @@ import { Request, Response, NextFunction } from 'express';
 export const loginVal = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const schema = Joi.object().keys({
-      username: Joi.string().required(),
+      email: Joi.string().required(),
       password: Joi.string().required(),
-    });
-
-    const result = await schema.validate(req.body, { abortEarly: false, allowUnknown: true });
-    if (result.error) throw result.error.details;
-
-    return next();
-  } catch (e) {
-    return next({ stack: e, name: 'PayloadValidationError' });
-  }
-};
-
-export const ssoVal = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const schema = Joi.object().keys({
-      code: Joi.string().required(),
-    });
-
-    const result = await schema.validate(req.body, { abortEarly: false, allowUnknown: true });
-    if (result.error) throw result.error.details;
-
-    return next();
-  } catch (e) {
-    return next({ stack: e, name: 'PayloadValidationError' });
-  }
-};
-
-export const changePasswordVal = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const schema = Joi.object().keys({
-      newPass: Joi.string().required(),
     });
 
     const result = await schema.validate(req.body, { abortEarly: false, allowUnknown: true });
@@ -51,10 +21,8 @@ export const changePasswordVal = async (req: Request, res: Response, next: NextF
 export const registerVal = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const schema = Joi.object().keys({
-      email: Joi.string().email().required(),
-      password: Joi.string(),
-      nik: Joi.string(),
-      nama: Joi.string(),
+      email: Joi.string().required(),
+      password: Joi.string().required(),
     });
 
     const result = await schema.validate(req.body, { abortEarly: false, allowUnknown: true });
@@ -69,8 +37,6 @@ export const registerVal = async (req: Request, res: Response, next: NextFunctio
 const authVal = {
   loginVal,
   registerVal,
-  ssoVal,
-  changePasswordVal,
 };
 
 export default authVal;

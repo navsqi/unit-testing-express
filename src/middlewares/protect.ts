@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { jwtPayload } from 'types/jwtPayload';
-import { dataSource } from '~/orm/dbCreateConnection';
-import User from '~/orm/entities/User';
-import CustomError from './../utils/customError';
+import { jwtPayload } from '~/types/jwtPayload.types';
+import User from '~/entities/User';
+import CustomError from '~/utils/customError';
+import { dataSource } from '~/config/infra/postgres';
 
 const userRepo = dataSource.getRepository(User);
 
@@ -34,41 +34,21 @@ export const protect = (roles?: string[], isExclude = false) => {
         where: { id: jwtPayload.id },
         select: {
           id: true,
-          nik: true,
           email: true,
-          nama: true,
-          kode_role: true,
-          kode_unit_kerja: true,
-          unit_kerja: {
-            unit_kerja: true,
-            nama: true,
-          },
         },
-        relations: { unit_kerja: true },
       });
 
-      if (isExclude && roles && roles.includes(req.user.kode_role))
-        return next(new CustomError(`Role ${req.user.kode_role} is not permitted`, 403));
+      if (isExclude && roles && roles.includes(req.user.role))
+        return next(new CustomError(`Role ${req.user.role} is not permitted`, 403));
 
-      if (!isRoleMatch(roles, req.user.kode_role))
-        return next(new CustomError(`Role ${req.user.kode_role} is not permitted`, 403));
+      if (!isRoleMatch(roles, req.user.role))
+        return next(new CustomError(`Role ${req.user.role} is not permitted`, 403));
 
       next();
     } catch (e) {
       return next(e);
     }
   };
-};
-
-export const cabangOnly = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    if (Number(req.user.unit_kerja.unit_kerja) !== 4)
-      return next(new CustomError(`Hanya user cabang yang dapat melakukan aksi`, 403));
-
-    return next();
-  } catch (e) {
-    return next(e);
-  }
 };
 
 export default protect;

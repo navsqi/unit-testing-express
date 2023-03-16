@@ -1,6 +1,6 @@
-import User from 'orm/entities/User';
-import { jwtPayload } from 'types/jwtPayload';
-import { MetaPages } from '../metaPageTypes';
+import User from '~/entities/User';
+import { jwtPayload } from 'types/jwtPayload.types';
+import { MetaPages } from '../metaPage.types';
 
 declare global {
   namespace Express {
